@@ -27,7 +27,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film add(@RequestBody Film film ) {
+    public Film add(@RequestBody Film film) {
         logger.debug("Film {} check validation", film);
 
         if (film.getName().isBlank() || film.getDescription().length() > MAX_LENGTH_DESCRIPTION
