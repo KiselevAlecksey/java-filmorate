@@ -1,16 +1,16 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
 /**
  * Film.
  */
-@Value
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Film {

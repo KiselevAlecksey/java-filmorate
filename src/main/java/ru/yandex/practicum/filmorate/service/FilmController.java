@@ -6,11 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
@@ -19,7 +18,8 @@ public class FilmController {
     private static final Logger logger = LoggerFactory.getLogger(FilmController.class);
     static final int MAX_LENGTH_DESCRIPTION = 200;
     static final long CINEMA_BURN_DAY = -2335564800000L;
-    Map<Long, Film> films = new HashMap<>();
+
+    FilmRepository films = new FilmRepository();
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -55,7 +55,7 @@ public class FilmController {
                 .duration(film.getDuration())
                 .build();
         logger.debug("Created film is {}", putFilm);
-        films.put(putFilm.getId(), putFilm);
+        films.save(putFilm);
         logger.trace("Added film");
         return putFilm;
     }
@@ -68,7 +68,7 @@ public class FilmController {
             throw new ConditionsNotMetException("Id должен быть указан");
         }
 
-        if (films.containsKey(film.getId())) {
+        if (films.findById(film.getId()) != null) {
 
             if (film.getName().isBlank() || film.getDescription().length() > MAX_LENGTH_DESCRIPTION
                     || film.getReleaseDate().isBefore(Instant.ofEpochMilli(CINEMA_BURN_DAY))
@@ -87,7 +87,7 @@ public class FilmController {
             }
             logger.trace("Updated film");
 
-            Film updateFilm = films.get(film.getId()).builder()
+            Film updateFilm = film.toBuilder()              //films.get(film.getId()).builder()
                     .id(film.getId())
                     .name(film.getName())
                     .description(film.getDescription())
@@ -95,7 +95,7 @@ public class FilmController {
                     .duration(film.getDuration())
                     .build();
             logger.debug("Updated film is {} ", updateFilm);
-            films.put(film.getId(), film);
+            films.save(film);
             logger.trace("Updated film");
             return updateFilm;
         }
@@ -105,11 +105,7 @@ public class FilmController {
 
     private long getNextId() {
         logger.trace("Created new id");
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
+        long currentMaxId = 0;
         logger.trace("New id is {} ", currentMaxId);
         return ++currentMaxId;
     }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import java.time.Instant;
+
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,16 +9,16 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
     private static final Logger logger = LoggerFactory.getLogger(FilmController.class);
-    Map<Long, User> users = new HashMap<>();
+    UserRepository users = new UserRepository();
 
     @GetMapping
     public Collection<User> findAll() {
@@ -52,9 +53,9 @@ public class UserController {
         boolean isEmpty = createUser.getName() == null || createUser.getName().isBlank();
         if (isEmpty) {
           //  User blankName = createUser.toBuilder().name(user.getLogin()).build();
-            users.put(createUser.getId(), createUser.toBuilder().name(user.getLogin()).build());
+            users.save(createUser.toBuilder().name(user.getLogin()).build());
         } else {
-            users.put(createUser.getId(), createUser);
+            users.save(createUser);
         }
         logger.trace("Added user");
         return isEmpty ? createUser.toBuilder().name(user.getLogin()).build() : createUser;
@@ -68,7 +69,7 @@ public class UserController {
             throw new ConditionsNotMetException("Id должен быть указан");
         }
 
-        if (users.containsKey(user.getId())) {
+        if (users.findById(user.getId()) != null) {
             if (user.getEmail().isBlank() || user.getEmail().indexOf('@') == -1
                     || user.getLogin().isBlank() || user.getLogin().indexOf(' ') >= 0
                     || user.getBirthday().isAfter(Instant.now())) {
@@ -90,7 +91,7 @@ public class UserController {
                     .birthday(user.getBirthday())
                     .build();
             logger.debug("Updated user is {} ", updateUser);
-            users.put(updateUser.getId(), updateUser);
+            users.save(updateUser);
             logger.trace("Updated user");
 
             return updateUser.getName().isBlank() ? updateUser.toBuilder().name(user.getLogin()).build() : updateUser;
@@ -101,11 +102,7 @@ public class UserController {
 
     private long getNextId() {
         logger.trace("Created new id");
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
+        long currentMaxId = 0;
         logger.trace("New id is {} ", currentMaxId);
         return ++currentMaxId;
     }

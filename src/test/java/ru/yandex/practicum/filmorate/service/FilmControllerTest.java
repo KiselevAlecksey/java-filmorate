@@ -57,7 +57,7 @@ public class FilmControllerTest {
     public void shouldReturnListOfFilms() {
         Map<Long, Film> expectedFilms = new HashMap<>();
         expectedFilms.put(defaultFilm.getId(), defaultFilm);
-        filmController.films.put(defaultFilm.getId(), defaultFilm);
+        filmController.films.save(defaultFilm);
         assertEquals(expectedFilms.size(), filmController.findAll().size());
         assertEqualsFilm(expectedFilms.get(defaultFilm.getId()), filmController.films.get(defaultFilm.getId()), "фильмы не совпадают");
     }

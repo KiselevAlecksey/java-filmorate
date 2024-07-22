@@ -54,7 +54,7 @@ public class UserControllerTest {
     public void shouldReturnListOfUsers() {
         Map<Long, User> expectedUsers = new HashMap<>();
         expectedUsers.put(defaultUser.getId(), defaultUser);
-        userController.users.put(defaultUser.getId(), defaultUser);
+        userController.users.save(defaultUser);
         assertEquals(expectedUsers.size(), userController.findAll().size());
         assertEqualsUser(expectedUsers.get(defaultUser.getId()), userController.users.get(defaultUser.getId()), "фильмы не совпадают");
     }
