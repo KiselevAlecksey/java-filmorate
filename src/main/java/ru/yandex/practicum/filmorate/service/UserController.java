@@ -52,7 +52,6 @@ public class UserController {
         logger.debug("Created user is {}", createUser);
         boolean isEmpty = createUser.getName() == null || createUser.getName().isBlank();
         if (isEmpty) {
-          //  User blankName = createUser.toBuilder().name(user.getLogin()).build();
             users.save(createUser.toBuilder().name(user.getLogin()).build());
         } else {
             users.save(createUser);

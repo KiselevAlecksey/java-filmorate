@@ -87,7 +87,7 @@ public class FilmController {
             }
             logger.trace("Updated film");
 
-            Film updateFilm = film.toBuilder()              //films.get(film.getId()).builder()
+            Film updateFilm = film.toBuilder()
                     .id(film.getId())
                     .name(film.getName())
                     .description(film.getDescription())
