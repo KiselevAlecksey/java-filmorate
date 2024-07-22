@@ -1,25 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
+
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
 /**
- * Film.
+ * User.
  */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class Film {
+public class User {
     Long id;
+    @Email
+    String email;
     @NotNull
+    String login;
     String name;
-    String description;
     @Builder.Default
-    Instant releaseDate = Instant.ofEpochMilli(0L);
-    @NotNull
-    Integer duration;
+    Instant birthday = Instant.ofEpochMilli(0L);
 }
