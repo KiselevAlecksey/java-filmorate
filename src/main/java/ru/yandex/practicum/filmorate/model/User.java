@@ -19,12 +19,17 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class User {
+
     Long id;
+
     @Email
     String email;
+
     @NotNull
     String login;
+
     String name;
+
     @Builder.Default
     Instant birthday = Instant.ofEpochMilli(0L);
 }

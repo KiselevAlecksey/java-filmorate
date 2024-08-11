@@ -1,38 +1,24 @@
 package ru.yandex.practicum.filmorate.repository;
 
-import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-@Repository
-public class UserRepository implements BaseRepository<User> {
+public interface UserRepository {
+    void addFriend(Long userId, Long friendId);
 
-    private Map<Long, User> users;
+    void removeFriend(Long userId, Long friendId);
 
-    public UserRepository() {
-        this.users = new HashMap<>();
-    }
+    List<Long> getFriends(Long userId);
 
-    @Override
-    public void save(User user) {
-        users.put(user.getId(), user);
-    }
+    void save(User user);
 
-    @Override
-    public User findById(Long id) {
-        return users.get(id);
-    }
+    User findById(Long id);
 
-    @Override
-    public Collection<User> values() {
-        return users.values();
-    }
+    Collection<User> values();
 
-    @Override
-    public User get(Long id) {
-        return users.get(id);
-    }
+    User remove(User user);
+
+    Collection<User> findAllById(List<Long> ids);
 }
