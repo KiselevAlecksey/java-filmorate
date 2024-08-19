@@ -3,34 +3,21 @@ package ru.yandex.practicum.filmorate.repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-public class FilmRepository implements BaseRepository<Film> {
+public interface FilmRepository {
 
-    private Map<Long, Film> films;
+    void addLike(Long filmId, Long userId);
 
-    public FilmRepository() {
-        this.films = new HashMap<>();
-    }
+    void removeLike(Long filmId, Long userId);
 
-    @Override
-    public void save(Film film) {
-        films.put(film.getId(), film);
-    }
+    void save(Film film);
 
-    @Override
-    public Film findById(Long id) {
-        return films.get(id);
-    }
+    Film findById(Long id);
 
-    @Override
-    public Collection<Film> values() {
-        return films.values();
-    }
+    Collection<Film> values();
 
-    @Override
-    public Film get(Long id) {
-        return films.get(id);
-    }
+    Film remove(Film film);
+
+    List<Film> getPopularFilms();
 }
