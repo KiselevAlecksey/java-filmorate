@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -19,25 +21,25 @@ public class FilmController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public Collection<Film> findAll() {
+    public Collection<FilmDto> findAll() {
         return filmService.findAll();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Film add(@RequestBody Film film) {
-        logger.error("Film add {} start", film);
-        Film created = filmService.add(film);
-        logger.error("Added film is {}", filmService.get(created));
+    public FilmDto add(@RequestBody NewFilmRequest filmRequest) {
+        logger.error("Film add {} start", filmRequest);
+        FilmDto created = filmService.add(filmRequest);
+        logger.error("Added film is {}", created.getName());
         return created;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
-    public Film update(@RequestBody Film film) {
-        logger.error("Film update {} start", film);
-        Film updated = filmService.update(film);
-        logger.error("Updated film is {} complete", filmService.get(updated));
+    public FilmDto update(@RequestBody UpdateFilmRequest filmRequest) {
+        logger.error("Film update {} start", filmRequest);
+        FilmDto updated = filmService.update(filmRequest);
+        logger.error("Updated film is {} complete", updated.getName());
         return updated;
     }
 
@@ -59,10 +61,19 @@ public class FilmController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam int count) {
+    public Collection<FilmDto> getPopularFilms(@RequestParam int count) {
         logger.error("Get popular films count {} start", count);
-        Collection<Film> popularFilms = filmService.getPopularFilms(count);
+        Collection<FilmDto> popularFilms = filmService.getPopularFilms(count);
         logger.error("Get popular films count {} complete", count);
         return popularFilms;
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{id}")
+    public FilmDto getFilmWithGenre(@PathVariable long id) {
+        logger.error("Get film with genre id {} start", id);
+        FilmDto film = filmService.getFilmWithGenre(id);
+        logger.error("Get film with genre id {} complete", id);
+        return film;
     }
 }

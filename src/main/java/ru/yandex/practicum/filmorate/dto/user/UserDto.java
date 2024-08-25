@@ -1,6 +1,6 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto.user;
 
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -8,17 +8,11 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
-/**
- * User.
- */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder(toBuilder = true)
-@EqualsAndHashCode(of = "id")
-public class User {
+public class UserDto {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Long id;
 
     @Email
@@ -29,6 +23,7 @@ public class User {
 
     String name;
 
-    @Builder.Default
-    Instant birthday = Instant.ofEpochMilli(0L);
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    Instant birthday;
+
 }
