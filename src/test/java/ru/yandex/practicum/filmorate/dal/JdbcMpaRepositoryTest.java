@@ -23,7 +23,7 @@ class JdbcMpaRepositoryTest {
     private final JdbcMpaRepository mpaRepository;
 
     private static final int TEST_MPA_ID = 1;
-    private static final int TOTAL_MPA = 1;
+    private static final int TOTAL_MPA = 5;
 
     @Test
     @DisplayName("должен находить MPA по идентификатору")

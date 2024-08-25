@@ -23,7 +23,7 @@ class JdbcGenreRepositoryTest {
 
     public static final int TEST_GENRE_ID = 1;
     public static final long TEST_FILM_ID = 1L;
-    public static final int TOTAL_GENRES = 2;
+    public static final int TOTAL_GENRES = 6;
 
     private final JdbcGenreRepository genreRepository;
 
@@ -60,7 +60,7 @@ class JdbcGenreRepositoryTest {
 
         assertThat(genres)
                 .isNotEmpty()
-                .hasSize(2)
+                .hasSize(6)
                 .extracting(Genre::getId)
                 .contains(TOTAL_GENRES);
     }

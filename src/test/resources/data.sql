@@ -1,8 +1,10 @@
-INSERT INTO rating (name) VALUES ('PG-13');
+MERGE INTO rating KEY (id) VALUES (1, 'G'), (2, 'PG'), (3, 'PG-13'), (4, 'R'), (5, 'NC-17');
 
-INSERT INTO genre (name) VALUES ('genre1'), ('genre2');
-
-SELECT * FROM users;
+MERGE INTO genre AS target
+USING (VALUES ('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик')) AS source(name)
+ON target.name = source.name
+WHEN NOT MATCHED THEN
+    INSERT (name) VALUES (source.name);
 
 INSERT INTO users (email, login, name, birthday)
 VALUES ('email@email.com', 'login', 'name', '2024-05-02');
