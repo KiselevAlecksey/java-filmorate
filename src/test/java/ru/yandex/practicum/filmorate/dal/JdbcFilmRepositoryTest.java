@@ -51,7 +51,6 @@ class JdbcFilmRepositoryTest {
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
         assertThat(count).isEqualTo(1);
 
-
         Integer filmCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM films", Integer.class);
         assertThat(filmCount).isEqualTo(1);
     }
