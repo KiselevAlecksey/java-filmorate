@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.resouces;
+package resouces;
 
 public class FilmDescription {
     public static final String DESCRIPTION = "Сотрудник страховой компании страдает хронической бессонницей " +

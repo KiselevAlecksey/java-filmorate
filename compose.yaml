@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16.1
+    container_name: filmorate
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=filmorate
+      - POSTGRES_USER=filmorate
+      - POSTGRES_PASSWORD=123
+      - TZ=Europe/Moscow
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+volumes:
+  postgres:
