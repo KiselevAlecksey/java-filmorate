@@ -18,13 +18,13 @@ public class JdbcGenreRepository extends BaseRepository implements GenreReposito
     }
 
     @Override
-    public Genre save(Genre film) {
-        return null;
+    public void save(Genre genre) {
+        String query = "INSERT INTO genre (name) VALUES (?)";
+        insert(query, genre.getName());
     }
 
     @Override
-    public Genre update(Genre film) {
-        return null;
+    public void update(Genre genre) {
     }
 
     @Override

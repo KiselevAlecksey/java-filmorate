@@ -27,11 +27,13 @@ class JdbcFilmRepositoryTest {
 
     private final JdbcFilmRepository filmRepository;
 
+    private final JdbcTemplate jdbcTemplate;
+
     @Test
     @DisplayName("должен возвращать фильм по идентификатору")
     public void should_return_film_when_find_by_id() {
 
-        Optional<Film> filmOptional = filmRepository.findById(TEST_USER_ID);
+        Optional<Film> filmOptional = filmRepository.findById(TEST_FILM_ID);
 
         assertThat(filmOptional)
                 .isPresent()
@@ -40,9 +42,6 @@ class JdbcFilmRepositoryTest {
                 .isEqualTo(getTestFilm()
                 );
     }
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Test
     @DisplayName("Verify data.sql is loading data correctly")
@@ -204,6 +203,7 @@ class JdbcFilmRepositoryTest {
     }
 
     private static LinkedHashSet<Genre> getGenres() {
+
         Genre genre = new Genre();
         LinkedHashSet<Genre> genres = new LinkedHashSet<>();
         genre.setId(1);
