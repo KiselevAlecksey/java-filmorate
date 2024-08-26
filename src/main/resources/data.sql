@@ -1,4 +1,4 @@
-/*
+
 -- Наполнение таблицы rating
 
 MERGE INTO rating AS target
@@ -22,7 +22,7 @@ USING (SELECT 1 AS id, 'Комедия' AS name UNION ALL
 ON target.id = source.id
 WHEN NOT MATCHED THEN
     INSERT (id, name) VALUES (source.id, source.name);
-
+/*
 -- Наполнение таблицы users
 MERGE INTO users AS target
 USING (SELECT 1 AS id, 'user1@example.com' AS email, 'user1' AS login, 'Алексей' AS name, '1990-01-01 10:00:00+00' AS birthday UNION ALL
