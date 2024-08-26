@@ -1,3 +1,4 @@
+/*
 -- Наполнение таблицы rating
 
 MERGE INTO rating AS target
@@ -74,3 +75,4 @@ USING (SELECT 1 AS film_id, 1 AS user_id UNION ALL
 ON target.film_id = source.film_id AND target.user_id = source.user_id
 WHEN NOT MATCHED THEN
     INSERT (film_id, user_id) VALUES (source.film_id, source.user_id);
+*/

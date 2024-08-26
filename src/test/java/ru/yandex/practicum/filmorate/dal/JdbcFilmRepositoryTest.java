@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.*;
 
@@ -20,14 +22,24 @@ import ru.yandex.practicum.filmorate.model.Genre;
 @JdbcTest
 @Import({JdbcFilmRepository.class, FilmRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DisplayName("JdbcFilmRepositoryTest")
+@DisplayName("JdbcFilmRepository")
 class JdbcFilmRepositoryTest {
     public static final long TEST_USER_ID = 1L;
     public static final long TEST_FILM_ID = 1L;
 
     private final JdbcFilmRepository filmRepository;
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbc;
+
+    private Map<String, Object> params;
+
+    private MapSqlParameterSource sqlParameterSource;
+
+    @BeforeEach
+    void init() {
+        sqlParameterSource = new MapSqlParameterSource();
+        params = new HashMap<>();
+    }
 
     @Test
     @DisplayName("должен возвращать фильм по идентификатору")
@@ -47,11 +59,11 @@ class JdbcFilmRepositoryTest {
     @DisplayName("Verify data.sql is loading data correctly")
     void testDataSqlLoading() {
 
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM users", sqlParameterSource,  Integer.class);
         assertThat(count).isEqualTo(1);
 
 
-        Integer filmCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM films", Integer.class);
+        Integer filmCount = jdbc.queryForObject("SELECT COUNT(*) FROM films", sqlParameterSource,  Integer.class);
         assertThat(filmCount).isEqualTo(1);
     }
 
@@ -62,6 +74,7 @@ class JdbcFilmRepositoryTest {
         filmRepository.save(film);
 
         Optional<Film> savedFilm = filmRepository.findById(film.getId());
+
         assertThat(savedFilm)
                 .isPresent()
                 .get()
@@ -75,10 +88,13 @@ class JdbcFilmRepositoryTest {
 
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
 
-        Integer likeCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM likes WHERE film_id = ? AND user_id = ?",
-                Integer.class,
-                TEST_USER_ID, TEST_USER_ID
+        params.put("film_id", TEST_FILM_ID);
+        params.put("user_id", TEST_USER_ID);
+        sqlParameterSource.addValues(params);
+
+        Integer likeCount = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM likes WHERE film_id = :film_id AND user_id = :user_id", sqlParameterSource,
+                Integer.class
         );
 
         assertThat(likeCount).isEqualTo(1);
@@ -91,10 +107,15 @@ class JdbcFilmRepositoryTest {
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
         filmRepository.removeLike(TEST_FILM_ID, TEST_USER_ID);
 
-        Integer likeCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM likes WHERE film_id = ? AND user_id = ?",
-                Integer.class,
-                TEST_USER_ID, TEST_USER_ID
+        params.put("film_id", TEST_FILM_ID);
+        params.put("user_id", TEST_USER_ID);
+        sqlParameterSource.addValues(params);
+
+        sqlParameterSource.addValues(params);
+
+        Integer likeCount = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM likes WHERE film_id = :film_id AND user_id = :user_id", sqlParameterSource,
+                Integer.class
         );
 
         assertThat(likeCount).isEqualTo(0);

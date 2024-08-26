@@ -48,6 +48,12 @@ public class JdbcUserRepository extends BaseRepository implements UserRepository
         Map<String, Object> params = new HashMap<>();
         params.put("user_id", userId);
 
+        Optional<User> user = findOneByIdInFriends(userId);
+
+        if (user.isEmpty()) {
+            return Collections.emptySet();
+        }
+
         List<Long> list = findMany(FIND_BY_ID_FRIENDS_QUERY, params);
 
         return new HashSet<>(list);
@@ -112,7 +118,13 @@ public class JdbcUserRepository extends BaseRepository implements UserRepository
     @Override
     public boolean remove(User user) {
         Map<String, Object> params = new HashMap<>();
-        params.put("user_id", user.getId());
+        params.put("id", user.getId());
+        Optional<User> optionalUser = findById(user.getId());
+
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+
         return delete(DELETE_USER_QUERY, params);
     }
 
