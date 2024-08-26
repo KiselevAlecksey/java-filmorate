@@ -1,18 +1,16 @@
 package ru.yandex.practicum.filmorate.dal;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository("JdbcMpaRepository")
 public class JdbcMpaRepository extends BaseRepository implements MpaRepository {
 
-    public JdbcMpaRepository(JdbcTemplate jdbc, RowMapper<Mpa> mapper) {
+    public JdbcMpaRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Mpa> mapper) {
         super(jdbc, mapper, Mpa.class);
     }
 
@@ -28,20 +26,22 @@ public class JdbcMpaRepository extends BaseRepository implements MpaRepository {
 
     @Override
     public Optional<Mpa> findById(Integer id) {
-        String query = "SELECT * FROM rating WHERE id = ?";
-        Optional<Mpa> mpa = findOne(query, id);
+        String query = "SELECT * FROM rating WHERE id = :id";
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        Optional<Mpa> mpa = findOne(query, params);
         return mpa;
     }
 
     @Override
     public Collection<Mpa> values() {
         String query = "SELECT * FROM rating";
-        return findMany(query);
+        return jdbc.query(query, mapper);
     }
 
     @Override
     public List<Integer> getAllMpaIds() {
         String query = "SELECT id FROM rating";
-        return jdbc.query(query, (rs, rowNum) -> rs.getInt("id"));
+        return jdbc.query(query, (rs, rowNumber) -> rs.getInt("id"));
     }
 }

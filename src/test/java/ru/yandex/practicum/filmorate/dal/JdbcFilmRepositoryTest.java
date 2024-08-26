@@ -168,7 +168,7 @@ class JdbcFilmRepositoryTest {
         filmRepository.save(film2);
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
 
-        List<Film> popularFilms = filmRepository.getPopularFilms();
+        List<Film> popularFilms = filmRepository.getTopPopular();
 
         assertThat(popularFilms)
                 .hasSize(3)

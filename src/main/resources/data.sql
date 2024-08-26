@@ -22,7 +22,7 @@ ON target.id = source.id
 WHEN NOT MATCHED THEN
     INSERT (id, name) VALUES (source.id, source.name);
 
-/*-- Наполнение таблицы users
+-- Наполнение таблицы users
 MERGE INTO users AS target
 USING (SELECT 1 AS id, 'user1@example.com' AS email, 'user1' AS login, 'Алексей' AS name, '1990-01-01 10:00:00+00' AS birthday UNION ALL
        SELECT 2, 'user2@example.com', 'user2', 'Мария', '1992-02-15 10:00:00+00' UNION ALL
@@ -73,4 +73,4 @@ USING (SELECT 1 AS film_id, 1 AS user_id UNION ALL
        SELECT 4, 4) AS source
 ON target.film_id = source.film_id AND target.user_id = source.user_id
 WHEN NOT MATCHED THEN
-    INSERT (film_id, user_id) VALUES (source.film_id, source.user_id);*/
+    INSERT (film_id, user_id) VALUES (source.film_id, source.user_id);

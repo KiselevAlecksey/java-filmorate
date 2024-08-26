@@ -20,7 +20,7 @@ public interface UserRepository {
 
     Optional<User> findById(Long userId);
 
-    Optional<User> findByIdInFriends(Long userId);
+    Optional<User> findOneByIdInFriends(Long userId);
 
     Collection<User> values();
 

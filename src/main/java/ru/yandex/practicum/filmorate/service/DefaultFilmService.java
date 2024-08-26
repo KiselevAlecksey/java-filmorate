@@ -54,25 +54,71 @@ public class DefaultFilmService implements FilmService {
                 new NotFoundException("Фильм с id = " + id + " не найден")
         );
 
+        setGenreAndMpa(id, film, film.getMpa());
+
+        return FilmMapper.mapToFilmDto(film);
+    }
+
+    private void setGenreAndMpa(Long id, Film film, Mpa film1) {
         Collection<Genre> genres = genreRepository.getFilmGenres(id);
 
         film.setGenres(new LinkedHashSet<>(genres));
 
-        Mpa mpa = mpaRepository.findById(film.getMpa().getId()).orElseThrow(() ->
+        Mpa mpa = mpaRepository.findById(film1.getId()).orElseThrow(() ->
                 new NotFoundException("MPA с id = " + id + " не найден")
         );
 
         film.setMpa(mpa);
-        return FilmMapper.mapToFilmDto(film);
+    }
+
+    @Override
+    public FilmDto add(NewFilmRequest filmRequest) {
+
+        validate.validateFilmRequest(filmRequest);
+
+        Film putFilm = FilmMapper.mapToFilm(filmRequest);
+
+        filmRepository.save(putFilm);
+
+        setGenreAndMpa(putFilm.getId(), putFilm, putFilm.getMpa());
+
+        return FilmMapper.mapToFilmDto(putFilm);
+    }
+
+    @Override
+    public FilmDto update(UpdateFilmRequest filmRequest) {
+
+        if (filmRequest.getId() == null) {
+            throw new NotFoundException("Id должен быть указан");
+        }
+
+        if (filmRepository.findById(filmRequest.getId()).isPresent()) {
+
+            validate.validateFilmRequest(filmRequest);
+
+            Film updateFilm = filmRepository.findById(filmRequest.getId())
+                    .map(film -> FilmMapper.updateFilmFields(film, filmRequest))
+                    .orElseThrow(() -> new NotFoundException("Фильм не найден"));
+
+            filmRepository.update(updateFilm);
+
+            setGenreAndMpa(updateFilm.getId(), updateFilm, updateFilm.getMpa());
+
+            return FilmMapper.mapToFilmDto(updateFilm);
+        }
+        throw new NotFoundException("Фильм с id = " + filmRequest.getId() + " не найден");
     }
 
     @Override
     public boolean addLike(Long filmId, Long userId) {
+
         if (filmId == null || userId == null) {
             throw new NotFoundException("Id должен быть указан");
         }
 
-        if (userRepository.findById(userId).isPresent() & filmRepository.findById(filmId).isPresent()) {
+        boolean isDb = userRepository.findById(userId).isPresent() & filmRepository.findById(filmId).isPresent();
+
+        if (isDb) {
             filmRepository.addLike(filmId, userId);
             return true;
         }
@@ -103,25 +149,30 @@ public class DefaultFilmService implements FilmService {
     @Override
     public Collection<FilmDto> getPopularFilms(Integer count) {
 
-        int popularFilmsSize = filmRepository.getPopularFilms().size();
+        int popularFilmsSize = filmRepository.getTopPopular().size();
 
         int start = 0;
 
         int end = Math.min(popularFilmsSize, 10);
 
         if (count == null) {
-            return filmRepository.getPopularFilms().subList(start, end)
-                    .stream()
-                    .map(FilmMapper::mapToFilmDto)
-                    .collect(Collectors.toList()
-                    );
+            return getTopTen(start, end);
         }
 
         if (count <= 0) {
             throw new ParameterNotValidException("" + count, "Должен быть > 0");
         }
 
-        return filmRepository.getPopularFilms().subList(start, count < popularFilmsSize ? count : popularFilmsSize)
+        return filmRepository.getTopPopular().subList(start, count < popularFilmsSize ? count : popularFilmsSize)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList()
+                );
+    }
+
+    private Collection<FilmDto> getTopTen(int start, int end) {
+
+        return filmRepository.getTopPopular().subList(start, end)
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList()
@@ -130,10 +181,11 @@ public class DefaultFilmService implements FilmService {
 
     @Override
     public Collection<FilmDto> findAll() {
+
         return filmRepository.values().stream()
+                .peek(film -> setGenreAndMpa(film.getId(), film, film.getMpa()))
                 .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList()
-                );
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -142,39 +194,4 @@ public class DefaultFilmService implements FilmService {
                 .map(FilmMapper::mapToFilmDto)
                 .orElseThrow(() -> new NotFoundException("Фильм не найден")));
     }
-
-    @Override
-    public FilmDto add(NewFilmRequest filmRequest) {
-
-        validate.validateFilmRequest(filmRequest);
-
-        Film putFilm = FilmMapper.mapToFilm(filmRequest);
-
-        filmRepository.save(putFilm);
-
-        return FilmMapper.mapToFilmDto(putFilm);
-    }
-
-    @Override
-    public FilmDto update(UpdateFilmRequest filmRequest) {
-
-        if (filmRequest.getId() == null) {
-            throw new NotFoundException("Id должен быть указан");
-        }
-
-        if (filmRepository.findById(filmRequest.getId()).isPresent()) {
-
-                validate.validateFilmRequest(filmRequest);
-
-            Film updateFilm = filmRepository.findById(filmRequest.getId())
-                    .map(film -> FilmMapper.updateFilmFields(film, filmRequest))
-                    .orElseThrow(() -> new NotFoundException("Фильм не найден"));
-
-            filmRepository.update(updateFilm);
-
-            return FilmMapper.mapToFilmDto(updateFilm);
-        }
-        throw new NotFoundException("Фильм с id = " + filmRequest.getId() + " не найден");
-    }
-
 }

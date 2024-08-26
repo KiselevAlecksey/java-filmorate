@@ -22,7 +22,7 @@ public interface FilmRepository {
 
     boolean remove(Film film);
 
-    List<Film> getPopularFilms();
+    List<Film> getTopPopular();
 
     Collection<Film> findFilmsByGenre(Long id);
 

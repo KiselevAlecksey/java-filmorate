@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.dal;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -14,104 +13,114 @@ import static ru.yandex.practicum.filmorate.model.FilmSql.*;
 @Repository("JdbcFilmRepository")
 public class JdbcFilmRepository extends BaseRepository implements FilmRepository  {
 
-    public JdbcFilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
+    public JdbcFilmRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper, Film.class);
     }
 
     @Override
     public void addLike(Long filmId, Long userId) {
-        update(ADD_LIKE_QUERY, filmId, userId);
+        Map<String, Object> params = new HashMap<>();
+        params.put("film_id", filmId);
+        params.put("user_id", userId);
+        update(ADD_LIKE_QUERY, params);
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
-        update(REMOVE_LIKE_QUERY, filmId, userId);
+        Map<String, Object> params = new HashMap<>();
+        params.put("film_id", filmId);
+        params.put("user_id", userId);
+        update(REMOVE_LIKE_QUERY, params);
     }
 
     @Override
     public Film save(Film film) {
-        Long id = insert(
-                INSERT_FILM,
-                film.getName(),
-                film.getDescription(),
-                Timestamp.from(film.getReleaseDate()),
-                film.getDuration(),
-                film.getMpa().getId()
-        );
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("name", film.getName());
+        params.put("description", film.getDescription());
+        params.put("release_date", Timestamp.from(film.getReleaseDate())); // Дата в Timestamp
+        params.put("duration", film.getDuration());
+        params.put("rating_id", film.getMpa().getId());
+
+        Long id = insert(INSERT_FILM, params);
 
         film.setId(id);
+
         if (film.getGenres() != null) {
-            saveGenres(film.getId(), new ArrayList<>(film.getGenres()));
+            film.getGenres().forEach(genre -> {
+                Map<String, Object> objectMap = new HashMap<>();
+                objectMap.put("film_id", film.getId());
+                objectMap.put("genre_id", genre.getId());
+                update(INSERT_FILM_GENRE_QUERY, objectMap);
+            });
         }
+
         return film;
     }
 
     @Override
     public Film update(Film film) {
 
-        update(
-                UPDATE_FILM,
-                film.getName(),
-                film.getDescription(),
-                film.getDuration(),
-                Timestamp.from(film.getReleaseDate()),
-                film.getMpa().getId(),
-                film.getId()
-        );
-        LinkedHashSet<Genre> updatedGenres = updateGenres(film.getId(), new ArrayList<>(film.getGenres()));
-        film.setGenres(updatedGenres);
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("id", film.getId());
+        params.put("name", film.getName());
+        params.put("description", film.getDescription());
+        params.put("release_date", Timestamp.from(film.getReleaseDate()));
+        params.put("duration", film.getDuration());
+        params.put("rating_id", film.getMpa().getId());
+
+        update(UPDATE_FILM, params);
+
         return film;
     }
 
     @Override
     public Optional<Film> findById(Long id) {
-        return findOne(FIND_BY_ID_QUERY, id);
+
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("id", id);
+
+        return findOne(FIND_BY_ID_QUERY, params);
     }
 
     @Override
     public Collection<Film> values() {
-        return findMany(FIND_ALL_FILMS);
+        return jdbc.query(FIND_ALL_FILMS, mapper);
     }
 
     @Override
     public boolean remove(Film film) {
-        return delete(DELETE_QUERY, film.getId());
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("id", film.getId());
+
+        return delete(DELETE_FILM, params);
     }
 
     @Override
-    public List<Film> getPopularFilms() {
-        return findMany(GET_POPULAR_FILMS_QUERY, 10);
+    public List<Film> getTopPopular() {
+        return jdbc.query(GET_POPULAR_FILMS_QUERY, mapper);
     }
 
     @Override
     public Collection<Film> findFilmsByGenre(Long id) {
+        Map<String, Object> params = new HashMap<>();
 
-        return findMany(FIND_FILM_BY_ID_GENRE, id);
+        params.put("genre_id", id);
+
+        return findMany(FIND_FILM_BY_ID_GENRE, params);
     }
 
     @Override
     public Optional<Film> findFilm(Long id) {
 
-        return findOne(FIND_FILMS_BY_ID, id);
-    }
+        Map<String, Object> params = new HashMap<>();
 
-    private LinkedHashSet<Genre> updateGenres(Long id, List<Genre> genreList) {
-        delete(DELETE_GENRE, id);
-        genreList.forEach(genre -> update(
-                UPDATE_GENRE,
-                id,
-                genre.getId()
-        ));
-        return new LinkedHashSet<>(genreList);
-    }
+        params.put("id", id);
 
-    private List<Genre> saveGenres(Long id, List<Genre> genreList) {
-
-        genreList.forEach(genre -> update(
-                INSERT_FILM_GENRE_QUERY,
-                id,
-                genre.getId()
-        ));
-        return genreList;
+        return findOne(FIND_FILMS_BY_ID, params);
     }
 }

@@ -72,8 +72,11 @@ public class Validator {
             return false;
         }
 
-        return filmRequest.getMpa().getId() < 0 || filmRequest.getMpa().getId() > 6
-                || mpaRepository.findById(filmRequest.getMpa().getId()).isEmpty();
+        boolean isIdValid = mpaRepository.findById(filmRequest.getMpa().getId()).isEmpty();
+
+        boolean isValid = filmRequest.getMpa().getId() < 0 || filmRequest.getMpa().getId() > 6
+                || isIdValid;
+        return isValid;
     }
 
     private boolean areGenresInvalid(FilmRequest filmRequest) {
