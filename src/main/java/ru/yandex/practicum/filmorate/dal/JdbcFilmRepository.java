@@ -3,7 +3,12 @@ package ru.yandex.practicum.filmorate.dal;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
+import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -11,10 +16,19 @@ import java.util.*;
 import static ru.yandex.practicum.filmorate.model.FilmSql.*;
 
 @Repository("JdbcFilmRepository")
+
 public class JdbcFilmRepository extends BaseRepository implements FilmRepository  {
+
+    private final RowMapper<Genre> genreMapper;
+
+    private final RowMapper<Mpa> mpaMapper;
 
     public JdbcFilmRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper, Film.class);
+
+        genreMapper = new GenreRowMapper(jdbc);
+
+        mpaMapper = new MpaRowMapper(jdbc);
     }
 
     @Override
@@ -121,6 +135,35 @@ public class JdbcFilmRepository extends BaseRepository implements FilmRepository
 
         params.put("id", id);
 
-        return findOne(FIND_FILMS_BY_ID, params);
+        Optional<Film> filmOptional = findOne(FIND_FILMS_BY_ID, params);
+
+        Film film = filmOptional.orElseThrow(() -> new NotFoundException("Фильм не найден"));
+
+        Mpa mpa = findMpaById(film.getMpa().getId()).orElseThrow(() -> new NotFoundException("Рейтинг не найден"));
+
+        film.setMpa(mpa);
+
+        film.setGenres(new LinkedHashSet<>(getFilmGenres(film.getId())));
+
+        return filmOptional;
+    }
+
+    public Optional<Mpa> findMpaById(Integer id) {
+        String query = "SELECT * FROM rating WHERE id = :id";
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", id);
+        Mpa mpa = jdbc.queryForObject(query, params, mpaMapper);
+        return Optional.ofNullable(mpa);
+    }
+
+    private Collection<Genre> getFilmGenres(Long filmId) {
+        String query = "SELECT * FROM genre " +
+                "WHERE id IN (SELECT genre_id AS id FROM film_genres WHERE film_id = :film_id)";
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("film_id", filmId);
+
+        Collection<Genre> genres = jdbc.query(query, params, genreMapper);
+        return genres;
     }
 }

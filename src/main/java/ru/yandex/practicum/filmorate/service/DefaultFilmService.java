@@ -45,7 +45,7 @@ public class DefaultFilmService implements FilmService {
     private final Validator validate;
 
     @Override
-    public FilmDto getFilmWithGenre(Long id) {
+    public FilmDto getById(Long id) {
         if (id == null) {
             throw new NotFoundException("Id должен быть указан");
         }
@@ -53,8 +53,6 @@ public class DefaultFilmService implements FilmService {
         Film film = filmRepository.findFilm(id).orElseThrow(() ->
                 new NotFoundException("Фильм с id = " + id + " не найден")
         );
-
-        setGenreAndMpa(id, film, film.getMpa());
 
         return FilmMapper.mapToFilmDto(film);
     }
@@ -189,7 +187,7 @@ public class DefaultFilmService implements FilmService {
     }
 
     @Override
-    public Optional<FilmDto> get(Film film) {
+    public Optional<FilmDto> getById(Film film) {
         return Optional.ofNullable(filmRepository.findById(film.getId())
                 .map(FilmMapper::mapToFilmDto)
                 .orElseThrow(() -> new NotFoundException("Фильм не найден")));

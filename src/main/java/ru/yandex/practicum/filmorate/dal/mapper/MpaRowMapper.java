@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.dal.mapper;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -12,7 +12,7 @@ import java.sql.SQLException;
 @Component
 @RequiredArgsConstructor
 public class MpaRowMapper implements RowMapper<Mpa> {
-    protected final JdbcTemplate jdbc;
+    protected final NamedParameterJdbcTemplate jdbc;
 
     @Override
     public Mpa mapRow(ResultSet resultSet, int rowNum) throws SQLException {
