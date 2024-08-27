@@ -19,4 +19,8 @@ public interface FilmRequest {
     Mpa getMpa();
 
     LinkedHashSet<Genre> getGenres();
+
+    void setGenres(LinkedHashSet<Genre> genres);
+
+    void setMpa(Mpa mpa);
 }

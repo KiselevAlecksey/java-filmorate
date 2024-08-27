@@ -37,9 +37,9 @@ public abstract class BaseRepository<T> {
         return rowsDeleted > 0;
     }
 
-    protected Long insert(String query, Map<String, ?> params) {
+    protected Long insert(String query, MapSqlParameterSource params) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(query,new MapSqlParameterSource(params), keyHolder, new String[]{"id"});
+        jdbc.update(query, params, keyHolder, new String[]{"id"});
 
         Long id = keyHolder.getKeyAs(Long.class);
 

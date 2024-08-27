@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JdbcTest
 @Import({JdbcUserRepository.class, UserRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DisplayName("JdbcUserRepositoryTest")
+@DisplayName("JdbcUserRepository")
 class JdbcUserRepositoryTest {
     public static final long TEST_USER_ID = 2L;
     public static final long TEST_FRIEND_ID = 3L;
@@ -30,13 +30,7 @@ class JdbcUserRepositoryTest {
     @DisplayName("должен добавлять друга")
     void should_add_friend() {
 
-        User user1 = User.builder()
-                .id(TEST_FRIEND_ID)
-                .email("example@email.ru")
-                .name("name")
-                .login("description")
-                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
-                .build();
+        User user1 = getTestUser();
 
         userRepository.save(user1);
         User user2 = userRepository.save(getTestUser());
@@ -52,13 +46,7 @@ class JdbcUserRepositoryTest {
     @Test
     @DisplayName("должен удалять друга")
     void should_remove_friend() {
-        User user1 = User.builder()
-                .id(TEST_FRIEND_ID)
-                .email("example@email.ru")
-                .name("name")
-                .login("description")
-                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
-                .build();
+        User user1 = getTestUser();
 
         userRepository.save(user1);
         User user2 = userRepository.save(getTestUser());
@@ -110,13 +98,7 @@ class JdbcUserRepositoryTest {
     @Test
     @DisplayName("должен возвращать пользователя из друзей по идентификатору")
     void should_return_user_from_friends_when_find_by_id() {
-        User user1 = User.builder()
-                .id(TEST_FRIEND_ID)
-                .email("example@email.ru")
-                .name("name")
-                .login("description")
-                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
-                .build();
+        User user1 = getTestUser();
 
         userRepository.save(user1);
         User user2 = userRepository.save(getTestUser());

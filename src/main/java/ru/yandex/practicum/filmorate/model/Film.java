@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
+@EqualsAndHashCode(of = "id")
 public class Film {
 
     Long id;

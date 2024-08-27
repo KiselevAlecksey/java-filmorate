@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
@@ -10,14 +11,16 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static ru.yandex.practicum.filmorate.model.FilmSql.*;
+import static ru.yandex.practicum.filmorate.model.slqreuest.FilmSql.*;
+import static ru.yandex.practicum.filmorate.model.slqreuest.GenreSql.ALL_GENRE_QUERY;
+import static ru.yandex.practicum.filmorate.model.slqreuest.MpaSql.ALL_MPA_QUERY;
 
 @Repository("JdbcFilmRepository")
-
-public class JdbcFilmRepository extends BaseRepository implements FilmRepository  {
+public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepository  {
 
     private final RowMapper<Genre> genreMapper;
 
@@ -49,49 +52,61 @@ public class JdbcFilmRepository extends BaseRepository implements FilmRepository
 
     @Override
     public Film save(Film film) {
-        Map<String, Object> params = new HashMap<>();
 
-        params.put("name", film.getName());
-        params.put("description", film.getDescription());
-        params.put("release_date", Timestamp.from(film.getReleaseDate())); // Дата в Timestamp
-        params.put("duration", film.getDuration());
-        params.put("rating_id", film.getMpa().getId());
-
-        Long id = insert(INSERT_FILM, params);
+        Long id = insert(INSERT_FILM, createParameterSource(film));
 
         film.setId(id);
 
-        if (film.getGenres() != null) {
-            film.getGenres().forEach(genre -> {
-                Map<String, Object> objectMap = new HashMap<>();
-                objectMap.put("film_id", film.getId());
-                objectMap.put("genre_id", genre.getId());
-                update(INSERT_FILM_GENRE_QUERY, objectMap);
-            });
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+
+            List<Long> genreIds = film.getGenres().stream()
+                    .map(genre -> Long.valueOf(genre.getId()))
+                    .toList();
+
+            insertGenres(id, genreIds);
         }
 
-        return film;
+        return getByIdFullDetails(film.getId()).orElseThrow(
+                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
     }
 
     @Override
     public Film update(Film film) {
 
-        Map<String, Object> params = new HashMap<>();
+        jdbc.update(UPDATE_FILM, createParameterSource(film));
 
-        params.put("id", film.getId());
-        params.put("name", film.getName());
-        params.put("description", film.getDescription());
-        params.put("release_date", Timestamp.from(film.getReleaseDate()));
-        params.put("duration", film.getDuration());
-        params.put("rating_id", film.getMpa().getId());
+        List<Long> genreIds = film.getGenres().stream()
+                .map(genre -> Long.valueOf(genre.getId()))
+                .toList();
 
-        update(UPDATE_FILM, params);
+        deleteGenres(film.getId(), genreIds);
 
-        return film;
+        insertGenres(film.getId(), genreIds);
+
+        return getByIdFullDetails(film.getId()).orElseThrow(
+                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
+    }
+
+    private void insertGenres(Long filmId, List<Long> genreIds) {
+
+        String insertGenres = "INSERT INTO film_genres (film_id, genre_id) VALUES (:film_id, :genre_id)";
+
+        List<MapSqlParameterSource> paramsList = getMapSqlParameterSources(filmId, genreIds);
+
+        jdbc.batchUpdate(insertGenres, paramsList.toArray(new MapSqlParameterSource[0]));
+    }
+
+    private void deleteGenres(Long filmId, List<Long> genreIds) {
+
+        String deleteGenres = "DELETE FROM film_genres WHERE film_id = :film_id AND genre_id = :genre_id";
+
+        List<MapSqlParameterSource> paramsList = getMapSqlParameterSources(filmId, genreIds);
+
+        jdbc.batchUpdate(deleteGenres, paramsList.toArray(new MapSqlParameterSource[0]));
     }
 
     @Override
-    public Optional<Film> findById(Long id) {
+    public Optional<Film> getByIdPartialDetails(Long id) {
 
         Map<String, Object> params = new HashMap<>();
 
@@ -102,7 +117,16 @@ public class JdbcFilmRepository extends BaseRepository implements FilmRepository
 
     @Override
     public Collection<Film> values() {
-        return jdbc.query(FIND_ALL_FILMS, mapper);
+
+        List<Film> films = jdbc.query(ALL_FILMS_QUERY, mapper);
+
+        Map<Long, LinkedHashSet<Genre>> filmGenresMap = getFilmGenresMap();
+
+        Map<Long, Mpa> filmMpaMap = getMpaMap();
+
+        setFilmDetails(films, filmGenresMap, filmMpaMap);
+
+        return films;
     }
 
     @Override
@@ -129,7 +153,7 @@ public class JdbcFilmRepository extends BaseRepository implements FilmRepository
     }
 
     @Override
-    public Optional<Film> findFilm(Long id) {
+    public Optional<Film> getByIdFullDetails(Long id) {
 
         Map<String, Object> params = new HashMap<>();
 
@@ -165,5 +189,74 @@ public class JdbcFilmRepository extends BaseRepository implements FilmRepository
 
         Collection<Genre> genres = jdbc.query(query, params, genreMapper);
         return genres;
+    }
+
+
+    private static List<MapSqlParameterSource> getMapSqlParameterSources(Long filmId, List<Long> genreIds) {
+        List<MapSqlParameterSource> paramsList = new ArrayList<>();
+
+        for (Long genreId : genreIds) {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("film_id", filmId);
+            params.addValue("genre_id", genreId);
+            paramsList.add(params);
+        }
+        return paramsList;
+    }
+
+    private static MapSqlParameterSource createParameterSource(Film film) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        params.addValue("id", film.getId());
+        params.addValue("name", film.getName());
+        params.addValue("description", film.getDescription());
+        params.addValue("release_date", Timestamp.from(film.getReleaseDate()));
+        params.addValue("duration", film.getDuration());
+        params.addValue("rating_id", film.getMpa().getId());
+
+        return params;
+    }
+
+    private static void setFilmDetails(List<Film> films, Map<Long,
+            LinkedHashSet<Genre>> filmGenresMap, Map<Long, Mpa> filmMpaMap) {
+
+        for (Film film : films) {
+            LinkedHashSet<Genre> genres = filmGenresMap.get(film.getId());
+            if (genres != null) {
+                film.setGenres(genres);
+            }
+
+            Mpa mpa = filmMpaMap.get(film.getId());
+
+            if (mpa != null) {
+                film.setMpa(mpa);
+            }
+        }
+    }
+
+    private Map<Long, Mpa> getMpaMap() {
+        Map<Long, Mpa> filmMpaMap = new HashMap<>();
+
+        jdbc.query(ALL_MPA_QUERY, (ResultSet rs, int rowNum) -> {
+            Long filmId = rs.getLong("film_id");
+            Mpa mpa = mpaMapper.mapRow(rs,rowNum);
+
+            filmMpaMap.put(filmId, mpa);
+            return null;
+        });
+        return filmMpaMap;
+    }
+
+    private Map<Long, LinkedHashSet<Genre>> getFilmGenresMap() {
+        Map<Long, LinkedHashSet<Genre>> filmGenresMap = new HashMap<>();
+
+        jdbc.query(ALL_GENRE_QUERY, (ResultSet rs, int rowNum) -> {
+            Long filmId = rs.getLong("film_id");
+            Genre genre = genreMapper.mapRow(rs, rowNum);
+
+            filmGenresMap.computeIfAbsent(filmId, key -> new LinkedHashSet<>()).add(genre);
+            return null;
+        });
+        return filmGenresMap;
     }
 }

@@ -2,10 +2,8 @@ package ru.yandex.practicum.filmorate.dal.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -34,38 +32,19 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setName(resultSet.getString("name"));
         film.setDescription(resultSet.getString("description"));
         film.setDuration(resultSet.getInt("duration"));
-        film.setGenres(getFilmGenres(film.getId()));
+        film.setGenres(new LinkedHashSet<>());
+
+        Mpa mpa = new Mpa();
 
         if (resultSet.getInt("rating_id") != 0) {
-            film.setMpa(findMpaById(resultSet.getInt("rating_id"))
-                    .orElseThrow(() -> new NotFoundException("Рейтинг не найден")));
+            mpa.setId(resultSet.getInt("rating_id"));
+            film.setMpa(mpa);
         }
-
 
         Timestamp releaseDate = resultSet.getTimestamp("release_date");
         film.setReleaseDate(releaseDate.toInstant());
 
         return film;
-    }
-
-
-    private LinkedHashSet<Genre> getFilmGenres(Long filmId) {
-
-        String query = "SELECT * FROM genre " +
-                "WHERE id IN (SELECT genre_id FROM film_genres WHERE film_id = :film_id)";
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("film_id", filmId);
-
-        return new LinkedHashSet<>(jdbc.query(query, params, genreMapper));
-    }
-
-    public Optional<Mpa> findMpaById(Integer id) {
-        String query = "SELECT * FROM rating WHERE id = :id";
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-        Mpa mpa = jdbc.queryForObject(query, params, mpaMapper);
-        return Optional.ofNullable(mpa);
     }
 
 }

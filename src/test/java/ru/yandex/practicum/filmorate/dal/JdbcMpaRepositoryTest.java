@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JdbcTest
 @Import({JdbcMpaRepository.class, MpaRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@DisplayName("JdbcMpaRepositoryTest")
+@DisplayName("JdbcMpaRepository")
 class JdbcMpaRepositoryTest {
 
     private final JdbcMpaRepository mpaRepository;

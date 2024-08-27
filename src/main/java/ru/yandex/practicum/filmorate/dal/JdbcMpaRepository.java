@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.*;
 
 @Repository("JdbcMpaRepository")
-public class JdbcMpaRepository extends BaseRepository implements MpaRepository {
+public class JdbcMpaRepository extends BaseRepository<Mpa> implements MpaRepository {
 
     public JdbcMpaRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Mpa> mapper) {
         super(jdbc, mapper, Mpa.class);

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.MpaRepository;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -46,15 +47,32 @@ public class DefaultFilmService implements FilmService {
 
     @Override
     public FilmDto getById(Long id) {
+
         if (id == null) {
             throw new NotFoundException("Id должен быть указан");
         }
 
-        Film film = filmRepository.findFilm(id).orElseThrow(() ->
+        Film film = filmRepository.getByIdFullDetails(id).orElseThrow(() ->
                 new NotFoundException("Фильм с id = " + id + " не найден")
         );
 
         return FilmMapper.mapToFilmDto(film);
+    }
+
+    @Override
+    public FilmDto add(NewFilmRequest filmRequest) {
+
+        validate.validateFilmRequest(filmRequest);
+
+        Film putFilm = FilmMapper.mapToFilm(filmRequest);
+
+        validateGenre(filmRequest);
+
+        validateMpa(filmRequest);
+
+        putFilm = filmRepository.save(putFilm);
+
+        return FilmMapper.mapToFilmDto(putFilm);
     }
 
     private void setGenreAndMpa(Long id, Film film, Mpa film1) {
@@ -69,42 +87,49 @@ public class DefaultFilmService implements FilmService {
         film.setMpa(mpa);
     }
 
-    @Override
-    public FilmDto add(NewFilmRequest filmRequest) {
-
-        validate.validateFilmRequest(filmRequest);
-
-        Film putFilm = FilmMapper.mapToFilm(filmRequest);
-
-        filmRepository.save(putFilm);
-
-        setGenreAndMpa(putFilm.getId(), putFilm, putFilm.getMpa());
-
-        return FilmMapper.mapToFilmDto(putFilm);
-    }
 
     @Override
     public FilmDto update(UpdateFilmRequest filmRequest) {
 
-        if (filmRequest.getId() == null) {
-            throw new NotFoundException("Id должен быть указан");
+        validate.validateFilmRequest(filmRequest);
+
+        Film updateFilm = filmRepository.getByIdPartialDetails(filmRequest.getId())
+                .orElseThrow(() -> new NotFoundException("Фильм не найден"));
+
+        validateGenre(filmRequest);
+
+        validateMpa(filmRequest);
+
+        FilmMapper.updateFilmFields(updateFilm, filmRequest);
+
+        filmRepository.update(updateFilm);
+
+        return FilmMapper.mapToFilmDto(updateFilm);
+
+    }
+
+    private void validateGenre(FilmRequest filmRequest) {
+        if (filmRequest.getGenres() != null) {
+            List<Integer> genreIds = filmRequest.getGenres().stream().map(Genre::getId).toList();
+
+            List<Genre> genres = genreRepository.getByIds(genreIds);
+
+            if (genreIds.size() != genres.size()) {
+                throw new NotFoundException("Жанры не найдены");
+            }
+
+            filmRequest.setGenres(new LinkedHashSet<>(genres));
         }
+    }
 
-        if (filmRepository.findById(filmRequest.getId()).isPresent()) {
+    private void validateMpa(FilmRequest filmRequest) {
+        if (filmRequest.getMpa().getId() != null) {
+            Mpa mpa = filmRequest.getMpa();
 
-            validate.validateFilmRequest(filmRequest);
+            mpa = mpaRepository.findById(mpa.getId()).orElseThrow(() -> new NotFoundException("Рейтинг не найден"));
 
-            Film updateFilm = filmRepository.findById(filmRequest.getId())
-                    .map(film -> FilmMapper.updateFilmFields(film, filmRequest))
-                    .orElseThrow(() -> new NotFoundException("Фильм не найден"));
-
-            filmRepository.update(updateFilm);
-
-            setGenreAndMpa(updateFilm.getId(), updateFilm, updateFilm.getMpa());
-
-            return FilmMapper.mapToFilmDto(updateFilm);
+            filmRequest.setMpa(mpa);
         }
-        throw new NotFoundException("Фильм с id = " + filmRequest.getId() + " не найден");
     }
 
     @Override
@@ -114,7 +139,7 @@ public class DefaultFilmService implements FilmService {
             throw new NotFoundException("Id должен быть указан");
         }
 
-        boolean isDb = userRepository.findById(userId).isPresent() & filmRepository.findById(filmId).isPresent();
+        boolean isDb = userRepository.findById(userId).isPresent() & filmRepository.getByIdPartialDetails(filmId).isPresent();
 
         if (isDb) {
             filmRepository.addLike(filmId, userId);
@@ -133,7 +158,7 @@ public class DefaultFilmService implements FilmService {
             throw new NotFoundException("Id должен быть указан");
         }
 
-        if (userRepository.findById(userId).isPresent() & filmRepository.findById(filmId).isPresent()) {
+        if (userRepository.findById(userId).isPresent() & filmRepository.getByIdPartialDetails(filmId).isPresent()) {
             filmRepository.removeLike(filmId, userId);
             return true;
         }
@@ -169,26 +194,24 @@ public class DefaultFilmService implements FilmService {
     }
 
     private Collection<FilmDto> getTopTen(int start, int end) {
-
-        return filmRepository.getTopPopular().subList(start, end)
+        Collection<FilmDto> filmDtos = filmRepository.getTopPopular().subList(start, end)
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList()
                 );
+        return filmDtos;
     }
 
     @Override
     public Collection<FilmDto> findAll() {
-
         return filmRepository.values().stream()
-                .peek(film -> setGenreAndMpa(film.getId(), film, film.getMpa()))
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<FilmDto> getById(Film film) {
-        return Optional.ofNullable(filmRepository.findById(film.getId())
+        return Optional.ofNullable(filmRepository.getByIdPartialDetails(film.getId())
                 .map(FilmMapper::mapToFilmDto)
                 .orElseThrow(() -> new NotFoundException("Фильм не найден")));
     }

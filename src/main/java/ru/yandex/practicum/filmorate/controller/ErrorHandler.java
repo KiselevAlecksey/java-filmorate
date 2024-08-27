@@ -17,6 +17,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(final NotFoundException e) {
         logger.error(e.getMessage());
+
         return new ErrorResponse(
                 e.getMessage()
         );
@@ -37,6 +38,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handle(final Throwable e) {
         logger.error(e.getMessage());
+
         return new ErrorResponse(
                 "Произошла непредвиденная ошибка"
         );
@@ -46,6 +48,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleParameterNotValid(final ParameterNotValidException e) {
         logger.error(e.getMessage());
+
         return new ErrorResponse(
                 "Некорректное значение параметра " + e.getParameter() + ": " + e.getReason()
         );

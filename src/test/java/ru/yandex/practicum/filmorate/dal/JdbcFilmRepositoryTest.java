@@ -28,6 +28,10 @@ import ru.yandex.practicum.filmorate.model.Genre;
 class JdbcFilmRepositoryTest {
     public static final long TEST_USER_ID = 1L;
     public static final long TEST_FILM_ID = 1L;
+    public static final long TEST_FILM2_ID = 2L;
+    public static final int TEST_LIKE_COUNT = 1;
+    public static final int COUNT_ZERO = 0;
+    public static final int COUNT_ONE = 1;
 
     private final JdbcFilmRepository filmRepository;
 
@@ -41,20 +45,9 @@ class JdbcFilmRepositoryTest {
     void init() {
         sqlParameterSource = new MapSqlParameterSource();
         params = new HashMap<>();
-    }
 
-    @Test
-    @DisplayName("должен возвращать фильм по идентификатору")
-    public void should_return_film_when_find_by_id() {
-
-        Optional<Film> filmOptional = filmRepository.findById(TEST_FILM_ID);
-
-        assertThat(filmOptional)
-                .isPresent()
-                .get()
-                .usingRecursiveComparison()
-                .isEqualTo(getTestFilm()
-                );
+        jdbc.update("DELETE FROM films", new MapSqlParameterSource());
+        jdbc.update("ALTER TABLE films ALTER COLUMN id RESTART WITH 1",  new MapSqlParameterSource());
     }
 
     @Test
@@ -62,31 +55,46 @@ class JdbcFilmRepositoryTest {
     void testDataSqlLoading() {
 
         Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM users", sqlParameterSource,  Integer.class);
-        assertThat(count).isEqualTo(1);
+        assertThat(count).isEqualTo(COUNT_ONE);
 
-
+        filmRepository.save(getTestFilm());
         Integer filmCount = jdbc.queryForObject("SELECT COUNT(*) FROM films", sqlParameterSource,  Integer.class);
-        assertThat(filmCount).isEqualTo(1);
+        assertThat(filmCount).isEqualTo(COUNT_ONE);
+
+    }
+
+    @Test
+    @DisplayName("должен возвращать фильм по идентификатору")
+    public void should_return_film_when_find_by_id() {
+        filmRepository.save(getTestFilm());
+        Optional<Film> filmOptional = filmRepository.getByIdFullDetails(TEST_FILM_ID);
+
+        assertThat(filmOptional)
+                .isPresent()
+                .get()
+                .usingRecursiveComparison()
+                .isEqualTo(getTestFilm());
     }
 
     @Test
     @DisplayName("сохранить фильм")
     void should_save_film() {
-        Film film = getTestFilm();
-        filmRepository.save(film);
 
-        Optional<Film> savedFilm = filmRepository.findById(film.getId());
+        filmRepository.save(getTestFilm());
+        Optional<Film> savedFilm = filmRepository.getByIdFullDetails(TEST_FILM_ID);
 
         assertThat(savedFilm)
                 .isPresent()
                 .get()
                 .usingRecursiveComparison()
-                .isEqualTo(film);
+                .isEqualTo(getTestFilm());
     }
 
     @Test
     @DisplayName("должен добавить лайк")
     void should_add_like_to_film() {
+
+        filmRepository.save(getTestFilm());
 
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
 
@@ -99,12 +107,18 @@ class JdbcFilmRepositoryTest {
                 Integer.class
         );
 
-        assertThat(likeCount).isEqualTo(1);
+        assertThat(likeCount).isEqualTo(TEST_LIKE_COUNT);
     }
 
     @Test
     @DisplayName("должен удалить лайк")
     void should_remove_like_from_film() {
+        Film film1 = getTestFilm();
+        Film film2 = getTestFilm2(film1);
+
+        filmRepository.save(film1);
+        filmRepository.save(film2);
+
 
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
         filmRepository.removeLike(TEST_FILM_ID, TEST_USER_ID);
@@ -120,39 +134,31 @@ class JdbcFilmRepositoryTest {
                 Integer.class
         );
 
-        assertThat(likeCount).isEqualTo(0);
+        assertThat(likeCount).isEqualTo(COUNT_ZERO);
 
     }
 
     @Test
     @DisplayName("обновить фильм")
     void should_update_film() {
-        Film film = getTestFilm();
+
+        Film film = filmRepository.save(getTestFilm());
         film.setName("updated name");
         filmRepository.update(film);
 
-        Optional<Film> updatedFilm = filmRepository.findById(TEST_FILM_ID);
+        Optional<Film> updatedFilm = filmRepository.getByIdFullDetails(TEST_FILM_ID);
         assertThat(updatedFilm)
                 .isPresent()
                 .get()
-                .extracting(Film::getName)
-                .isEqualTo("updated name");
+                .usingRecursiveComparison()
+                .isEqualTo(film);
     }
 
     @Test
     @DisplayName("должен возвращать все фильмы")
     void should_return_all_films_when_values_called() {
-
         Film film1 = getTestFilm();
-        Film film2 = Film.builder()
-                .id(2L)
-                .name("another name")
-                .description("another desc")
-                .releaseDate(Instant.now())
-                .duration(90)
-                .genres(getGenres())
-                .mpa(getMpa())
-                .build();
+        Film film2 = getTestFilm2(film1);
 
         filmRepository.save(film1);
         filmRepository.save(film2);
@@ -160,9 +166,8 @@ class JdbcFilmRepositoryTest {
         Collection<Film> allFilms = filmRepository.values();
 
         assertThat(allFilms)
-                .hasSize(3)
-                .extracting(Film::getId)
-                .containsExactlyInAnyOrder(1L, film1.getId(), film2.getId());
+                .usingRecursiveComparison()
+                .isEqualTo(Arrays.asList(film1, film2));
     }
 
     @Test
@@ -170,7 +175,7 @@ class JdbcFilmRepositoryTest {
     void should_remove_film() {
         filmRepository.remove(getTestFilm());
 
-        Optional<Film> removedFilm = filmRepository.findById(TEST_USER_ID);
+        Optional<Film> removedFilm = filmRepository.getByIdPartialDetails(TEST_USER_ID);
         assertThat(removedFilm).isNotPresent();
     }
 
@@ -178,15 +183,8 @@ class JdbcFilmRepositoryTest {
     @DisplayName("получить популярные фильмы")
     void should_return_popular_films() {
         Film film1 = getTestFilm();
-        Film film2 = Film.builder()
-                .id(2L)
-                .name("name")
-                .description("description")
-                .releaseDate(Instant.ofEpochMilli(1_114_608_000_000L))
-                .duration(100)
-                .genres(getGenres())
-                .mpa(getMpa())
-                .build();
+        Film film2 = getTestFilm2(film1);
+
         filmRepository.save(film1);
         filmRepository.save(film2);
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
@@ -194,9 +192,10 @@ class JdbcFilmRepositoryTest {
         List<Film> popularFilms = filmRepository.getTopPopular();
 
         assertThat(popularFilms)
-                .hasSize(3)
+                .hasSize(2)
                 .extracting(Film::getId)
-                .containsExactly(TEST_FILM_ID, film1.getId(), film2.getId());
+                .containsExactly(TEST_FILM_ID, TEST_FILM2_ID);
+        assertThat(popularFilms.getFirst()).isEqualTo(film1);
     }
 
     @Test
@@ -204,29 +203,19 @@ class JdbcFilmRepositoryTest {
     void should_return_films_when_find_by_genre_called() {
 
         Film film1 = getTestFilm();
-        Film film2 = Film.builder()
-                .id(2L)
-                .name("another name")
-                .description("another desc")
-                .releaseDate(Instant.now())
-                .duration(90)
-                .genres(new LinkedHashSet<>(Collections.singletonList(new Genre(2, "genre2"))))
-                .mpa(getMpa())
-                .build();
+        Film film2 = getTestFilm2(film1);
 
         filmRepository.save(film1);
         filmRepository.save(film2);
 
-        Collection<Film> filmsByGenre = filmRepository.findFilmsByGenre(1L);
+        Collection<Film> films = filmRepository.values();
 
-        assertThat(filmsByGenre)
-                .hasSize(2)
-                .extracting(Film::getId)
-                .contains(TEST_FILM_ID);
+        assertThat(films)
+                .usingRecursiveComparison()
+                .isEqualTo(Arrays.asList(film1, film2));
     }
 
     private static LinkedHashSet<Genre> getGenres() {
-
         Genre genre = new Genre();
         LinkedHashSet<Genre> genres = new LinkedHashSet<>();
         genre.setId(1);
@@ -243,17 +232,26 @@ class JdbcFilmRepositoryTest {
     }
 
     private static Film getTestFilm() {
+        return Film.builder()
+                .id(TEST_FILM_ID)
+                .name("name")
+                .description("description")
+                .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
+                .duration(100)
+                .genres(getGenres())
+                .mpa(getMpa())
+                .build();
+    }
 
-Film film = Film.builder()
-        .id(TEST_FILM_ID)
-        .name("name")
-        .description("description")
-        .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
-        .duration(100)
-        .genres(getGenres())
-        .mpa(getMpa())
-        .build();
-
-        return film;
+    private static Film getTestFilm2(Film film) {
+        return film.toBuilder()
+                .id(TEST_FILM2_ID)
+                .name("another name")
+                .description("another desc")
+                .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
+                .duration(90)
+                .genres(getGenres())
+                .mpa(getMpa())
+                .build();
     }
 }

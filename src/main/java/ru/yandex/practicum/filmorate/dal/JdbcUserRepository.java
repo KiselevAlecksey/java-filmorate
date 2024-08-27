@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dal;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
@@ -10,11 +11,11 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static ru.yandex.practicum.filmorate.model.UserSql.*;
+import static ru.yandex.practicum.filmorate.model.slqreuest.UserSql.*;
 
 @Repository
 @Qualifier("JdbcUserRepository")
-public class JdbcUserRepository extends BaseRepository implements UserRepository {
+public class JdbcUserRepository extends BaseRepository<User> implements UserRepository {
 
     public JdbcUserRepository(NamedParameterJdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper, User.class);
@@ -54,22 +55,21 @@ public class JdbcUserRepository extends BaseRepository implements UserRepository
             return Collections.emptySet();
         }
 
-        List<Long> list = findMany(FIND_BY_ID_FRIENDS_QUERY, params);
+        List<User> list = findMany(FIND_BY_ID_FRIENDS_QUERY, params);
 
-        return new HashSet<>(list);
+        LinkedHashSet<Long> ids = new LinkedHashSet<>();
+
+        for (User user1 : list) {
+            ids.add(user1.getId());
+        }
+
+        return ids;
     }
 
     @Override
     public User save(User user) {
 
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("email", user.getEmail());
-        params.put("login", user.getLogin());
-        params.put("name", user.getName());
-        params.put("birthday", Timestamp.from(user.getBirthday()));
-
-        Long id = insert(INSERT_QUERY, params);
+        Long id = insert(INSERT_QUERY, createParameterSource(user));
 
         user.setId(id);
 
@@ -79,6 +79,17 @@ public class JdbcUserRepository extends BaseRepository implements UserRepository
         } else {
             throw new InternalServerException("Не удалось сохранить данные");
         }
+    }
+
+    private static MapSqlParameterSource createParameterSource(User user) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        params.addValue("email", user.getEmail());
+        params.addValue("login", user.getLogin());
+        params.addValue("name", user.getName());
+        params.addValue("birthday", Timestamp.from(user.getBirthday()));
+
+        return params;
     }
 
     @Override

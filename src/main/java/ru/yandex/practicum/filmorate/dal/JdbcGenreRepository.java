@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -8,7 +9,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.*;
 
 @Repository("JdbcGenreRepository")
-public class JdbcGenreRepository extends BaseRepository implements GenreRepository {
+public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreRepository {
     private static final String FIND_BY_ID_GENRE = "SELECT * FROM genre WHERE id = :id";
 
     public JdbcGenreRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Genre> mapper) {
@@ -19,10 +20,7 @@ public class JdbcGenreRepository extends BaseRepository implements GenreReposito
     public void save(Genre genre) {
         String query = "INSERT INTO genre (name) VALUES (:name)";
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", genre.getName());
-
-        insert(query, params);
+        insert(query, new MapSqlParameterSource().addValue("name", genre.getName()));
     }
 
     @Override
@@ -60,5 +58,13 @@ public class JdbcGenreRepository extends BaseRepository implements GenreReposito
     public List<Integer> getAllGenreIds() {
         String query = "SELECT id FROM genre";
         return jdbc.query(query, (rs, rowNum) -> rs.getInt("id"));
+    }
+
+    @Override
+    public List<Genre> getByIds(List<Integer> ids) {
+
+        String query = "SELECT id, name FROM genre WHERE id IN (:ids)";
+
+        return jdbc.query(query, new MapSqlParameterSource("ids", ids), mapper);
     }
 }
