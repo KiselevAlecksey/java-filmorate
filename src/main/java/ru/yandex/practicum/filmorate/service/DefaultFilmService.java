@@ -1,41 +1,118 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
+import ru.yandex.practicum.filmorate.dal.GenreRepository;
+import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dto.film.FilmDto;
+import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
-import ru.yandex.practicum.filmorate.model.Constant;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.validator.Validator;
 
-import java.time.Instant;
-import java.util.Collection;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DefaultFilmService implements FilmService {
 
+    @Autowired
+    @Qualifier("JdbcFilmRepository")
     private final FilmRepository filmRepository;
+
+    @Autowired
+    @Qualifier("JdbcUserRepository")
     private final UserRepository userRepository;
 
-    long currentMaxId = 0;
+    @Autowired
+    @Qualifier("JdbcGenreRepository")
+    private final GenreRepository genreRepository;
+
+    @Autowired
+    @Qualifier("JdbcMpaRepository")
+    private final MpaRepository mpaRepository;
+
+    private final Validator validate;
+
+    @Override
+    public FilmDto get(Long id) {
+
+        if (id == null) {
+            throw new NotFoundException("Id должен быть указан");
+        }
+
+        Film film = filmRepository.getByIdFullDetails(id).orElseThrow(() ->
+                new NotFoundException("Фильм с id = " + id + " не найден")
+        );
+
+        return FilmMapper.mapToFilmDto(film);
+    }
+
+    @Override
+    public FilmDto add(NewFilmRequest filmRequest) {
+
+        validate.validateFilmRequest(filmRequest);
+
+        Film putFilm = FilmMapper.mapToFilm(filmRequest);
+
+        validateGenre(filmRequest);
+
+        validateMpa(filmRequest);
+
+        putFilm = filmRepository.save(putFilm);
+
+        return FilmMapper.mapToFilmDto(putFilm);
+    }
+
+    @Override
+    public FilmDto update(UpdateFilmRequest filmRequest) {
+
+        validate.validateFilmRequest(filmRequest);
+
+        Film updateFilm = filmRepository.getByIdPartialDetails(filmRequest.getId())
+                .orElseThrow(() -> new NotFoundException("Фильм не найден"));
+
+        validateGenre(filmRequest);
+
+        validateMpa(filmRequest);
+
+        FilmMapper.updateFilmFields(updateFilm, filmRequest);
+
+        filmRepository.update(updateFilm);
+
+        return FilmMapper.mapToFilmDto(updateFilm);
+
+    }
 
     @Override
     public boolean addLike(Long filmId, Long userId) {
+
         if (filmId == null || userId == null) {
             throw new NotFoundException("Id должен быть указан");
         }
 
-        if (userRepository.findById(userId) != null & filmRepository.findById(filmId) != null) {
+        boolean isDb = userRepository.findById(userId).isPresent()
+                & filmRepository.getByIdPartialDetails(filmId).isPresent();
+
+        if (isDb) {
             filmRepository.addLike(filmId, userId);
             return true;
         }
 
         throw new NotFoundException(
                 "Ресурс с id = "
-                        + (userRepository.findById(userId) == null ? userId : filmId) + " не найден"
+                        + (userRepository.findById(userId).isEmpty() ? userId : filmId) + " не найден"
         );
     }
 
@@ -45,113 +122,98 @@ public class DefaultFilmService implements FilmService {
             throw new NotFoundException("Id должен быть указан");
         }
 
-        if (userRepository.findById(userId) != null & filmRepository.findById(filmId) != null) {
+        if (userRepository.findById(userId).isPresent()
+                & filmRepository.getByIdPartialDetails(filmId).isPresent()) {
             filmRepository.removeLike(filmId, userId);
             return true;
         }
 
         throw new NotFoundException(
                 "Ресурс с id = "
-                        + (userRepository.findById(userId) == null ? userId : filmId) + " не найден"
+                        + (userRepository.findById(userId).isEmpty() ? userId : filmId) + " не найден"
         );
     }
 
     @Override
-    public Collection<Film> getPopularFilms(Integer count) {
+    public Collection<FilmDto> getPopularFilms(Integer count) {
 
-        int popularFilmsSize = filmRepository.getPopularFilms().size();
+        int popularFilmsSize = filmRepository.getTopPopular().size();
 
         int start = 0;
 
         int end = Math.min(popularFilmsSize, 10);
 
         if (count == null) {
-            return filmRepository.getPopularFilms().subList(start, end);
+            return getTopTen(start, end);
         }
 
         if (count <= 0) {
             throw new ParameterNotValidException("" + count, "Должен быть > 0");
         }
 
-        return filmRepository.getPopularFilms().subList(start, count < popularFilmsSize ? count : popularFilmsSize);
-    }
-
-    @Override
-    public Collection<Film> findAll() {
-        return filmRepository.values();
-    }
-
-    @Override
-    public Film get(Film film) {
-        return filmRepository.findById(film.getId());
-    }
-
-    @Override
-    public Film add(Film film) {
-
-        if (film.getName().isBlank()
-                || film.getDescription().length() > Constant.MAX_LENGTH_DESCRIPTION
-                || film.getReleaseDate().isBefore(Instant.ofEpochMilli(Constant.CINEMA_BURN_DAY))
-                || film.getDuration() < 0) {
-
-            throw new ConditionsNotMetException(
-                    "Название не может быть пустым," +
-                    " описание не может быть больше " + Constant.MAX_LENGTH_DESCRIPTION +
-                    " дата релиза не может быть раньше " + Constant.CINEMA_BURN_DAY +
-                    " продолжительность не может быть отрицательной"
-            );
-        }
-
-        Film putFilm = Film.builder()
-                .id(getNextId())
-                .name(film.getName())
-                .description(film.getDescription())
-                .releaseDate(film.getReleaseDate())
-                .duration(film.getDuration())
-                .build();
-
-        filmRepository.save(putFilm);
-        return putFilm;
-    }
-
-    @Override
-    public Film update(Film film) {
-
-        if (film.getId() == null) {
-            throw new NotFoundException("Id должен быть указан");
-        }
-
-        if (filmRepository.findById(film.getId()) != null) {
-
-            if (film.getName().isBlank()
-                    || film.getDescription().length() > Constant.MAX_LENGTH_DESCRIPTION
-                    || film.getReleaseDate().isBefore(Instant.ofEpochMilli(Constant.CINEMA_BURN_DAY))
-                    || film.getDuration() < 0) {
-
-                throw new ConditionsNotMetException(
-                        "Название не может быть пустым," +
-                                " описание не может быть больше " + Constant.MAX_LENGTH_DESCRIPTION +
-                                " дата релиза не может быть раньше " + Constant.CINEMA_BURN_DAY +
-                                " продолжительность не может быть отрицательной"
+        return filmRepository.getTopPopular().subList(start, count < popularFilmsSize ? count : popularFilmsSize)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList()
                 );
+    }
+
+    private Collection<FilmDto> getTopTen(int start, int end) {
+        return filmRepository.getTopPopular().subList(start, end)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList()
+                );
+    }
+
+    @Override
+    public Collection<FilmDto> findAll() {
+        return filmRepository.values().stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<FilmDto> get(Film film) {
+        return Optional.ofNullable(filmRepository.getByIdFullDetails(film.getId())
+                .map(FilmMapper::mapToFilmDto)
+                .orElseThrow(() -> new NotFoundException("Фильм не найден")));
+    }
+
+
+    private void validateGenre(FilmRequest filmRequest) {
+        if (filmRequest.getGenres() != null) {
+            List<Integer> genreIds = filmRequest.getGenres().stream().map(Genre::getId).toList();
+
+            List<Genre> genres = genreRepository.getByIds(genreIds);
+
+            if (genreIds.size() != genres.size()) {
+                throw new NotFoundException("Жанры не найдены");
             }
 
-            Film updateFilm = film.toBuilder()
-                    .id(film.getId())
-                    .name(film.getName())
-                    .description(film.getDescription())
-                    .releaseDate(film.getReleaseDate())
-                    .duration(film.getDuration())
-                    .build();
-
-            filmRepository.save(film);
-
-            return updateFilm;
+            filmRequest.setGenres(new LinkedHashSet<>(genres));
         }
-        throw new NotFoundException("Фильм с id = " + film.getId() + " не найден");
     }
 
-    private long getNextId() {
-        return ++currentMaxId;
+    private void validateMpa(FilmRequest filmRequest) {
+        if (filmRequest.getMpa().getId() != null) {
+            Mpa mpa = filmRequest.getMpa();
+
+            mpa = mpaRepository.findById(mpa.getId()).orElseThrow(() -> new NotFoundException("Рейтинг не найден"));
+
+            filmRequest.setMpa(mpa);
+        }
+    }
+
+    private void setGenreAndMpa(Long id, Film film, Mpa film1) {
+        Collection<Genre> genres = genreRepository.getFilmGenres(id);
+
+        film.setGenres(new LinkedHashSet<>(genres));
+
+        Mpa mpa = mpaRepository.findById(film1.getId()).orElseThrow(() ->
+                new NotFoundException("MPA с id = " + id + " не найден")
+        );
+
+        film.setMpa(mpa);
     }
 }
