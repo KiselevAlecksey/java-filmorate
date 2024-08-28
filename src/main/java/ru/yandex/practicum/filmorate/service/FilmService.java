@@ -9,13 +9,13 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface FilmService {
-    Optional<FilmDto> getById(Film film);
+    Optional<FilmDto> get(Film film);
 
     FilmDto add(NewFilmRequest filmRequest);
 
     FilmDto update(UpdateFilmRequest filmRequest);
 
-    FilmDto getById(Long id);
+    FilmDto get(Long id);
 
     boolean addLike(Long filmId, Long userId);
 

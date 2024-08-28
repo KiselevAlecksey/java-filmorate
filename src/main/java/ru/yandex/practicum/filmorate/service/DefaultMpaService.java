@@ -32,10 +32,9 @@ public class DefaultMpaService implements MpaService {
 
     @Override
     public Collection<MpaDto> getAll() {
-        Collection<MpaDto> mpaList = mpaRepository.values().stream()
+        return mpaRepository.values().stream()
                 .map(MpaMapper::mapToMpaDto)
                 .collect(Collectors.toList()
                 );
-        return mpaList;
     }
 }

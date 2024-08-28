@@ -72,7 +72,7 @@ public class FilmController {
     @GetMapping("/{id}")
     public FilmDto getFilmWithGenre(@PathVariable long id) {
         logger.error("Get film with genre id {} start", id);
-        FilmDto film = filmService.getById(id);
+        FilmDto film = filmService.get(id);
         logger.error("Get film with genre id {} complete", id);
         return film;
     }
