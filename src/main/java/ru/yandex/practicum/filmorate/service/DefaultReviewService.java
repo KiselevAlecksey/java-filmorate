@@ -68,7 +68,7 @@ public class DefaultReviewService implements ReviewService {
 
     @Override
     public Collection<ReviewDto> getByReviewsId(long filmId, long count) {
-        return reviewRepository.getReviewsByFilmId(filmId, count).stream()
+        return reviewRepository.getByReviewsId(filmId, count).stream()
                 .map(ReviewMapper::mapToReviewDto)
                 .toList();
     }

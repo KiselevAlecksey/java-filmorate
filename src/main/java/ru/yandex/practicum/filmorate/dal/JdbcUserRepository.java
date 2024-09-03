@@ -116,10 +116,9 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     }
 
     @Override
-    public boolean remove(Long id) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-        Optional<User> optionalUser = findById(id);
+    public boolean remove(User user) {
+
+        Optional<User> optionalUser = findById(user.getId());
 
         if (optionalUser.isEmpty()) {
             return false;
@@ -127,6 +126,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
 
         return delete(DELETE_USER_QUERY, new MapSqlParameterSource().addValue("id", user.getId()));
     }
+
 
     @Override
     public Collection<User> findFriendsById(List<Long> ids) {
