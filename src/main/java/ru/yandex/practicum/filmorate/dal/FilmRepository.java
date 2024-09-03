@@ -16,7 +16,7 @@ public interface FilmRepository {
 
     Film update(Film film);
 
-    Optional<Film> getByIdPartialDetails(Long id);
+    Optional<Film> findById(Long id);
 
     Collection<Film> values();
 

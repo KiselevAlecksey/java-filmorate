@@ -90,5 +90,6 @@ public class DefaultReviewService implements ReviewService {
 
     @Override
     public void removeDislike(long id, long userId) {
+
     }
 }
