@@ -1,5 +1,4 @@
-
-package ru.yandex.practicum.filmorate.dal;
+package ru.yandex.practicum.filmorate.dal.repository;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -17,7 +16,7 @@ public interface FilmRepository {
 
     Film update(Film film);
 
-    Optional<Film> findById(Long id);
+    Optional<Film> getByIdPartialDetails(Long id);
 
     Collection<Film> values();
 
@@ -29,11 +28,7 @@ public interface FilmRepository {
 
     Optional<Film> getByIdFullDetails(Long id);
 
-    List<Film> getFilmsByDirector(Long dirId, List<String> sort);
-
     List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year);
 
-
     List<Film> getRecommendedFilms(Long userId);
-
 }

@@ -132,7 +132,6 @@ class JdbcFilmRepositoryTest {
         filmRepository.save(film1);
         filmRepository.save(film2);
 
-
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
         filmRepository.removeLike(TEST_FILM_ID, TEST_USER_ID);
 
@@ -186,6 +185,7 @@ class JdbcFilmRepositoryTest {
         filmRepository.remove(getTestFilm().getId());
 
         Optional<Film> removedFilm = filmRepository.getByIdPartialDetails(TEST_USER_ID);
+
         assertThat(removedFilm).isNotPresent();
     }
 

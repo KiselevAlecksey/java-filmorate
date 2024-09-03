@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.interfaces;
 
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FilmService {
-    Optional<FilmDto> get(Film film);
+
+    Optional<FilmDto> getById(Film film);
 
     FilmDto add(NewFilmRequest filmRequest);
 
     FilmDto update(UpdateFilmRequest filmRequest);
 
-    FilmDto get(Long id);
+    FilmDto getById(Long id);
 
     boolean addLike(Long filmId, Long userId);
 

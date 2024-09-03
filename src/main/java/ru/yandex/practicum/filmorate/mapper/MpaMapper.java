@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.dto.*;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
+import ru.yandex.practicum.filmorate.dto.mpa.NewMpaRequest;
+import ru.yandex.practicum.filmorate.dto.mpa.UpdateMpaRequest;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

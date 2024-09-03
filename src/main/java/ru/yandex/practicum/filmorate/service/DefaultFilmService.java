@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
 import java.util.*;
@@ -45,10 +46,10 @@ public class DefaultFilmService implements FilmService {
     @Qualifier("JdbcDirectorRepository")
     private final DirectorRepository directorRepository;
 
-    private final Validator validate;
+    private final Validator validator;
 
     @Override
-    public FilmDto get(Long id) {
+    public FilmDto getById(Long id) {
 
         if (id == null) {
             throw new NotFoundException("Id должен быть указан");
@@ -64,7 +65,7 @@ public class DefaultFilmService implements FilmService {
     @Override
     public FilmDto add(NewFilmRequest filmRequest) {
 
-        validate.validateFilmRequest(filmRequest);
+        validator.validateFilmRequest(filmRequest);
 
         Film putFilm = FilmMapper.mapToFilm(filmRequest);
 
@@ -78,7 +79,7 @@ public class DefaultFilmService implements FilmService {
     }
 
     public boolean remove(Long id) {
-        if (id == null || !filmRepository.getByIdPartialDetails(id).isPresent()) {
+        if (id == null || filmRepository.getByIdPartialDetails(id).isEmpty()) {
             throw new NotFoundException("Id не найден");
         }
         return filmRepository.remove(id);
@@ -87,9 +88,9 @@ public class DefaultFilmService implements FilmService {
     @Override
     public FilmDto update(UpdateFilmRequest filmRequest) {
 
-        validate.validateFilmRequest(filmRequest);
+        validator.validateFilmRequest(filmRequest);
 
-        Film updateFilm = filmRepository.getByIdPartialDetails(filmRequest.getId())
+        Film updatedFilm = filmRepository.getByIdPartialDetails(filmRequest.getId())
                 .orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
         validateGenre(filmRequest);
@@ -100,9 +101,7 @@ public class DefaultFilmService implements FilmService {
 
         FilmMapper.updateFilmFields(updateFilm, filmRequest);
 
-        filmRepository.update(updateFilm);
-
-        FilmDto dto = FilmMapper.mapToFilmDto(updateFilm);
+        filmRepository.update(updatedFilm);
 
         return FilmMapper.mapToFilmDto(updateFilm);
 
@@ -166,7 +165,7 @@ public class DefaultFilmService implements FilmService {
             throw new ParameterNotValidException("" + count, "Должен быть > 0");
         }
 
-        return filmRepository.getTopPopular().subList(start, count < popularFilmsSize ? count : popularFilmsSize)
+        return filmRepository.getTopPopular().subList(start, Math.min(count, popularFilmsSize))
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList()
@@ -195,11 +194,11 @@ public class DefaultFilmService implements FilmService {
     public Collection<FilmDto> findAll() {
         return filmRepository.values().stream()
                 .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
-    public Optional<FilmDto> get(Film film) {
+    public Optional<FilmDto> getById(Film film) {
         return Optional.ofNullable(filmRepository.getByIdFullDetails(film.getId())
                 .map(FilmMapper::mapToFilmDto)
                 .orElseThrow(() -> new NotFoundException("Фильм не найден")));

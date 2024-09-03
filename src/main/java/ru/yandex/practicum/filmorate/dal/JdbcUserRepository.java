@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.repository.UserRepository;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -23,22 +24,14 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
 
     @Override
     public void addFriend(Long userId, Long friendId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("user_id", userId);
-        params.put("friend_id", friendId);
-
-        update(INSERT_FRIEND, params);
+        update(INSERT_FRIEND, new MapSqlParameterSource().addValue("user_id", userId).addValue("friend_id", friendId));
     }
 
     @Override
     public void removeFriend(Long userId, Long friendId) {
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("user_id", userId);
-        params.put("friend_id", friendId);
-
         if (findOneByIdInFriends(userId).isPresent()) {
-            update(DELETE_FRIEND, params);
+            update(DELETE_FRIEND, new MapSqlParameterSource().addValue("user_id", userId).addValue("friend_id", friendId));
         }
 
     }
@@ -55,7 +48,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
             return Collections.emptySet();
         }
 
-        List<User> list = findMany(FIND_BY_ID_FRIENDS_QUERY, params);
+        List<User> list = findMany(FIND_BY_ID_FRIENDS_QUERY, new MapSqlParameterSource().addValue("user_id", userId));
 
         LinkedHashSet<Long> ids = new LinkedHashSet<>();
 
@@ -102,23 +95,20 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
         params.put("name", user.getName());
         params.put("birthday", Timestamp.from(user.getBirthday()));
 
-        update(UPDATE_QUERY, params);
+        update(UPDATE_QUERY, new MapSqlParameterSource().addValues(params));
+
         return user;
     }
 
     @Override
     public Optional<User> findById(Long userId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", userId);
-        return findOne(FIND_BY_ID_QUERY_USERS, params);
+        return findOne(FIND_BY_ID_QUERY_USERS, new MapSqlParameterSource().addValue("id", userId));
     }
 
     @Override
     public Optional<User> findOneByIdInFriends(Long userId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("user_id", userId);
 
-        return findOne(FIND_ALL_FRIENDS, params);
+        return findOne(FIND_ALL_FRIENDS, new MapSqlParameterSource().addValue("user_id", userId));
     }
 
     @Override
@@ -128,29 +118,28 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
 
     @Override
     public boolean remove(Long id) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
+
         Optional<User> optionalUser = findById(id);
 
         if (optionalUser.isEmpty()) {
             return false;
         }
 
-        return delete(DELETE_USER_QUERY, params);
+        return delete(DELETE_USER_QUERY, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
     public Collection<User> findFriendsById(List<Long> ids) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("user_id", ids.getFirst());
-        Collection<User> users = findMany(FIND_ALL_FRIENDS, params);
+        Collection<User> users = findMany(FIND_ALL_FRIENDS, new MapSqlParameterSource()
+                .addValue("user_id", ids.getFirst()));
 
         if (ids.size() > 1) {
-            params.remove("user_id");
-            params.put("user_id", ids.getLast());
-            Collection<User> friends = findMany(FIND_ALL_FRIENDS, params);
+            Collection<User> friends = findMany(FIND_ALL_FRIENDS, new MapSqlParameterSource()
+                    .addValue("user_id", ids.getLast()));
+
             users.retainAll(friends);
         }
+
         return users;
     }
 }

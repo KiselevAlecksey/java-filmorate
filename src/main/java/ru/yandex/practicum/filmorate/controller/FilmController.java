@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
 
 import java.util.Collection;
 import java.util.List;
@@ -67,7 +67,7 @@ public class FilmController {
     @GetMapping("/{id}")
     public FilmDto get(@PathVariable long id) {
         log.error("Get film with genre id {} start", id);
-        FilmDto film = filmService.get(id);
+        FilmDto film = filmService.getById(id);
         log.error("Get film with genre id {} complete", id);
         return film;
     }

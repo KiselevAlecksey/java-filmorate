@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.repository.GenreRepository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.*;
@@ -32,22 +33,13 @@ public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreR
         String query = "SELECT * FROM genre " +
                 "WHERE id IN (SELECT genre_id AS id FROM film_genres WHERE film_id = :film_id)";
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("film_id", filmId);
-
-        Collection<Genre> genres = findMany(query, params);
-
+        Collection<Genre> genres = findMany(query, new MapSqlParameterSource().addValue("film_id", filmId));
         return new LinkedHashSet<>(genres);
     }
 
     @Override
     public Optional<Genre> findById(Integer id) {
-
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("id", id);
-
-        return findOne(FIND_BY_ID_GENRE, params);
+        return findOne(FIND_BY_ID_GENRE, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
