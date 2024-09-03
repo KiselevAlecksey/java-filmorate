@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.dal;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.repository.MpaRepository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;
@@ -27,9 +29,8 @@ public class JdbcMpaRepository extends BaseRepository<Mpa> implements MpaReposit
     @Override
     public Optional<Mpa> findById(Integer id) {
         String query = "SELECT * FROM rating WHERE id = :id";
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-        Optional<Mpa> mpa = findOne(query, params);
+
+        Optional<Mpa> mpa = findOne(query, new MapSqlParameterSource().addValue("id", id));
         return mpa;
     }
 

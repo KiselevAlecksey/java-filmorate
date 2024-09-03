@@ -16,7 +16,7 @@ public interface FilmRepository {
 
     Film update(Film film);
 
-    Optional<Film> getByIdPartialDetails(Long id);
+    Optional<Film> findById(Long id);
 
     Collection<Film> values();
 
@@ -26,5 +26,5 @@ public interface FilmRepository {
 
     Collection<Film> findFilmsByGenre(Long id);
 
-    Optional<Film> getByIdFullDetails(Long id);
+    Optional<Film> findFilm(Long id);
 }

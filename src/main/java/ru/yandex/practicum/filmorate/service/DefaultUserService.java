@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.dal.repository.UserRepository;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
@@ -20,6 +20,13 @@ import java.util.stream.Collectors;
 public class DefaultUserService implements UserService {
 
     private final UserRepository userRepository;
+
+    @Override
+    public UserDto getById(long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Пользователь с id = " + id + " не найден"));
+        return UserMapper.mapToUserDto(user);
+    }
 
     @Override
     public Collection<UserDto> getFriends(Long id) {
