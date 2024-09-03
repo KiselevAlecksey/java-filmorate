@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dto;
+package ru.yandex.practicum.filmorate.dto.genre;
 
 import lombok.AccessLevel;
 import lombok.Data;

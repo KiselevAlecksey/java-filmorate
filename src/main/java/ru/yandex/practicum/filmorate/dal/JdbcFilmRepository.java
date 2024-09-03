@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
+import ru.yandex.practicum.filmorate.dal.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -20,7 +21,7 @@ import static ru.yandex.practicum.filmorate.model.slqreuest.GenreSql.ALL_GENRE_Q
 import static ru.yandex.practicum.filmorate.model.slqreuest.MpaSql.ALL_MPA_QUERY;
 
 @Repository("JdbcFilmRepository")
-public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepository  {
+public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepository {
 
     private final RowMapper<Genre> genreMapper;
 
@@ -36,18 +37,18 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public void addLike(Long filmId, Long userId) {
-        Map<String, Object> params = new HashMap<>();
+        /*Map<String, Object> params = new HashMap<>();
         params.put("film_id", filmId);
-        params.put("user_id", userId);
-        update(ADD_LIKE_QUERY, params);
+        params.put("user_id", userId);*/
+        update(ADD_LIKE_QUERY, new MapSqlParameterSource().addValue("film_id", filmId).addValue("user_id", userId));
     }
 
     @Override
     public void removeLike(Long filmId, Long userId) {
-        Map<String, Object> params = new HashMap<>();
+        /*Map<String, Object> params = new HashMap<>();
         params.put("film_id", filmId);
-        params.put("user_id", userId);
-        update(REMOVE_LIKE_QUERY, params);
+        params.put("user_id", userId);*/
+        update(REMOVE_LIKE_QUERY, new MapSqlParameterSource().addValue("film_id", filmId).addValue("user_id", userId));
     }
 
     @Override
@@ -73,7 +74,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     @Override
     public Film update(Film film) {
 
-        jdbc.update(UPDATE_FILM, createParameterSource(film));
+        update(UPDATE_FILM, createParameterSource(film));
 
         List<Long> genreIds = film.getGenres().stream()
                 .map(genre -> Long.valueOf(genre.getId()))
@@ -107,12 +108,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public Optional<Film> getByIdPartialDetails(Long id) {
-
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("id", id);
-
-        return findOne(FIND_BY_ID_QUERY, params);
+        return findOne(FIND_BY_ID_QUERY, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
@@ -131,11 +127,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public boolean remove(Film film) {
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("id", film.getId());
-
-        return delete(DELETE_FILM, params);
+        return delete(DELETE_FILM, new MapSqlParameterSource().addValue("id", film.getId()));
     }
 
     @Override
@@ -145,21 +137,13 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public Collection<Film> findFilmsByGenre(Long id) {
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("genre_id", id);
-
-        return findMany(FIND_FILM_BY_ID_GENRE, params);
+        return findMany(FIND_FILM_BY_ID_GENRE, new MapSqlParameterSource().addValue("genre_id", id));
     }
 
     @Override
     public Optional<Film> getByIdFullDetails(Long id) {
 
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("id", id);
-
-        Optional<Film> filmOptional = findOne(FIND_FILMS_BY_ID, params);
+        Optional<Film> filmOptional = findOne(FIND_FILMS_BY_ID, new MapSqlParameterSource().addValue("id", id));
 
         Film film = filmOptional.orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
@@ -193,6 +177,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
 
     private static List<MapSqlParameterSource> getMapSqlParameterSources(Long filmId, List<Long> genreIds) {
+
         List<MapSqlParameterSource> paramsList = new ArrayList<>();
 
         for (Long genreId : genreIds) {
@@ -205,6 +190,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     }
 
     private static MapSqlParameterSource createParameterSource(Film film) {
+
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         params.addValue("id", film.getId());
@@ -239,7 +225,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         jdbc.query(ALL_MPA_QUERY, (ResultSet rs, int rowNum) -> {
             Long filmId = rs.getLong("film_id");
-            Mpa mpa = mpaMapper.mapRow(rs,rowNum);
+            Mpa mpa = mpaMapper.mapRow(rs, rowNum);
 
             filmMpaMap.put(filmId, mpa);
             return null;

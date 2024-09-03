@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dal.GenreRepository;
-import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.repository.GenreRepository;
+import ru.yandex.practicum.filmorate.dal.repository.MpaRepository;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
+import ru.yandex.practicum.filmorate.dto.review.ReviewRequest;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.Constant;
 
@@ -23,6 +24,10 @@ public class Validator {
     @Autowired
     @Qualifier("JdbcMpaRepository")
     private final MpaRepository mpaRepository;
+
+    public void validateReviewRequest(ReviewRequest reviewRequest) {
+
+    }
 
     public void validateFilmRequest(FilmRequest filmRequest) {
         StringBuilder errorMessage = new StringBuilder();
@@ -74,9 +79,8 @@ public class Validator {
 
         boolean isIdValid = mpaRepository.findById(filmRequest.getMpa().getId()).isEmpty();
 
-        boolean isValid = filmRequest.getMpa().getId() < 0 || filmRequest.getMpa().getId() > 6
+        return filmRequest.getMpa().getId() < 0 || filmRequest.getMpa().getId() > 6
                 || isIdValid;
-        return isValid;
     }
 
     private boolean areGenresInvalid(FilmRequest filmRequest) {

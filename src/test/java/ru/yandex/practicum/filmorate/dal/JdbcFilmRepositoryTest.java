@@ -119,7 +119,6 @@ class JdbcFilmRepositoryTest {
         filmRepository.save(film1);
         filmRepository.save(film2);
 
-
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
         filmRepository.removeLike(TEST_FILM_ID, TEST_USER_ID);
 

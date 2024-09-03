@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.GenreRepository;
-import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.repository.GenreRepository;
+import ru.yandex.practicum.filmorate.dal.repository.MpaRepository;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
@@ -14,8 +14,8 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.dal.FilmRepository;
-import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.dal.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.repository.UserRepository;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.validator.Validator;
@@ -43,7 +43,7 @@ public class DefaultFilmService implements FilmService {
     @Qualifier("JdbcMpaRepository")
     private final MpaRepository mpaRepository;
 
-    private final Validator validate;
+    private final Validator validator;
 
     @Override
     public FilmDto get(Long id) {
@@ -62,7 +62,7 @@ public class DefaultFilmService implements FilmService {
     @Override
     public FilmDto add(NewFilmRequest filmRequest) {
 
-        validate.validateFilmRequest(filmRequest);
+        validator.validateFilmRequest(filmRequest);
 
         Film putFilm = FilmMapper.mapToFilm(filmRequest);
 
@@ -78,20 +78,20 @@ public class DefaultFilmService implements FilmService {
     @Override
     public FilmDto update(UpdateFilmRequest filmRequest) {
 
-        validate.validateFilmRequest(filmRequest);
+        validator.validateFilmRequest(filmRequest);
 
-        Film updateFilm = filmRepository.getByIdPartialDetails(filmRequest.getId())
+        Film updatedFilm = filmRepository.getByIdPartialDetails(filmRequest.getId())
                 .orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
         validateGenre(filmRequest);
 
         validateMpa(filmRequest);
 
-        FilmMapper.updateFilmFields(updateFilm, filmRequest);
+        FilmMapper.updateFilmFields(updatedFilm, filmRequest);
 
-        filmRepository.update(updateFilm);
+        filmRepository.update(updatedFilm);
 
-        return FilmMapper.mapToFilmDto(updateFilm);
+        return FilmMapper.mapToFilmDto(updatedFilm);
 
     }
 
@@ -170,7 +170,7 @@ public class DefaultFilmService implements FilmService {
     public Collection<FilmDto> findAll() {
         return filmRepository.values().stream()
                 .map(FilmMapper::mapToFilmDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

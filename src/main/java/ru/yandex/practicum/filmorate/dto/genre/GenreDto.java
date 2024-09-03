@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dto;
+package ru.yandex.practicum.filmorate.dto.genre;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class NewGenreRequest {
+public class GenreDto {
 
     Integer id;
 

@@ -19,7 +19,7 @@ public abstract class BaseRepository<T> {
     protected final RowMapper<T> mapper;
     private final Class<T> entityType;
 
-    protected Optional<T> findOne(String query, Map<String, ?> params) {
+    protected Optional<T> findOne(String query, MapSqlParameterSource params) {
         try {
             T result = jdbc.queryForObject(query, params, mapper);
             return Optional.ofNullable(result);
@@ -28,11 +28,11 @@ public abstract class BaseRepository<T> {
         }
     }
 
-    protected List<T> findMany(String query, Map<String, ?> params) {
+    protected List<T> findMany(String query, MapSqlParameterSource params) {
         return jdbc.query(query, params,  mapper);
     }
 
-    public boolean delete(String query, Map<String, ?> params) {
+    public boolean delete(String query, MapSqlParameterSource params) {
         int rowsDeleted = jdbc.update(query, params);
         return rowsDeleted > 0;
     }
@@ -50,7 +50,7 @@ public abstract class BaseRepository<T> {
         }
     }
 
-    protected void update(String query, Map<String, ?> params) {
+    protected void update(String query, MapSqlParameterSource params) {
         int rowsUpdated = jdbc.update(query, params);
         if (rowsUpdated == 0) {
             throw new InternalServerException("Не удалось обновить данные");
