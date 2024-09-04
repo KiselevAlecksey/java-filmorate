@@ -26,6 +26,11 @@ public class UserController {
         return userService.findAll();
     }
 
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserDto get(@PathVariable long id) {
+        return userService.get(id);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -82,5 +87,14 @@ public class UserController {
         Collection<UserDto> friends = userService.getFriends(id);
         logger.error("User get friends list id {} complete", id);
         return friends;
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean userRemove(@PathVariable long id) {
+        logger.error("Users remove user id {},start", id);
+        boolean response = userService.remove(id);
+        logger.error("Users remove user id {},complete", id);
+        return response;
     }
 }
