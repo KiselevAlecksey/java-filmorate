@@ -75,6 +75,13 @@ public class DefaultFilmService implements FilmService {
         return FilmMapper.mapToFilmDto(putFilm);
     }
 
+    public boolean remove(Long id) {
+        if (id == null || !filmRepository.getByIdFullDetails(id).isPresent()) {
+            throw new NotFoundException("Id не найден");
+        }
+        return filmRepository.remove(id);
+    }
+
     @Override
     public FilmDto update(UpdateFilmRequest filmRequest) {
 

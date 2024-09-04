@@ -126,7 +126,7 @@ class JdbcUserRepositoryTest {
     void should_remove_user() {
         User user = getTestUser();
         userRepository.save(user);
-        userRepository.remove(user);
+        userRepository.remove(user.getId());
         assertThat(userRepository.findById(TEST_USER_ID)).isNotPresent();
     }
 
