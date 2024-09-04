@@ -127,7 +127,6 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
         return delete(DELETE_USER_QUERY, new MapSqlParameterSource().addValue("id", id));
     }
 
-
     @Override
     public Collection<User> findFriendsById(List<Long> ids) {
         MapSqlParameterSource params = new MapSqlParameterSource()
