@@ -29,6 +29,7 @@ class JdbcFilmRepositoryTest {
     public static final long TEST_USER_ID = 1L;
     public static final long TEST_FILM_ID = 1L;
     public static final long TEST_FILM2_ID = 2L;
+    public static final long TEST_FILM3_ID = 3L;
     public static final int TEST_LIKE_COUNT = 1;
     public static final int COUNT_ZERO = 0;
     public static final int COUNT_ONE = 1;
@@ -199,6 +200,29 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
+    @DisplayName("должен возвращать популярные фильмы по жанру и году")
+    void should_return_popular_films_by_genre_and_year() {
+        Film film1 = getTestFilm();
+        Film film2 = getTestFilm2(film1);
+        Film film3 = getTestFilm3(film2);
+
+        filmRepository.save(film1);
+        filmRepository.save(film2);
+        filmRepository.save(film3);
+
+        filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
+        filmRepository.addLike(TEST_FILM2_ID, TEST_USER_ID);
+        filmRepository.addLike(TEST_FILM3_ID, TEST_USER_ID);
+
+        List<Film> popularFilms = filmRepository.getPopularFilmsByGenreAndYear(2, 1,  2024);
+
+        assertThat(popularFilms)
+                .hasSize(2)
+                .extracting(Film::getId)
+                .containsExactly(TEST_FILM_ID, TEST_FILM2_ID);
+    }
+
+    @Test
     @DisplayName("должен возвращать фильмы по жанру")
     void should_return_films_when_find_by_genre_called() {
 
@@ -250,6 +274,18 @@ class JdbcFilmRepositoryTest {
                 .description("another desc")
                 .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
                 .duration(90)
+                .genres(getGenres())
+                .mpa(getMpa())
+                .build();
+    }
+
+    private static Film getTestFilm3(Film film) {
+        return film.toBuilder()
+                .id(TEST_FILM3_ID)
+                .name("third name")
+                .description("third desc")
+                .releaseDate(Instant.ofEpochMilli(1_515_468_800_000L)) // 2018-03-01
+                .duration(110)
                 .genres(getGenres())
                 .mpa(getMpa())
                 .build();

@@ -27,4 +27,7 @@ public interface FilmRepository {
     Collection<Film> findFilmsByGenre(Long id);
 
     Optional<Film> getByIdFullDetails(Long id);
+
+    List<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year);
+
 }

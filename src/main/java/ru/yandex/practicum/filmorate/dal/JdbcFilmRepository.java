@@ -172,6 +172,17 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         return filmOptional;
     }
 
+    @Override
+    public List<Film> getPopularFilmsByGenreAndYear(int count, int genre_id, int year) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("genre_id", genre_id);
+        params.put("year", year);
+        params.put("count", count);
+        String query = GET_POPULAR_FILMS_BY_GENRE_AND_YEAR;
+
+        return jdbc.query(query, params, mapper);
+    }
+
     public Optional<Mpa> findMpaById(Integer id) {
         String query = "SELECT * FROM rating WHERE id = :id";
         Map<String, Object> params = new HashMap<>();
