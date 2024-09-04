@@ -96,16 +96,16 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilmRecommendations(@PathVariable Long id) {
-        logger.info("Get film recommendations request");
+        log.info("Get film recommendations request");
         return userService.getFilmRecommendations(id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public boolean userRemove(@PathVariable long id) {
-        logger.error("Users remove user id {},start", id);
+        log.error("Users remove user id {},start", id);
         boolean response = userService.remove(id);
-        logger.error("Users remove user id {},complete", id);
+        log.error("Users remove user id {},complete", id);
         return response;
     }
 }
