@@ -130,6 +130,13 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
+    public List<Film> getFilmRecommendations(Long id) {
+        userRepository.findById(id);
+        return filmRepository.getRecommendedFilms(id);
+    }
+
+
+    @Override
     public UserDto create(NewUserRequest userRequest) {
 
         if (userRequest.getEmail().isBlank() || userRequest.getEmail().indexOf('@') == -1

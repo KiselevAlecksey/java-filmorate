@@ -26,6 +26,8 @@ public interface UserService {
 
     List<Film> getFilmRecommendations(Long id);
 
+    List<Film> getFilmRecommendations(Long id);
+
     UserDto create(NewUserRequest userRequest);
 
     UserDto update(UpdateUserRequest userRequest);
