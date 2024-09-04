@@ -16,7 +16,7 @@ public interface ReviewService {
 
     ReviewDto getById(long id);
 
-    Collection<ReviewDto> getByReviewsId(long id, long count);
+    Collection<ReviewDto> getByReviewsId(Long id, Long count);
 
     void addLike(long id, long userId);
 

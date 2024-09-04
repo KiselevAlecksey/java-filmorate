@@ -24,4 +24,8 @@ public interface ReviewRepository {
     void addDislike(Long id, Long userId);
 
     void removeDislike(Long id, Long userId);
+
+    Collection<Review> getAllReviews(Long count);
+
+    Collection<Review> getAllReviews();
 }

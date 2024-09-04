@@ -12,9 +12,9 @@ public class ReviewMapper {
 
     public static Review mapToReview(NewReviewRequest reviewRequest) {
         Review review = new Review();
-        review.setId(reviewRequest.getId());
+        review.setReviewId(reviewRequest.getReviewId());
         review.setContent(reviewRequest.getContent());
-        review.setPositive(reviewRequest.isPositive());
+        review.setIsPositive(reviewRequest.getIsPositive());
         review.setUserId(reviewRequest.getUserId());
         review.setFilmId(reviewRequest.getFilmId());
         review.setUseful(reviewRequest.getUseful());
@@ -23,35 +23,35 @@ public class ReviewMapper {
 
     public static ReviewDto mapToReviewDto(Review review) {
         ReviewDto dto = new ReviewDto();
-        dto.setId(review.getId());
+        dto.setReviewId(review.getReviewId());
         dto.setContent(review.getContent());
-        dto.setPositive(review.isPositive());
+        dto.setIsPositive(review.getIsPositive());
         dto.setUserId(review.getUserId());
         dto.setFilmId(review.getFilmId());
         dto.setUseful(review.getUseful());
-        System.out.println(dto);
+
         return dto;
     }
 
     public static Review updateReviewFields(Review review, UpdateReviewRequest request) {
-        /*if (request.hasName()) {
-            review.setName(request.getName());
+        if (request.hasReviewId()) {
+            review.setReviewId(request.getReviewId());
         }
-        if (request.hasDescription()) {
-            review.setDescription(request.getDescription());
+        if (request.hasContent()) {
+            review.setContent(request.getContent());
         }
-        if (request.hasDuration()) {
-            review.setDuration(request.getDuration());
+        if (request.hasIsPositive()) {
+            review.setIsPositive(request.getIsPositive());
         }
-        if (request.hasGenre()) {
-            review.setGenres(request.getGenres());
+        if (request.hasUserId()) {
+            review.setUserId(request.getUserId());
         }
-        if (request.hasMpa()) {
-            review.setMpa(request.getMpa());
+        if (request.hasFilmId()) {
+            review.setFilmId(request.getFilmId());
         }
-        if (request.hasReleaseDate()) {
-            review.setReleaseDate(request.getReleaseDate());
-        }*/
+        if (request.hasUseful()) {
+            review.setUseful(request.getUseful());
+        }
         return review;
     }
 }

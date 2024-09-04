@@ -42,7 +42,7 @@ public class DefaultReviewService implements ReviewService {
 
         validator.validateReviewRequest(reviewRequest);
 
-        Review updatedReview = reviewRepository.getById(reviewRequest.getId())
+        Review updatedReview = reviewRepository.getById(reviewRequest.getReviewId())
                 .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
 
         ReviewMapper.updateReviewFields(updatedReview, reviewRequest);
@@ -54,6 +54,10 @@ public class DefaultReviewService implements ReviewService {
 
     @Override
     public void remove(long id) {
+
+        reviewRepository.getById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+
 
     }
 
@@ -67,8 +71,28 @@ public class DefaultReviewService implements ReviewService {
     }
 
     @Override
-    public Collection<ReviewDto> getByReviewsId(long filmId, long count) {
-        return reviewRepository.getByReviewsId(filmId, count).stream()
+    public Collection<ReviewDto> getByReviewsId(Long filmId, Long count) {
+
+        if (filmId != null && count != null) {
+            return reviewRepository.getReviewsByFilmId(filmId, count).stream()
+                    .map(ReviewMapper::mapToReviewDto)
+                    .toList();
+        }
+
+        if (filmId != null) {
+            count = 10L;
+            return reviewRepository.getReviewsByFilmId(filmId, count).stream()
+                    .map(ReviewMapper::mapToReviewDto)
+                    .toList();
+        }
+
+        if (count != null) {
+            return reviewRepository.getAllReviews(count).stream()
+                    .map(ReviewMapper::mapToReviewDto)
+                    .toList();
+        }
+
+        return reviewRepository.getAllReviews().stream()
                 .map(ReviewMapper::mapToReviewDto)
                 .toList();
     }

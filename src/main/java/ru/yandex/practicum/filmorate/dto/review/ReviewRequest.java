@@ -1,9 +1,10 @@
 package ru.yandex.practicum.filmorate.dto.review;
 
 public interface ReviewRequest {
-    Long getId();
 
-    boolean isPositive();
+    Long getReviewId();
+
+    Boolean getIsPositive();
 
     Integer getUseful();
 
@@ -13,9 +14,9 @@ public interface ReviewRequest {
 
     Long getFilmId();
 
-    void setId(Long id);
+    void setReviewId(Long id);
 
-    void setPositive(boolean isPositive);
+    void setIsPositive(Boolean isPositive);
 
     void setUseful(Integer useful);
 

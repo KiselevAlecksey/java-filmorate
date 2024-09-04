@@ -10,14 +10,15 @@ import lombok.experimental.FieldDefaults;
 @Data
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(of = "reviewId")
 public class Review {
 
-    Long id;
+    Long reviewId;
 
+    @NotNull
     String content;
 
-    boolean isPositive;
+    Boolean isPositive;
 
     @NotNull
     Long userId;
@@ -26,5 +27,17 @@ public class Review {
     Long filmId;
 
     Integer useful;
+
+    public Boolean isPositive() {
+        if (this.isPositive == null) {
+            this.isPositive = false;
+        }
+
+        return this.isPositive;
+    }
+
+    public void setPositive(Boolean isPositive) {
+        this.isPositive = isPositive;
+    }
 }
 

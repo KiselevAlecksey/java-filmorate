@@ -25,7 +25,7 @@ public class ReviewController {
     public ReviewDto create(@RequestBody NewReviewRequest reviewRequest) {
         log.error("Review create {} start", reviewRequest);
         ReviewDto created = reviewService.create(reviewRequest);
-        log.error("Created review is {} complete", created.getId());
+        log.error("Created review is {} complete", created.getReviewId());
         return created;
     }
 
@@ -34,7 +34,7 @@ public class ReviewController {
     public ReviewDto update(@RequestBody UpdateReviewRequest reviewRequest) {
         log.error("Review update {} start", reviewRequest);
         ReviewDto updated = reviewService.update(reviewRequest);
-        log.error("Updated review is {} complete", updated.getId());
+        log.error("Updated review is {} complete", updated.getReviewId());
         return updated;
     }
 
@@ -57,7 +57,10 @@ public class ReviewController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<ReviewDto> getAll(@RequestParam(required = false) long filmId, @RequestParam(required = false) long count) {
+    public Collection<ReviewDto> getAll(
+            @RequestParam(required = false) Long filmId,
+            @RequestParam(required = false) Long count) {
+
         log.error("Get all review by filmId {}, count {} start", filmId, count);
         Collection<ReviewDto> reviewDto = reviewService.getByReviewsId(filmId, count);
         log.error("Get all review by filmId {}, count {} complete", filmId, count);

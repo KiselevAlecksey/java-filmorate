@@ -26,7 +26,7 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
         Long id = insert(query, createParameterSource(review));
 
         if (id != null) {
-            review.setId(id);
+            review.setReviewId(id);
             return review;
         } else {
             throw new InternalServerException("Не удалось сохранить данные");
@@ -35,12 +35,12 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
     @Override
     public Review update(Review review) {
-        String query = "UPDATE reviews SET review = :review, is_positive = :is_positive," +
-                " useful = :useful, film_id = :film_id, user_id = :user_id WHERE id = :id";
+        String query = "UPDATE reviews SET content = :content, is_positive = :is_positive," +
+                " user_id = :user_id, film_id = :film_id, useful = :useful WHERE id = :id";
 
         update(query, createParameterSource(review));
 
-        return getById(review.getId()).orElseThrow(
+        return getById(review.getReviewId()).orElseThrow(
                 () -> new InternalServerException("Не удалось сохранить данные"));
     }
 
@@ -55,7 +55,7 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
     public Optional<Review> getById(Long id) {
         String query = "SELECT * FROM reviews WHERE id = :id";
 
-        Optional<Review> review = Optional.ofNullable(jdbc.queryForObject(query, new MapSqlParameterSource().addValue("id", id), mapper));
+        Optional<Review> review = findOne(query, new MapSqlParameterSource().addValue("id", id));
         return review;
     }
 
@@ -64,7 +64,7 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
         long countDefault = 10L;
 
         StringBuilder queryBuilder = new StringBuilder(
-                "SELECT id, review, is_positive, useful, film_id, user_id FROM reviews"
+                "SELECT id, content, is_positive, user_id, film_id, useful FROM reviews"
         );
 
         if (filmId != null) {
@@ -88,9 +88,39 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
         if (filmId != null) {
             params.addValue("filmId", filmId);
         }
+
         params.addValue("limit", count);
 
         jdbc.query(query, params, (ResultSet rs, int rowNum) -> {
+            Review review = mapper.mapRow(rs, rowNum);
+            reviewSet.add(review);
+            return null;
+        });
+
+        return reviewSet;
+    }
+
+    @Override
+    public Collection<Review> getAllReviews(Long count) {
+        String query = "SELECT * FROM reviews LIMIT " + count;
+
+        Set<Review> reviewSet = new TreeSet<>(Comparator.comparingInt(Review::getUseful).reversed());
+
+        jdbc.query(query,(ResultSet rs, int rowNum) -> {
+            Review review = mapper.mapRow(rs, rowNum);
+            reviewSet.add(review);
+            return null;
+        });
+        return reviewSet;
+    }
+
+    @Override
+    public Collection<Review> getAllReviews() {
+        String query = "SELECT * FROM reviews";
+
+        Set<Review> reviewSet = new TreeSet<>(Comparator.comparingInt(Review::getUseful).reversed());
+
+        jdbc.query(query,(ResultSet rs, int rowNum) -> {
             Review review = mapper.mapRow(rs, rowNum);
             reviewSet.add(review);
             return null;
@@ -122,9 +152,9 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
     private static MapSqlParameterSource createParameterSource(Review review) {
         MapSqlParameterSource params = new MapSqlParameterSource();
 
-        params.addValue("id", review.getId());
+        params.addValue("id", review.getReviewId());
         params.addValue("content", review.getContent());
-        params.addValue("is_positive", review.isPositive());
+        params.addValue("is_positive", review.getIsPositive());
         params.addValue("user_id", review.getUserId());
         params.addValue("film_id", review.getFilmId());
         params.addValue("useful", review.getUseful());
