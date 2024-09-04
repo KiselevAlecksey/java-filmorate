@@ -10,7 +10,6 @@ public class UserSql {
     public static final String UPDATE_QUERY = "UPDATE users SET email = :email, login = :login," +
             " name = :name, birthday = :birthday WHERE id = :id";
     public static final String FIND_BY_ID_QUERY_USERS = "SELECT * FROM users WHERE id = :id";
-
     public static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = :id";
     public static final String INSERT_FRIEND = "INSERT INTO friends (user_id, friend_id) VALUES (:user_id, :friend_id)";
     public static final String DELETE_FRIEND = "DELETE FROM friends WHERE user_id = :user_id AND friend_id = :friend_id";

@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -47,18 +48,18 @@ class JdbcFilmRepositoryTest {
         params = new HashMap<>();
 
         jdbc.update("DELETE FROM films", new MapSqlParameterSource());
-        jdbc.update("ALTER TABLE films ALTER COLUMN id RESTART WITH 1",  new MapSqlParameterSource());
+        jdbc.update("ALTER TABLE films ALTER COLUMN id RESTART WITH 1", new MapSqlParameterSource());
     }
 
     @Test
     @DisplayName("Verify data.sql is loading data correctly")
     void testDataSqlLoading() {
 
-        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM users", sqlParameterSource,  Integer.class);
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM users", sqlParameterSource, Integer.class);
         assertThat(count).isEqualTo(COUNT_ONE);
 
         filmRepository.save(getTestFilm());
-        Integer filmCount = jdbc.queryForObject("SELECT COUNT(*) FROM films", sqlParameterSource,  Integer.class);
+        Integer filmCount = jdbc.queryForObject("SELECT COUNT(*) FROM films", sqlParameterSource, Integer.class);
         assertThat(filmCount).isEqualTo(COUNT_ONE);
 
     }
@@ -173,8 +174,7 @@ class JdbcFilmRepositoryTest {
     @Test
     @DisplayName("удалить фильм")
     void should_remove_film() {
-        filmRepository.remove(getTestFilm());
-
+        filmRepository.remove(getTestFilm().getId());
         Optional<Film> removedFilm = filmRepository.getByIdPartialDetails(TEST_USER_ID);
         assertThat(removedFilm).isNotPresent();
     }

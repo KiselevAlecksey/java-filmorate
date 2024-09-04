@@ -76,4 +76,10 @@ public class FilmController {
         logger.error("Get film with genre id {} complete", id);
         return film;
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{id}")
+    public boolean remove(@PathVariable Long id) {
+        return filmService.remove(id);
+    }
 }

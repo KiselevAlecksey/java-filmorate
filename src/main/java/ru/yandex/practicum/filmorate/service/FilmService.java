@@ -24,4 +24,6 @@ public interface FilmService {
     Collection<FilmDto> getPopularFilms(Integer count);
 
     Collection<FilmDto> findAll();
+
+    boolean remove(Long id);
 }
