@@ -86,5 +86,9 @@ public class FilmController {
         }
             return filmService.getPopularFilms(count);
     }
-
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{id}")
+    public boolean remove(@PathVariable Long id) {
+        return filmService.remove(id);
+    }
 }

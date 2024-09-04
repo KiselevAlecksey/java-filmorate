@@ -99,4 +99,13 @@ public class UserController {
         logger.info("Get film recommendations request");
         return userService.getFilmRecommendations(id);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public boolean userRemove(@PathVariable long id) {
+        logger.error("Users remove user id {},start", id);
+        boolean response = userService.remove(id);
+        logger.error("Users remove user id {},complete", id);
+        return response;
+    }
 }
