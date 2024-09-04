@@ -135,7 +135,7 @@ public class DefaultFilmService implements FilmService {
     }
 
     @Override
-    public Collection<FilmDto> getPopularFilms(Integer count) {
+    public Collection<FilmDto> getPopularFilms(Optional<Integer> countOpt) {
 
         int popularFilmsSize = filmRepository.getTopPopular().size();
 
@@ -143,8 +143,10 @@ public class DefaultFilmService implements FilmService {
 
         int end = Math.min(popularFilmsSize, 10);
 
-        if (count == null) {
-            return getTopTen(start, end);
+        int count = countOpt.orElse(0);
+
+        if (countOpt.isEmpty()) {
+            return getTopTen(0, Math.min(10, popularFilmsSize));
         }
 
         if (count <= 0) {
@@ -156,6 +158,27 @@ public class DefaultFilmService implements FilmService {
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList()
                 );
+    }
+
+    @Override
+    public Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> countOpt, int genreId, int year) {
+
+        int count = countOpt.orElse(0);
+
+        if (countOpt.isEmpty()) {
+            count = 10;
+        }
+
+        if (count <= 0) {
+            throw new ParameterNotValidException("" + count, "Должен быть > 0");
+        }
+
+        List<Film> films = filmRepository.getPopularFilmsByGenreAndYear(count, genreId, year);
+
+        return films.stream()
+                .limit(count)
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
     private Collection<FilmDto> getTopTen(int start, int end) {

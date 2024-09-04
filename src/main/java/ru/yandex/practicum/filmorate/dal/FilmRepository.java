@@ -16,7 +16,7 @@ public interface FilmRepository {
 
     Film update(Film film);
 
-    Optional<Film> findById(Long id);
+    Optional<Film> getByIdPartialDetails(Long id);
 
     Collection<Film> values();
 
@@ -25,6 +25,10 @@ public interface FilmRepository {
     List<Film> getTopPopular();
 
     Collection<Film> findFilmsByGenre(Long id);
+
+    Optional<Film> getByIdFullDetails(Long id);
+
+    List<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year);
 
     Optional<Film> findFilm(Long id);
 }

@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -60,15 +61,6 @@ public class FilmController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/popular")
-    public Collection<FilmDto> getPopularFilms(@RequestParam(required = false) int count) {
-        log.error("Get popular films count {} start", count);
-        Collection<FilmDto> popularFilms = filmService.getPopularFilms(count);
-        log.error("Get popular films count {} complete", count);
-        return popularFilms;
-    }
-
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public FilmDto getFilmWithGenre(@PathVariable long id) {
         log.error("Get film with genre id {} start", id);
@@ -76,4 +68,21 @@ public class FilmController {
         log.error("Get film with genre id {} complete", id);
         return film;
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/popular")
+    public Collection<FilmDto> getPopularFilms(
+            @RequestParam Optional<Integer> count,
+            @RequestParam(required = false) Integer genreId,
+            @RequestParam(required = false) Integer year) {
+        log.info("Get popular films count {} with optional genre {} and year {} start",
+                count, genreId, year);
+
+        if (genreId != null && year != null) {
+            return filmService.getPopularFilmsByGenresAndYears(count, genreId, year);
+        } else {
+            return filmService.getPopularFilms(count);
+        }
+    }
+
 }
