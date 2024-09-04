@@ -346,6 +346,26 @@ class JdbcFilmRepositoryTest {
                 .build();
     }
 
+    private static User getTestUser() {
+        return User.builder()
+                .id(TEST_USER_ID)
+                .email("example@email.ru")
+                .name("name")
+                .login("description")
+                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
+                .build();
+    }
+
+    private static User getTestUser2() {
+        return User.builder()
+                .id(TEST_USER2_ID)
+                .email("example@email.ru")
+                .name("name")
+                .login("description")
+                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
+                .build();
+    }
+
     private static Film getTestFilm3(Film film) {
         return film.toBuilder()
                 .id(TEST_FILM3_ID)
