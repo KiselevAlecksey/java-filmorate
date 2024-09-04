@@ -76,7 +76,6 @@ public class FilmController {
             @RequestParam Optional<Integer> count,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) Integer year) {
-
         log.info("Get popular films count {} with optional genre {} and year {} start",
 
                 count, genreId, year);
