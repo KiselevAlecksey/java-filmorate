@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
+import ru.yandex.practicum.filmorate.dal.mapper.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.Instant;
@@ -22,11 +23,13 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 @JdbcTest
-@Import({JdbcFilmRepository.class, FilmRowMapper.class, GenreRowMapper.class, MpaRowMapper.class})
+@Import({JdbcFilmRepository.class, FilmRowMapper.class, GenreRowMapper.class, MpaRowMapper.class,
+        JdbcUserRepository.class, UserRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcFilmRepository")
 class JdbcFilmRepositoryTest {
     public static final long TEST_USER_ID = 1L;
+    public static final long TEST_USER2_ID = 2L;
     public static final long TEST_FILM_ID = 1L;
     public static final long TEST_FILM2_ID = 2L;
     public static final long TEST_FILM3_ID = 3L;
@@ -35,6 +38,8 @@ class JdbcFilmRepositoryTest {
     public static final int COUNT_ONE = 1;
 
     private final JdbcFilmRepository filmRepository;
+
+    private final JdbcUserRepository userRepository;
 
     private final NamedParameterJdbcTemplate jdbc;
 
@@ -242,6 +247,33 @@ class JdbcFilmRepositoryTest {
                 .isEqualTo(Arrays.asList(film1, film2));
     }
 
+  /*  @Test
+    @DisplayName("должен возвращать рекомендованные фильмы")
+    void should_return_recommended_films() {
+        Film film1 = getTestFilm();
+        Film film2 = getTestFilm2(film1);
+
+        filmRepository.save(film1);
+        filmRepository.save(film2);
+
+        User user1 = getTestUser();
+        userRepository.save(user1);
+        User user2 = getTestUser2();
+        userRepository.save(user2);
+
+        filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
+        filmRepository.addLike(TEST_FILM_ID, TEST_USER2_ID);
+        filmRepository.addLike(TEST_FILM2_ID, TEST_USER2_ID);
+
+        List<Film> recommendedFilms = filmRepository.getRecommendedFilms(TEST_USER_ID);
+
+        assertThat(recommendedFilms)
+                .hasSize(1)
+                .first()
+                .usingRecursiveComparison()
+                .isEqualTo(film1);
+    }*/
+
     private static LinkedHashSet<Genre> getGenres() {
         Genre genre = new Genre();
         LinkedHashSet<Genre> genres = new LinkedHashSet<>();
@@ -279,6 +311,26 @@ class JdbcFilmRepositoryTest {
                 .duration(90)
                 .genres(getGenres())
                 .mpa(getMpa())
+                .build();
+    }
+
+    private static User getTestUser() {
+        return User.builder()
+                .id(TEST_USER_ID)
+                .email("example@email.ru")
+                .name("name")
+                .login("description")
+                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
+                .build();
+    }
+
+    private static User getTestUser2() {
+        return User.builder()
+                .id(TEST_USER2_ID)
+                .email("example@email.ru")
+                .name("name")
+                .login("description")
+                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
                 .build();
     }
 

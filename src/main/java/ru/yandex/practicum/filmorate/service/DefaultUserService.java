@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
@@ -9,6 +10,7 @@ import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.Instant;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class DefaultUserService implements UserService {
 
     private final UserRepository userRepository;
+    private final FilmRepository filmRepository;
 
     @Override
     public Collection<UserDto> getFriends(Long id) {
@@ -105,6 +108,13 @@ public class DefaultUserService implements UserService {
                 .map(UserMapper::mapToUserDto)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден")));
     }
+
+    @Override
+    public List<Film> getFilmRecommendations(Long id) {
+        userRepository.findById(id);
+        return filmRepository.getRecommendedFilms(id);
+    }
+
 
     @Override
     public UserDto create(NewUserRequest userRequest) {
