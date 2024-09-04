@@ -22,6 +22,13 @@ public class DefaultUserService implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    public UserDto getById(long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Пользователь с id = " + id + " не найден"));
+        return UserMapper.mapToUserDto(user);
+    }
+
+    @Override
     public Collection<UserDto> getFriends(Long id) {
         if (id == null) {
             throw new NotFoundException("Id должен быть указан");
