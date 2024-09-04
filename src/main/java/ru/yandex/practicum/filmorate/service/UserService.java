@@ -20,9 +20,11 @@ public interface UserService {
 
     Collection<UserDto> findAll();
 
-    Optional<UserDto> get(User user);
+    UserDto get(long user);
 
     UserDto create(NewUserRequest userRequest);
 
     UserDto update(UpdateUserRequest userRequest);
+
+    boolean remove(Long id);
 }
