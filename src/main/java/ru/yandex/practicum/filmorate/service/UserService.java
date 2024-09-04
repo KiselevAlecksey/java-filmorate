@@ -25,4 +25,6 @@ public interface UserService {
     UserDto create(NewUserRequest userRequest);
 
     UserDto update(UpdateUserRequest userRequest);
+
+    UserDto getById(long id);
 }

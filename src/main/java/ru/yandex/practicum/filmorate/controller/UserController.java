@@ -26,6 +26,13 @@ public class UserController {
         return userService.findAll();
     }
 
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserDto getById(@PathVariable long id) {
+        log.error("User get by id {} start", id);
+        return userService.getById(id);
+    }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

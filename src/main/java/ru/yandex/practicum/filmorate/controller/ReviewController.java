@@ -47,11 +47,11 @@ public class ReviewController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ReviewDto getById(@PathVariable Long id) {
+    public ReviewDto getById(@PathVariable long id) {
         log.error("Review delete id {} start", id);
         ReviewDto reviewDto = reviewService.getById(id);
         log.error("Deleted review id is {} complete", id);
-        return reviewDto;
+        return new ReviewDto();
     }
 
     @GetMapping

@@ -10,14 +10,12 @@ import org.springframework.jdbc.support.KeyHolder;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 public abstract class BaseRepository<T> {
     protected final NamedParameterJdbcTemplate jdbc;
     protected final RowMapper<T> mapper;
-    private final Class<T> entityType;
 
     protected Optional<T> findOne(String query, MapSqlParameterSource params) {
         try {
