@@ -173,9 +173,9 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     }
 
     @Override
-    public List<Film> getPopularFilmsByGenreAndYear(int count, int genre_id, int year) {
+    public List<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
         Map<String, Object> params = new HashMap<>();
-        params.put("genre_id", genre_id);
+        params.put("genre_id", genreId);
         params.put("year", year);
         params.put("count", count);
         String query = GET_POPULAR_FILMS_BY_GENRE_AND_YEAR;
