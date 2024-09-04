@@ -15,16 +15,16 @@ public class Review {
 
     Long id;
 
+    String content;
+
     boolean isPositive;
-
-    Integer useful;
-
-    String review;
 
     @NotNull
     Long userId;
 
     @NotNull
     Long filmId;
+
+    Integer useful;
 }
 

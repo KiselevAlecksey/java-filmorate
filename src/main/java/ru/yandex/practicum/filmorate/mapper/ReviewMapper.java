@@ -13,22 +13,23 @@ public class ReviewMapper {
     public static Review mapToReview(NewReviewRequest reviewRequest) {
         Review review = new Review();
         review.setId(reviewRequest.getId());
-        review.setReview(reviewRequest.getContent());
+        review.setContent(reviewRequest.getContent());
         review.setPositive(reviewRequest.isPositive());
-        review.setUseful(reviewRequest.getUseful());
-        review.setFilmId(reviewRequest.getFilmId());
         review.setUserId(reviewRequest.getUserId());
+        review.setFilmId(reviewRequest.getFilmId());
+        review.setUseful(reviewRequest.getUseful());
         return review;
     }
 
     public static ReviewDto mapToReviewDto(Review review) {
         ReviewDto dto = new ReviewDto();
         dto.setId(review.getId());
-        dto.setReview(review.getReview());
+        dto.setContent(review.getContent());
         dto.setPositive(review.isPositive());
-        dto.setUseful(review.getUseful());
-        dto.setFilmId(review.getFilmId());
         dto.setUserId(review.getUserId());
+        dto.setFilmId(review.getFilmId());
+        dto.setUseful(review.getUseful());
+        System.out.println(dto);
         return dto;
     }
 

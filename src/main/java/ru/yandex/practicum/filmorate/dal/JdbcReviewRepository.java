@@ -20,8 +20,8 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
     @Override
     public Review save(Review review) {
-        String query = "INSERT INTO reviews (review, is_positive, useful, film_id, user_id ) " +
-                "VALUES (:review, :is_positive, :useful, :film_id, :user_id)";
+        String query = "INSERT INTO reviews (content, is_positive, user_id, film_id, useful) " +
+                "VALUES (:content, :is_positive, :user_id, :film_id, :useful)";
 
         Long id = insert(query, createParameterSource(review));
 
@@ -55,11 +55,12 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
     public Optional<Review> getById(Long id) {
         String query = "SELECT * FROM reviews WHERE id = :id";
 
-        return findOne(query, new MapSqlParameterSource().addValue("id", id));
+        Optional<Review> review = Optional.ofNullable(jdbc.queryForObject(query, new MapSqlParameterSource().addValue("id", id), mapper));
+        return review;
     }
 
     @Override
-    public Collection<Review> getByReviewsId(Long filmId, Long count) {
+    public Collection<Review> getReviewsByFilmId(Long filmId, Long count) {
         long countDefault = 10L;
 
         StringBuilder queryBuilder = new StringBuilder(
@@ -122,11 +123,11 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         params.addValue("id", review.getId());
-        params.addValue("review", review.getReview());
+        params.addValue("content", review.getContent());
         params.addValue("is_positive", review.isPositive());
-        params.addValue("useful", review.getUseful());
-        params.addValue("film_id", review.getFilmId());
         params.addValue("user_id", review.getUserId());
+        params.addValue("film_id", review.getFilmId());
+        params.addValue("useful", review.getUseful());
 
         return params;
     }
