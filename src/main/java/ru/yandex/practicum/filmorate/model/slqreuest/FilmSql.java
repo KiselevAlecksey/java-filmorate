@@ -30,14 +30,4 @@ public class FilmSql {
             "WHERE id IN (SELECT film_id AS id FROM film_genres WHERE genre_id IN (:genre_id))";
 
     public static final String FIND_FILMS_BY_ID = "SELECT * FROM films WHERE id = :id";
-
-    public static final String GET_POPULAR_FILMS_BY_GENRE_AND_YEAR = "SELECT f.*, " +
-            "COUNT(l.user_id) AS likes_count FROM films f " +
-            "JOIN film_genres fg ON f.id = fg.film_id " +
-            "LEFT JOIN likes l ON f.id = l.film_id " +
-            "WHERE fg.genre_id = :genre_id AND YEAR(f.release_date) = :year " +
-            "GROUP BY f.id " +
-            "ORDER BY likes_count DESC " +
-            "LIMIT :count";
-
 }

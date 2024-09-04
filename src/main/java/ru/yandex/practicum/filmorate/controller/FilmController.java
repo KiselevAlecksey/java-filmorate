@@ -78,7 +78,7 @@ public class FilmController {
         log.info("Get popular films count {} with optional genre {} and year {} start",
                 count, genreId, year);
 
-        if (genreId != null && year != null) {
+        if (genreId != null || year != null) {
             return filmService.getPopularFilmsByGenresAndYears(count, genreId, year);
         } else {
             return filmService.getPopularFilms(count);
