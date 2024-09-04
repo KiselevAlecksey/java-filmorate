@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.dal.repository.FilmRepository;
@@ -27,12 +28,17 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     private final RowMapper<Mpa> mpaMapper;
 
+    private final RowMapper<Film> filmMapper;
+
     public JdbcFilmRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper, Film.class);
 
         genreMapper = new GenreRowMapper(jdbc);
 
         mpaMapper = new MpaRowMapper(jdbc);
+
+        filmMapper = new FilmRowMapper(jdbc, genreMapper, mpaMapper);
+
     }
 
     @Override
@@ -198,6 +204,20 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         }
 
         return jdbc.query(query, params, mapper);
+    }
+
+    @Override
+    public List<Film> getRecommendedFilms(Long userId) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("user_id", userId);
+
+        List<Film> recommendedFilms = jdbc.query(
+                GET_RECOMMENDED_FILMS,
+                params,
+                filmMapper
+        );
+
+        return recommendedFilms;
     }
 
     public Optional<Mpa> findMpaById(Integer id) {
