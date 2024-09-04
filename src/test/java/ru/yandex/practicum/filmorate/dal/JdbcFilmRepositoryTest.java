@@ -214,7 +214,10 @@ class JdbcFilmRepositoryTest {
         filmRepository.addLike(TEST_FILM2_ID, TEST_USER_ID);
         filmRepository.addLike(TEST_FILM3_ID, TEST_USER_ID);
 
-        List<Film> popularFilms = filmRepository.getPopularFilmsByGenreAndYear(2, 1,  2024);
+        List<Film> popularFilms = filmRepository.getPopularFilmsByGenreAndYear(
+                Optional.of(2),
+                1,
+                2024);
 
         assertThat(popularFilms)
                 .hasSize(2)

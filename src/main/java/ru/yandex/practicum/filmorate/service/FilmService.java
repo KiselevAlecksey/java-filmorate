@@ -25,5 +25,5 @@ public interface FilmService {
 
     Collection<FilmDto> findAll();
 
-    Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> count, int genreId, int year);
+    Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> count, Integer genreId, Integer year);
 }

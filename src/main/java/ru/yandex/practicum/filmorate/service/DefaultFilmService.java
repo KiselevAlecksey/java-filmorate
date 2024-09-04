@@ -161,18 +161,11 @@ public class DefaultFilmService implements FilmService {
     }
 
     @Override
-    public Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> countOpt, int genreId, int year) {
-
-        int count = countOpt.orElse(0);
-
-        if (count <= 0) {
-            throw new ParameterNotValidException("" + count, "Должен быть > 0");
-        }
-
-        List<Film> films = filmRepository.getPopularFilmsByGenreAndYear(count, genreId, year);
-
+    public Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> countOpt, Integer genreId, Integer year) {
+        List<Film> films = filmRepository.getPopularFilmsByGenreAndYear(countOpt, genreId, year);
+        int limit = countOpt.orElse(Integer.MAX_VALUE);
         return films.stream()
-                .limit(count)
+                .limit(limit)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }

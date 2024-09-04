@@ -173,12 +173,45 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     }
 
     @Override
-    public List<Film> getPopularFilmsByGenreAndYear(int count, int genreId, int year) {
+    public List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("SELECT f.*, COUNT(l.user_id) AS likes_count ")
+                .append("FROM films f ")
+                .append("LEFT JOIN likes l ON f.id = l.film_id ");
+
+        if (genreId != null) {
+            queryBuilder.append("JOIN film_genres fg ON f.id = fg.film_id ");
+        }
+
+        queryBuilder.append("WHERE 1=1 ");
+
+        if (genreId != null) {
+            queryBuilder.append("AND fg.genre_id = :genre_id ");
+        }
+
+        if (year != null) {
+            queryBuilder.append("AND YEAR(f.release_date) = :year ");
+        }
+
+        queryBuilder.append("GROUP BY f.id ")
+                .append("ORDER BY likes_count DESC ");
+
+        if (countOpt.isPresent() && countOpt.get() > 0) {
+            queryBuilder.append("LIMIT :count");
+        }
+
+        String query = queryBuilder.toString();
+
         Map<String, Object> params = new HashMap<>();
-        params.put("genre_id", genreId);
-        params.put("year", year);
-        params.put("count", count);
-        String query = GET_POPULAR_FILMS_BY_GENRE_AND_YEAR;
+        if (countOpt.isPresent() && countOpt.get() > 0) {
+            params.put("count", countOpt.get());
+        }
+        if (genreId != null) {
+            params.put("genre_id", genreId);
+        }
+        if (year != null) {
+            params.put("year", year);
+        }
 
         return jdbc.query(query, params, mapper);
     }
