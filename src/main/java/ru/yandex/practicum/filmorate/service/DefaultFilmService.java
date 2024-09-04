@@ -165,10 +165,6 @@ public class DefaultFilmService implements FilmService {
 
         int count = countOpt.orElse(0);
 
-        if (countOpt.isEmpty()) {
-            count = 10;
-        }
-
         if (count <= 0) {
             throw new ParameterNotValidException("" + count, "Должен быть > 0");
         }
