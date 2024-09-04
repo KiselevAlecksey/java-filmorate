@@ -20,7 +20,7 @@ import static ru.yandex.practicum.filmorate.model.slqreuest.GenreSql.ALL_GENRE_Q
 import static ru.yandex.practicum.filmorate.model.slqreuest.MpaSql.ALL_MPA_QUERY;
 
 @Repository("JdbcFilmRepository")
-public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepository  {
+public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepository {
 
     private final RowMapper<Genre> genreMapper;
 
@@ -237,7 +237,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         jdbc.query(ALL_MPA_QUERY, (ResultSet rs, int rowNum) -> {
             Long filmId = rs.getLong("film_id");
-            Mpa mpa = mpaMapper.mapRow(rs,rowNum);
+            Mpa mpa = mpaMapper.mapRow(rs, rowNum);
 
             filmMpaMap.put(filmId, mpa);
             return null;
