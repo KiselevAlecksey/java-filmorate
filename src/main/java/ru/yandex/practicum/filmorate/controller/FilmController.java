@@ -57,6 +57,7 @@ public class FilmController {
     public void removeLike(@PathVariable long id, @PathVariable long userId) {
         log.error("Remove like film id {}, user id {} start", id, userId);
         filmService.removeLike(id, userId);
+
         log.error("Removed like film id {}, user id {} complete", id, userId);
     }
 
@@ -75,7 +76,9 @@ public class FilmController {
             @RequestParam Optional<Integer> count,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) Integer year) {
+
         log.info("Get popular films count {} with optional genre {} and year {} start",
+
                 count, genreId, year);
 
         if (genreId != null || year != null) {
