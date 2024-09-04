@@ -125,11 +125,9 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     }
 
     @Override
-    public boolean remove(Film film) {
+    public boolean remove(Long id) {
         Map<String, Object> params = new HashMap<>();
-
-        params.put("id", film.getId());
-
+        params.put("id", id);
         return delete(DELETE_FILM, params);
     }
 
