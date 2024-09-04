@@ -173,7 +173,7 @@ class JdbcFilmRepositoryTest {
     @Test
     @DisplayName("удалить фильм")
     void should_remove_film() {
-        filmRepository.remove(getTestFilm());
+        filmRepository.remove(getTestFilm().getId());
 
         Optional<Film> removedFilm = filmRepository.getByIdPartialDetails(TEST_USER_ID);
         assertThat(removedFilm).isNotPresent();

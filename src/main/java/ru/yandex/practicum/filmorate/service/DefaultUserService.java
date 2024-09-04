@@ -96,14 +96,14 @@ public class DefaultUserService implements UserService {
         return userRepository.values().stream()
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList()
-        );
+                );
     }
 
     @Override
-    public Optional<UserDto> get(User user) {
-        return Optional.ofNullable(userRepository.findById(user.getId())
+    public UserDto get(long id) {
+        return userRepository.findById(id)
                 .map(UserMapper::mapToUserDto)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден")));
+                .orElseThrow(() -> new NotFoundException("Пользователя с ID " + id + " не существует"));
     }
 
     @Override
@@ -115,8 +115,8 @@ public class DefaultUserService implements UserService {
 
             throw new ConditionsNotMetException(
                     "Поле почта не может быть пустым"
-                    + " или пропущен знак @" + " логин не может быть пустым и содержать пробелы"
-                    + " дата рождения не может быть в будущем"
+                            + " или пропущен знак @" + " логин не может быть пустым и содержать пробелы"
+                            + " дата рождения не может быть в будущем"
             );
         }
 
@@ -131,6 +131,14 @@ public class DefaultUserService implements UserService {
         } else {
             return UserMapper.mapToUserDto(userRepository.save(createUser));
         }
+    }
+
+    @Override
+    public boolean remove(Long id) {
+        if (id == null || !userRepository.findById(id).isPresent()) {
+            throw new NotFoundException("Id не найден");
+        }
+        return userRepository.remove(id);
     }
 
     @Override
