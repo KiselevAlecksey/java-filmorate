@@ -22,13 +22,15 @@ public interface UserService {
 
     Collection<UserDto> findAll();
 
-    Optional<UserDto> get(User user);
+    UserDto get(long user);
 
     List<Film> getFilmRecommendations(Long id);
 
     UserDto create(NewUserRequest userRequest);
 
     UserDto update(UpdateUserRequest userRequest);
+
+    boolean remove(Long id);
 
     UserDto getById(long id);
 }
