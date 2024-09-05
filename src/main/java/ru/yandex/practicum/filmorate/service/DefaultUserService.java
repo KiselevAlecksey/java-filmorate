@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.FilmRepository;
 import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
@@ -9,6 +10,7 @@ import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.Instant;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class DefaultUserService implements UserService {
 
     private final UserRepository userRepository;
+    private final FilmRepository filmRepository;
 
     @Override
     public Collection<UserDto> getFriends(Long id) {
@@ -104,6 +107,19 @@ public class DefaultUserService implements UserService {
         return userRepository.findById(id)
                 .map(UserMapper::mapToUserDto)
                 .orElseThrow(() -> new NotFoundException("Пользователя с ID " + id + " не существует"));
+    }
+
+    @Override
+    public List<Film> getFilmRecommendations(Long id) {
+        if (id == null) {
+            throw new NotFoundException("Id должен быть указан");
+        }
+
+        if (userRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Пользователя с ID " + id + " не существует");
+        }
+
+        return filmRepository.getRecommendedFilms(id);
     }
 
     @Override

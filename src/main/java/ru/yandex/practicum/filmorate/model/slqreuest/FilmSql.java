@@ -30,4 +30,34 @@ public class FilmSql {
             "WHERE id IN (SELECT film_id AS id FROM film_genres WHERE genre_id IN (:genre_id))";
 
     public static final String FIND_FILMS_BY_ID = "SELECT * FROM films WHERE id = :id";
+
+    public static final String GET_RECOMMENDED_FILMS = "SELECT films.*, r.* " +
+            "FROM films " +
+            "JOIN rating AS r ON r.id = films.rating_id " +
+            "WHERE films.id IN ( " +
+            "SELECT DISTINCT film_id " +
+            "FROM likes " +
+            "WHERE user_id IN ( " +
+            "SELECT user_id " +
+            "FROM ( " +
+            "SELECT user_id, COUNT(*) AS matches " +
+            "FROM likes " +
+            "WHERE user_id <> :user_id " +
+            "AND film_id IN ( " +
+            "SELECT film_id " +
+            "FROM likes " +
+            "WHERE user_id = :user_id " +
+            ") " +
+            "GROUP BY user_id " +
+            "ORDER BY matches DESC " +
+            ") AS matched_users " +
+            "GROUP BY user_id " +
+            "HAVING matches = MAX(matches) " +
+            ") " +
+            "AND film_id NOT IN ( " +
+            "SELECT film_id " +
+            "FROM likes " +
+            "WHERE user_id = :user_id " +
+            ") " +
+            ");";
 }

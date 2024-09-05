@@ -3,7 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
+import ru.yandex.practicum.filmorate.model.Film;
+
+
 import java.util.Collection;
+import java.util.List;
+
 
 public interface UserService {
 
@@ -18,6 +23,8 @@ public interface UserService {
     Collection<UserDto> findAll();
 
     UserDto get(long id);
+
+    List<Film> getFilmRecommendations(Long id);
 
     UserDto create(NewUserRequest userRequest);
 

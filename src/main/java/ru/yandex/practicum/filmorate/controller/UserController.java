@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -87,6 +89,13 @@ public class UserController {
         Collection<UserDto> friends = userService.getFriends(id);
         logger.error("User get friends list id {} complete", id);
         return friends;
+    }
+
+    @GetMapping("/{id}/recommendations")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Film> getFilmRecommendations(@PathVariable Long id) {
+        logger.info("Get film recommendations request");
+        return userService.getFilmRecommendations(id);
     }
 
     @DeleteMapping("/{id}")

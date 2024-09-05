@@ -214,6 +214,26 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         return jdbc.query(query, params, mapper);
     }
 
+    @Override
+    public List<Film> getRecommendedFilms(Long userId) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("user_id", userId);
+
+        List<Film> recommendedFilms = jdbc.query(
+                GET_RECOMMENDED_FILMS,
+                params,
+                mapper
+        );
+
+        List<Film> recommendedFilmsWithFullDetails = new ArrayList<>();
+        for (Film film : recommendedFilms) {
+            Optional<Film> fullDetailsFilm = getByIdFullDetails(film.getId());
+            fullDetailsFilm.ifPresent(recommendedFilmsWithFullDetails::add);
+        }
+
+        return recommendedFilmsWithFullDetails;
+    }
+
     public Optional<Mpa> findMpaById(Integer id) {
         String query = "SELECT * FROM rating WHERE id = :id";
         Map<String, Object> params = new HashMap<>();
