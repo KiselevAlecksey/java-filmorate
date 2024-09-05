@@ -76,7 +76,7 @@ public class DefaultFilmService implements FilmService {
     }
 
     public boolean remove(Long id) {
-        if (id == null || !filmRepository.getByIdFullDetails(id).isPresent()) {
+        if (id == null || !filmRepository.getByIdPartialDetails(id).isPresent()) {
             throw new NotFoundException("Id не найден");
         }
         return filmRepository.remove(id);
