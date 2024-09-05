@@ -347,6 +347,18 @@ class JdbcFilmRepositoryTest {
                 .build();
     }
 
+    private static Film getTestFilm3() {
+        return Film.builder()
+                .id(TEST_FILM_ID)
+                .name("name")
+                .description("description")
+                .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
+                .duration(100)
+                .genres(getGenres())
+                .mpa(getMpa())
+                .build();
+    }
+
     private static User getTestUser() {
         return User.builder()
                 .id(TEST_USER_ID)
