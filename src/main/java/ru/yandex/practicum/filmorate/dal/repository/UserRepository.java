@@ -25,7 +25,7 @@ public interface UserRepository {
 
     Collection<User> values();
 
-    boolean remove(User user);
+    boolean remove(Long id);
 
     Collection<User> findFriendsById(List<Long> ids);
 }

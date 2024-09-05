@@ -116,15 +116,15 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     }
 
     @Override
-    public boolean remove(User user) {
+    public boolean remove(Long id) {
 
-        Optional<User> optionalUser = findById(user.getId());
+        Optional<User> optionalUser = findById(id);
 
         if (optionalUser.isEmpty()) {
             return false;
         }
 
-        return delete(DELETE_USER_QUERY, new MapSqlParameterSource().addValue("id", user.getId()));
+        return delete(DELETE_USER_QUERY, new MapSqlParameterSource().addValue("id", id));
     }
 
 

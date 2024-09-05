@@ -121,7 +121,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public boolean remove(Long id) {
-        return delete(DELETE_FILM, new MapSqlParameterSource().addValue("id", film.getId()));
+        return delete(DELETE_FILM, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
