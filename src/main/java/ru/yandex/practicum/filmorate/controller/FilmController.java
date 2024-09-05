@@ -85,4 +85,9 @@ public class FilmController {
         }
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{id}")
+    public boolean remove(@PathVariable Long id) {
+        return filmService.remove(id);
+    }
 }
