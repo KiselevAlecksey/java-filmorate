@@ -111,10 +111,16 @@ public class DefaultUserService implements UserService {
 
     @Override
     public List<Film> getFilmRecommendations(Long id) {
-        userRepository.findById(id);
+        if (id == null) {
+            throw new NotFoundException("Id должен быть указан");
+        }
+
+        if (userRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Пользователя с ID " + id + " не существует");
+        }
+
         return filmRepository.getRecommendedFilms(id);
     }
-
 
     @Override
     public UserDto create(NewUserRequest userRequest) {
