@@ -72,7 +72,7 @@ public class ReviewController {
     public void addLike(@PathVariable long id, @PathVariable long userId) {
         log.error("Add like review id {}, user id {} start", id, userId);
         reviewService.addLike(id, userId);
-        log.error("Added like film id {}, user id {} complete", id, userId);
+        log.error("Added like review id {}, user id {} complete", id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
@@ -80,7 +80,7 @@ public class ReviewController {
     public void removeLike(@PathVariable long id, @PathVariable long userId) {
         log.error("Remove like review id {}, user id {} start", id, userId);
         reviewService.removeLike(id, userId);
-        log.error("Removed like film id {}, user id {} complete", id, userId);
+        log.error("Removed like review id {}, user id {} complete", id, userId);
     }
 
     @PutMapping("/{id}/dislike/{userId}")
@@ -88,7 +88,7 @@ public class ReviewController {
     public void addDislike(@PathVariable long id, @PathVariable long userId) {
         log.error("Add dislike review id {}, user id {} start", id, userId);
         reviewService.addDislike(id, userId);
-        log.error("Added dislike film id {}, user id {} complete", id, userId);
+        log.error("Added dislike review id {}, user id {} complete", id, userId);
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
@@ -96,6 +96,6 @@ public class ReviewController {
     public void removeDislike(@PathVariable long id, @PathVariable long userId) {
         log.error("Remove dislike review id {}, user id {} start", id, userId);
         reviewService.removeDislike(id, userId);
-        log.error("Removed dislike film id {}, user id {} complete", id, userId);
+        log.error("Removed dislike review id {}, user id {} complete", id, userId);
     }
 }
