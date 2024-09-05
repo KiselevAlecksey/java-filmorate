@@ -20,7 +20,7 @@ public interface FilmRepository {
 
     Collection<Film> values();
 
-    boolean remove(Film film);
+    boolean remove(Long id);
 
     List<Film> getTopPopular();
 
