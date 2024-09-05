@@ -246,9 +246,10 @@ class JdbcFilmRepositoryTest {
                 .isEqualTo(Arrays.asList(film1, film2));
     }
 
-  /*  @Test
+    @Test
     @DisplayName("должен возвращать рекомендованные фильмы")
     void should_return_recommended_films() {
+
         Film film1 = getTestFilm();
         Film film2 = getTestFilm2(film1);
 
@@ -262,16 +263,16 @@ class JdbcFilmRepositoryTest {
 
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
         filmRepository.addLike(TEST_FILM_ID, TEST_USER2_ID);
-        filmRepository.addLike(TEST_FILM2_ID, TEST_USER2_ID);
+        filmRepository.addLike(TEST_FILM2_ID, TEST_USER_ID);
 
-        List<Film> recommendedFilms = filmRepository.getRecommendedFilms(TEST_USER_ID);
+        List<Film> recommendedFilms = filmRepository.getRecommendedFilms(TEST_USER2_ID);
 
         assertThat(recommendedFilms)
                 .hasSize(1)
                 .first()
                 .usingRecursiveComparison()
-                .isEqualTo(film1);
-    }*/
+                .isEqualTo(film2);
+    }
 
     private static LinkedHashSet<Genre> getGenres() {
         Genre genre = new Genre();
@@ -308,6 +309,18 @@ class JdbcFilmRepositoryTest {
                 .description("another desc")
                 .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
                 .duration(90)
+                .genres(getGenres())
+                .mpa(getMpa())
+                .build();
+    }
+
+    private static Film getTestFilm3() {
+        return Film.builder()
+                .id(TEST_FILM_ID)
+                .name("name")
+                .description("description")
+                .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
+                .duration(100)
                 .genres(getGenres())
                 .mpa(getMpa())
                 .build();

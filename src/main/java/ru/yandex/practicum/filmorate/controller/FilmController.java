@@ -83,9 +83,8 @@ public class FilmController {
 
         if (genreId != null || year != null) {
             return filmService.getPopularFilmsByGenresAndYears(count, genreId, year);
-        } else {
-            return filmService.getPopularFilms(count);
         }
+            return filmService.getPopularFilms(count);
     }
 
 }
