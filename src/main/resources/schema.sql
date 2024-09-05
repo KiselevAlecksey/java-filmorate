@@ -77,3 +77,15 @@ CREATE TABLE IF NOT EXISTS reviews (
     FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Table: reviews_reactions
+
+CREATE TABLE IF NOT EXISTS reviews_reactions (
+    review_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    reaction_like BOOLEAN DEFAULT FALSE,
+    reaction_dislike BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (review_id, user_id, reaction_like, reaction_dislike),
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

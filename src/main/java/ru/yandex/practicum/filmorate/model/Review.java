@@ -28,16 +28,5 @@ public class Review {
 
     Integer useful;
 
-    public Boolean isPositive() {
-        if (this.isPositive == null) {
-            this.isPositive = false;
-        }
-
-        return this.isPositive;
-    }
-
-    public void setPositive(Boolean isPositive) {
-        this.isPositive = isPositive;
-    }
 }
 

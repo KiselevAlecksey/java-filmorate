@@ -9,7 +9,7 @@ public interface ReviewRepository {
 
     Review save(Review review);
 
-    Review update(Review review);
+    Review updateReview(Review review);
 
     void remove(Long id);
 

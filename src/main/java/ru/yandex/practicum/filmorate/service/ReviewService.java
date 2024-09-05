@@ -12,7 +12,7 @@ public interface ReviewService {
 
     ReviewDto update(UpdateReviewRequest reviewRequest);
 
-    void remove(long id);
+    void remove(Long id);
 
     ReviewDto getById(long id);
 
