@@ -20,7 +20,7 @@ public interface UserService {
 
     Collection<UserDto> findAll();
 
-    UserDto get(long user);
+    UserDto get(long id);
 
     List<Film> getFilmRecommendations(Long id);
 
