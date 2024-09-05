@@ -233,7 +233,13 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
                 filmMapper
         );
 
-        return recommendedFilms;
+        List<Film> recommendedFilmsWithFullDetails = new ArrayList<>();
+        for (Film film : recommendedFilms) {
+            Optional<Film> fullDetailsFilm = getByIdFullDetails(film.getId());
+            fullDetailsFilm.ifPresent(recommendedFilmsWithFullDetails::add);
+        }
+
+        return recommendedFilmsWithFullDetails;
     }
 
     public Optional<Mpa> findMpaById(Integer id) {
