@@ -17,7 +17,7 @@ public interface UserService {
 
     Collection<UserDto> findAll();
 
-    UserDto get(long user);
+    UserDto get(long id);
 
     UserDto create(NewUserRequest userRequest);
 
