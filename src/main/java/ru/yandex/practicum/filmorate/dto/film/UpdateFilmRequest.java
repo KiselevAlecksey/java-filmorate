@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dto.film;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -27,6 +28,8 @@ public class UpdateFilmRequest implements FilmRequest {
 
     Instant releaseDate;
 
+    LinkedHashSet<Director> directors;
+
     public boolean hasName() {
         return isNotBlank(name);
     }
@@ -41,6 +44,10 @@ public class UpdateFilmRequest implements FilmRequest {
 
     public boolean hasGenre() {
         return genres != null && !genres.isEmpty();
+    }
+
+    public boolean hasDirector() {
+        return directors != null && !directors.isEmpty();
     }
 
     public boolean hasMpa() {

@@ -28,7 +28,7 @@ public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreR
     }
 
     @Override
-    public Collection<Genre> getFilmGenres(Long filmId) {
+    public LinkedHashSet<Genre> getFilmGenres(Long filmId) {
         String query = "SELECT * FROM genre " +
                 "WHERE id IN (SELECT genre_id AS id FROM film_genres WHERE film_id = :film_id)";
 
@@ -36,7 +36,7 @@ public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreR
         params.put("film_id", filmId);
 
         Collection<Genre> genres = findMany(query, params);
-        return genres;
+        return (LinkedHashSet<Genre>) genres;
     }
 
     @Override

@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 
 /**
  * Film.
@@ -35,4 +36,5 @@ public class Film {
     @Builder.Default
     Instant releaseDate = Instant.ofEpochMilli(0L);
 
+    LinkedHashSet<Director> directors;
 }

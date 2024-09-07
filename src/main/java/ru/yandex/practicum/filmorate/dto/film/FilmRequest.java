@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dto.film;
 
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -23,4 +24,8 @@ public interface FilmRequest {
     void setGenres(LinkedHashSet<Genre> genres);
 
     void setMpa(Mpa mpa);
+
+    LinkedHashSet<Director> getDirectors();
+
+    void setDirectors(LinkedHashSet<Director> directors);
 }

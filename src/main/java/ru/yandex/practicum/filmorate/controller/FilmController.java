@@ -1,23 +1,26 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
-    private static final Logger logger = LoggerFactory.getLogger(FilmController.class);
+
     private final FilmService filmService;
 
     @ResponseStatus(HttpStatus.OK)
@@ -29,43 +32,43 @@ public class FilmController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public FilmDto add(@RequestBody NewFilmRequest filmRequest) {
-        logger.error("Film add {} start", filmRequest);
+        log.error("Film add {} start", filmRequest);
         FilmDto created = filmService.add(filmRequest);
-        logger.error("Added film is {}", created.getName());
+        log.error("Added film is {}", created.getName());
         return created;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public FilmDto update(@RequestBody UpdateFilmRequest filmRequest) {
-        logger.error("Film update {} start", filmRequest);
+        log.error("Film update {} start", filmRequest);
         FilmDto updated = filmService.update(filmRequest);
-        logger.error("Updated film is {} complete", updated.getName());
+        log.error("Updated film is {} complete", updated.getName());
         return updated;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable long id, @PathVariable long userId) {
-        logger.error("Add like film id {}, user id {} start", id, userId);
+        log.error("Add like film id {}, user id {} start", id, userId);
         filmService.addLike(id, userId);
-        logger.error("Added like film id {}, user id {} complete", id, userId);
+        log.error("Added like film id {}, user id {} complete", id, userId);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable long id, @PathVariable long userId) {
-        logger.error("Remove like film id {}, user id {} start", id, userId);
+        log.error("Remove like film id {}, user id {} start", id, userId);
         filmService.removeLike(id, userId);
-        logger.error("Removed like film id {}, user id {} complete", id, userId);
+        log.error("Removed like film id {}, user id {} complete", id, userId);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public FilmDto getFilmWithGenre(@PathVariable long id) {
-        logger.error("Get film with genre id {} start", id);
+        log.error("Get film with genre id {} start", id);
         FilmDto film = filmService.get(id);
-        logger.error("Get film with genre id {} complete", id);
+        log.error("Get film with genre id {} complete", id);
         return film;
     }
 
@@ -75,7 +78,7 @@ public class FilmController {
             @RequestParam Optional<Integer> count,
             @RequestParam(required = false) Integer genreId,
             @RequestParam(required = false) Integer year) {
-        logger.info("Get popular films count {} with optional genre {} and year {} start",
+        log.info("Get popular films count {} with optional genre {} and year {} start",
                 count, genreId, year);
 
         if (genreId != null || year != null) {
@@ -89,4 +92,13 @@ public class FilmController {
     public boolean remove(@PathVariable Long id) {
         return filmService.remove(id);
     }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorFilmsSort(
+            @PathVariable("directorId") @Min(1) Long id,
+            @RequestParam(required = false) List<String> sortBy) {
+        log.info("Get director films sort, directorId: {}, sortBy: {}", id, sortBy);
+        return filmService.getFilmsByDirector(id, sortBy);
+    }
+
 }
