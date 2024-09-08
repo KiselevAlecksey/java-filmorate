@@ -69,7 +69,7 @@ public class DefaultDirectorService implements DirectorService {
         }
 
         if (directorRepository.getById(request.getId()).isPresent()) {
-            if (request.getName().isBlank() ) {
+            if (request.getName().isBlank()) {
 
                 throw new ConditionsNotMetException(
                         "Поле имя не может быть пустым"
