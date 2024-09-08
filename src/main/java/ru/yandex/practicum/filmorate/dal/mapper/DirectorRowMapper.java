@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 @Component
 @RequiredArgsConstructor
-public class DirectorRowMapper implements RowMapper <Director> {
+public class DirectorRowMapper implements RowMapper<Director> {
     protected final NamedParameterJdbcTemplate jdbc;
 
     @Override
