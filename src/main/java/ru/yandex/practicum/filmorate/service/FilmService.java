@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface FilmService {
@@ -24,6 +25,8 @@ public interface FilmService {
     Collection<FilmDto> getPopularFilms(Optional<Integer> countOpt);
 
     Collection<FilmDto> findAll();
+
+    List<Film> getFilmsByDirector(Long dirId, List<String> sortBy);
 
     boolean remove(Long id);
 

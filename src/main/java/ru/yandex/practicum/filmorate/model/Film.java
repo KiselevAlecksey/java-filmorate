@@ -35,4 +35,5 @@ public class Film {
     @Builder.Default
     Instant releaseDate = Instant.ofEpochMilli(0L);
 
+    LinkedHashSet<Director> directors;
 }
