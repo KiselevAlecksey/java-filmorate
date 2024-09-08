@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import ru.yandex.practicum.filmorate.dto.DirectorDto;
 import ru.yandex.practicum.filmorate.dto.NewDirectorRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateDirectorRequest;
-import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
 
