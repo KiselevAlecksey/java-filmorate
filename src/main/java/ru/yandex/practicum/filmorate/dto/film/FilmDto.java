@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -32,4 +33,6 @@ public class FilmDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Instant releaseDate;
+
+    LinkedHashSet<Director> directors;
 }

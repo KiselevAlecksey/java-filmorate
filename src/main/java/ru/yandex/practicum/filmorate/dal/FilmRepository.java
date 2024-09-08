@@ -28,6 +28,8 @@ public interface FilmRepository {
 
     Optional<Film> getByIdFullDetails(Long id);
 
+    List<Film> getFilmsByDirector(Long dirId, List<String> sort);
+
     List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year);
 
 

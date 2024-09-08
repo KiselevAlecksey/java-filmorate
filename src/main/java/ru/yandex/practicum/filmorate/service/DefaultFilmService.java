@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.GenreRepository;
-import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
@@ -13,9 +12,8 @@ import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.dal.FilmRepository;
-import ru.yandex.practicum.filmorate.dal.UserRepository;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.validator.Validator;
@@ -42,6 +40,10 @@ public class DefaultFilmService implements FilmService {
     @Autowired
     @Qualifier("JdbcMpaRepository")
     private final MpaRepository mpaRepository;
+
+    @Autowired
+    @Qualifier("JdbcDirectorRepository")
+    private final DirectorRepository directorRepository;
 
     private final Validator validate;
 
@@ -94,9 +96,13 @@ public class DefaultFilmService implements FilmService {
 
         validateMpa(filmRequest);
 
+        validateDirectors(filmRequest);
+
         FilmMapper.updateFilmFields(updateFilm, filmRequest);
 
         filmRepository.update(updateFilm);
+
+        FilmDto dto = FilmMapper.mapToFilmDto(updateFilm);
 
         return FilmMapper.mapToFilmDto(updateFilm);
 
@@ -214,6 +220,20 @@ public class DefaultFilmService implements FilmService {
         }
     }
 
+    private void validateDirectors(FilmRequest filmRequest) {
+        if (filmRequest.getDirectors() != null) {
+            List<Long> directorIds = filmRequest.getDirectors().stream().map(Director::getId).toList();
+
+            List<Director> directors = directorRepository.getByIds(directorIds);
+
+            if (directorIds.size() != directors.size()) {
+                throw new NotFoundException("Жанры не найдены");
+            }
+
+            filmRequest.setDirectors(new LinkedHashSet<>(directors));
+        }
+    }
+
     private void validateMpa(FilmRequest filmRequest) {
         if (filmRequest.getMpa().getId() != null) {
             Mpa mpa = filmRequest.getMpa();
@@ -234,5 +254,14 @@ public class DefaultFilmService implements FilmService {
         );
 
         film.setMpa(mpa);
+    }
+
+
+    public List<Film> getFilmsByDirector(Long dirId, List<String> sort) {
+        List<Film> films = filmRepository.getFilmsByDirector(dirId, sort);
+
+        return films.stream().map(film -> filmRepository.getByIdFullDetails(film.getId())
+                        .orElseThrow(() -> new NotFoundException("Фильм не найден")))
+                .toList();
     }
 }

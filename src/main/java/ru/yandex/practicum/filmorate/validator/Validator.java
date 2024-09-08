@@ -9,8 +9,10 @@ import ru.yandex.practicum.filmorate.dal.MpaRepository;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.model.Constant;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.time.Instant;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -80,8 +82,22 @@ public class Validator {
     }
 
     private boolean areGenresInvalid(FilmRequest filmRequest) {
-        return filmRequest.getGenres() != null &&
-                filmRequest.getGenres().stream()
-                        .anyMatch(genre -> !genreRepository.getAllGenreIds().contains(genre.getId()));
+
+        List<Integer> genreIds = genreRepository.getAllGenreIds();
+
+        if (filmRequest.getGenres() == null) return false;
+
+        for (Genre genre : filmRequest.getGenres()) {
+            Integer genreId = genre.getId();
+
+            if (genreId == null) {
+                continue;
+            }
+
+            if ((genreId <= 0 || genreId > genreIds.size()) || genreIds.get(genre.getId() - 1) == null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

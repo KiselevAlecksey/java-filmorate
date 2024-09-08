@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.filmorate.dal.mapper.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -19,12 +21,13 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import({JdbcGenreRepository.class, GenreRowMapper.class,
+@Import({JdbcGenreRepository.class, GenreRowMapper.class, JdbcDirectorRepository.class, DirectorRowMapper.class,
         JdbcFilmRepository.class, FilmRowMapper.class, MpaRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcGenreRepository")
 class JdbcGenreRepositoryTest {
 
+    public static final long TEST_DIRECTOR_ID = 1L;
     public static final int TEST_GENRE_ID = 1;
     public static final long TEST_FILM_ID = 1L;
     public static final int TOTAL_GENRES = 6;
@@ -93,6 +96,15 @@ class JdbcGenreRepositoryTest {
         return genres;
     }
 
+    private static LinkedHashSet<Director> getDirectors() {
+        Director director = new Director();
+        LinkedHashSet<Director> directors = new LinkedHashSet<>();
+        director.setId(TEST_DIRECTOR_ID);
+        director.setName("Имя Режиссера");
+        directors.add(director);
+        return directors;
+    }
+
     private static Film getTestFilm() {
         return Film.builder()
                 .id(TEST_FILM_ID)
@@ -102,6 +114,7 @@ class JdbcGenreRepositoryTest {
                 .duration(100)
                 .genres(getGenres())
                 .mpa(getMpa())
+                .directors(getDirectors())
                 .build();
     }
 
