@@ -68,8 +68,6 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
 
     @Override
     public boolean delete(Long id) {
-       /* String query = "DELETE FROM directors (name) VALUES (:name)";
-        insert(query, new MapSqlParameterSource().addValue("name", director.getName()));*/
 
         Map<String, Object> params = new HashMap<>();
         params.put("id", id);

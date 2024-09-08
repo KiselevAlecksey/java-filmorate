@@ -58,11 +58,6 @@ public class DefaultDirectorService implements DirectorService {
 
     @Override
     public DirectorDto update(UpdateDirectorRequest request) {
-      /*  Director updateDirector = directorRepository.getDirectorById(directorRequest.getId())
-                .orElseThrow(() -> new NotFoundException("Режиссер не найден"));
-        DirectorMapper.updateDirectorFields(updateDirector, directorRequest);
-        directorRepository.updateDir(updateDirector);
-        return DirectorMapper.mapToDirectorDto(updateDirector);*/
 
         if (request.getId() == null) {
             throw new NotFoundException("Id должен быть указан");
