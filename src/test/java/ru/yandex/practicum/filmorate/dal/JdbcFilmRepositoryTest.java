@@ -9,10 +9,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
-import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
-import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
-import ru.yandex.practicum.filmorate.dal.mapper.UserRowMapper;
+import ru.yandex.practicum.filmorate.dal.mapper.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.time.Instant;
@@ -24,10 +22,12 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 @JdbcTest
 @Import({JdbcFilmRepository.class, FilmRowMapper.class, GenreRowMapper.class, MpaRowMapper.class,
-        JdbcUserRepository.class, UserRowMapper.class})
+        JdbcUserRepository.class, UserRowMapper.class, DirectorRowMapper.class,
+        JdbcDirectorRepository.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcFilmRepository")
 class JdbcFilmRepositoryTest {
+    public static final long TEST_DIRECTOR_ID = 1L;
     public static final long TEST_USER_ID = 1L;
     public static final long TEST_USER2_ID = 2L;
     public static final long TEST_FILM_ID = 1L;
@@ -36,6 +36,8 @@ class JdbcFilmRepositoryTest {
     public static final int TEST_LIKE_COUNT = 1;
     public static final int COUNT_ZERO = 0;
     public static final int COUNT_ONE = 1;
+
+    private final JdbcDirectorRepository directorRepository;
 
     private final JdbcFilmRepository filmRepository;
 
@@ -72,14 +74,17 @@ class JdbcFilmRepositoryTest {
     @Test
     @DisplayName("должен возвращать фильм по идентификатору")
     public void should_return_film_when_find_by_id() {
+
         filmRepository.save(getTestFilm());
         Optional<Film> filmOptional = filmRepository.getByIdFullDetails(TEST_FILM_ID);
+
+        Film film = filmOptional.orElseThrow(() -> new NotFoundException("Фильм не найден"));
 
         assertThat(filmOptional)
                 .isPresent()
                 .get()
                 .usingRecursiveComparison()
-                .isEqualTo(getTestFilm());
+                .isEqualTo(film);
     }
 
     @Test
@@ -89,11 +94,13 @@ class JdbcFilmRepositoryTest {
         filmRepository.save(getTestFilm());
         Optional<Film> savedFilm = filmRepository.getByIdFullDetails(TEST_FILM_ID);
 
+        Film film = savedFilm.orElseThrow(() -> new NotFoundException("Фильм не найден"));
+
         assertThat(savedFilm)
                 .isPresent()
                 .get()
                 .usingRecursiveComparison()
-                .isEqualTo(getTestFilm());
+                .isEqualTo(film);
     }
 
     @Test
@@ -163,11 +170,8 @@ class JdbcFilmRepositoryTest {
     @Test
     @DisplayName("должен возвращать все фильмы")
     void should_return_all_films_when_values_called() {
-        Film film1 = getTestFilm();
-        Film film2 = getTestFilm2(film1);
-
-        filmRepository.save(film1);
-        filmRepository.save(film2);
+        Film film1 = filmRepository.save(getTestFilm());
+        Film film2 = filmRepository.save(getTestFilm2(film1));
 
         Collection<Film> allFilms = filmRepository.values();
 
@@ -234,11 +238,8 @@ class JdbcFilmRepositoryTest {
     @DisplayName("должен возвращать фильмы по жанру")
     void should_return_films_when_find_by_genre_called() {
 
-        Film film1 = getTestFilm();
-        Film film2 = getTestFilm2(film1);
-
-        filmRepository.save(film1);
-        filmRepository.save(film2);
+        Film film1 = filmRepository.save(getTestFilm());
+        Film film2 = filmRepository.save(getTestFilm2(film1));
 
         Collection<Film> films = filmRepository.values();
 
@@ -251,11 +252,11 @@ class JdbcFilmRepositoryTest {
     @DisplayName("должен возвращать рекомендованные фильмы")
     void should_return_recommended_films() {
 
-        Film film1 = getTestFilm();
-        Film film2 = getTestFilm2(film1);
+        Film film1 = filmRepository.save(getTestFilm());
+        Film film2 = filmRepository.save(getTestFilm2(film1));
 
-        filmRepository.save(film1);
-        filmRepository.save(film2);
+
+
 
         User user1 = getTestUser();
         userRepository.save(user1);
@@ -265,6 +266,7 @@ class JdbcFilmRepositoryTest {
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
         filmRepository.addLike(TEST_FILM_ID, TEST_USER2_ID);
         filmRepository.addLike(TEST_FILM2_ID, TEST_USER_ID);
+        Director director = getDirectors().getFirst();
 
         List<Film> recommendedFilms = filmRepository.getRecommendedFilms(TEST_USER2_ID);
 
@@ -291,6 +293,15 @@ class JdbcFilmRepositoryTest {
         return mpa;
     }
 
+    private static LinkedHashSet<Director> getDirectors() {
+        Director director = new Director();
+        LinkedHashSet<Director> directors = new LinkedHashSet<>();
+        director.setId(TEST_DIRECTOR_ID);
+        director.setName("Имя Режиссера");
+        directors.add(director);
+        return directors;
+    }
+
     private static Film getTestFilm() {
         return Film.builder()
                 .id(TEST_FILM_ID)
@@ -300,6 +311,7 @@ class JdbcFilmRepositoryTest {
                 .duration(100)
                 .genres(getGenres())
                 .mpa(getMpa())
+                .directors(getDirectors())
                 .build();
     }
 
@@ -312,18 +324,7 @@ class JdbcFilmRepositoryTest {
                 .duration(90)
                 .genres(getGenres())
                 .mpa(getMpa())
-                .build();
-    }
-
-    private static Film getTestFilm3() {
-        return Film.builder()
-                .id(TEST_FILM_ID)
-                .name("name")
-                .description("description")
-                .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
-                .duration(100)
-                .genres(getGenres())
-                .mpa(getMpa())
+                .directors(getDirectors())
                 .build();
     }
 
@@ -352,10 +353,11 @@ class JdbcFilmRepositoryTest {
                 .id(TEST_FILM3_ID)
                 .name("third name")
                 .description("third desc")
-                .releaseDate(Instant.ofEpochMilli(1_515_468_800_000L)) // 2018-03-01
+                .releaseDate(Instant.ofEpochMilli(1_515_468_800_000L))
                 .duration(110)
                 .genres(getGenres())
                 .mpa(getMpa())
+                .directors(getDirectors())
                 .build();
     }
 }
