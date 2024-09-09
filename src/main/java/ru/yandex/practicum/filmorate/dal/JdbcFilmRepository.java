@@ -5,8 +5,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mapper.DirectorRowMapper;
-import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
-import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.dal.repository.FilmRepository;

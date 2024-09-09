@@ -31,4 +31,6 @@ public interface FilmRepository {
     List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year);
 
     List<Film> getRecommendedFilms(Long userId);
+
+    List<Film> getFilmsByDirector(Long dirId, List<String> sort);
 }

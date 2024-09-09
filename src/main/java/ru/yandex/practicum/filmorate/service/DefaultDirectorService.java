@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.DirectorRepository;
+import ru.yandex.practicum.filmorate.dal.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.dto.DirectorDto;
 import ru.yandex.practicum.filmorate.dto.NewDirectorRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateDirectorRequest;
@@ -32,10 +32,9 @@ public class DefaultDirectorService implements DirectorService {
             throw new NotFoundException("Режиссер не найден");
         }
 
-        DirectorDto dto = directorRepository.getById(id)
+        return directorRepository.getById(id)
                 .map(DirectorMapper::mapToDirectorDto).orElseThrow(
                         () -> new NotFoundException("Режиссер не найден"));
-        return dto;
     }
 
     @Override

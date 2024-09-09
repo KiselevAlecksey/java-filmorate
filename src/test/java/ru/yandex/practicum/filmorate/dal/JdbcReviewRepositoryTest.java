@@ -21,13 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @JdbcTest
-@Import({JdbcReviewRepository.class, JdbcUserRepository.class,
-        JdbcFilmRepository.class, FilmRowMapper.class, GenreRowMapper.class, MpaRowMapper.class,
-        JdbcUserRepository.class, UserRowMapper.class, ReviewRowMapper.class})
+@Import({JdbcFilmRepository.class, JdbcReviewRepository.class, JdbcUserRepository.class, JdbcDirectorRepository.class,
+        DirectorRowMapper.class, FilmRowMapper.class, GenreRowMapper.class, MpaRowMapper.class,
+        UserRowMapper.class, ReviewRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcReviewRepository")
 public class JdbcReviewRepositoryTest {
 
+    public static final long TEST_DIRECTOR_ID = 1L;
     public static final long TEST_USER_ID = 1L;
     public static final int TEST_GENRE_ID = 1;
     public static final long TEST_REVIEW_ID = 1L;
@@ -193,6 +194,15 @@ public class JdbcReviewRepositoryTest {
         return genres;
     }
 
+    private static LinkedHashSet<Director> getDirectors() {
+        Director director = new Director();
+        LinkedHashSet<Director> directors = new LinkedHashSet<>();
+        director.setId(TEST_DIRECTOR_ID);
+        director.setName("Имя Режиссера");
+        directors.add(director);
+        return directors;
+    }
+
     private static Film getTestFilm() {
         return Film.builder()
                 .id(TEST_FILM_ID)
@@ -202,6 +212,7 @@ public class JdbcReviewRepositoryTest {
                 .duration(100)
                 .genres(getGenres())
                 .mpa(getMpa())
+                .directors(getDirectors())
                 .build();
     }
 

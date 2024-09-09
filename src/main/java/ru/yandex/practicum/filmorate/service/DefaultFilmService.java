@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.*;
+import ru.yandex.practicum.filmorate.dal.repository.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
@@ -99,11 +99,11 @@ public class DefaultFilmService implements FilmService {
 
         validateDirectors(filmRequest);
 
-        FilmMapper.updateFilmFields(updateFilm, filmRequest);
+        FilmMapper.updateFilmFields(updatedFilm, filmRequest);
 
         filmRepository.update(updatedFilm);
 
-        return FilmMapper.mapToFilmDto(updateFilm);
+        return FilmMapper.mapToFilmDto(updatedFilm);
 
     }
 
