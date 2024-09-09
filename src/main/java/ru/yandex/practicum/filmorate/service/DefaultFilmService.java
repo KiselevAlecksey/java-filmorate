@@ -204,6 +204,12 @@ public class DefaultFilmService implements FilmService {
                 .orElseThrow(() -> new NotFoundException("Фильм не найден")));
     }
 
+    @Override
+    public Collection<FilmDto> getCommonFilms(Long userId, Long friendId) {
+        return filmRepository.values().stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
 
     private void validateGenre(FilmRequest filmRequest) {
         if (filmRequest.getGenres() != null) {

@@ -60,4 +60,13 @@ public class FilmSql {
             "WHERE user_id = :user_id " +
             ") " +
             ");";
+
+    public static final String GET_COMMON_FILMS = "SELECT f.*, COUNT(allLikes.film_id) AS like_count " +
+            "FROM films AS f " +
+            "LEFT JOIN likes AS userLikes ON f.id = userLikes.film_id " +
+            "LEFT JOIN likes AS friendLikes ON f.id = friendLikes.film_id " +
+            "LEFT JOIN likes AS allLikes ON f.id = allLikes.film_id " +
+            "WHERE userLikes.user_id = :user_id AND friendLikes.user_id = :friend_id " +
+            "GROUP BY f.id " +
+            "ORDER BY like_count DESC; ";
 }

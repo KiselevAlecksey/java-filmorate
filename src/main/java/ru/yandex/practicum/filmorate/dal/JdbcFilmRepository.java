@@ -258,6 +258,20 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         return recommendedFilmsWithFullDetails;
     }
 
+    @Override
+    public Collection<Film> getCommonFilms(Long userId, Long friendId) {
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("user_id", userId);
+        params.addValue("friend_id", friendId);
+
+        return jdbc.query(
+                GET_COMMON_FILMS,
+                params,
+                mapper
+        );
+    }
+
     public Optional<Mpa> findMpaById(Integer id) {
         String query = "SELECT * FROM rating WHERE id = :id";
         Map<String, Object> params = new HashMap<>();

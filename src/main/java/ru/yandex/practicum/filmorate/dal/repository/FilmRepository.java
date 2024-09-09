@@ -33,4 +33,6 @@ public interface FilmRepository {
     List<Film> getRecommendedFilms(Long userId);
 
     List<Film> getFilmsByDirector(Long dirId, List<String> sort);
+
+    Collection<Film> getCommonFilms(Long userId, Long friendId);
 }
