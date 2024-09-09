@@ -13,11 +13,11 @@ import ru.yandex.practicum.filmorate.dal.mapper.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 
-import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.yandex.practicum.filmorate.utils.TestDataFactory.*;
 
 
 @JdbcTest
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("JdbcReviewRepository")
 public class JdbcReviewRepositoryTest {
 
-    public static final long TEST_DIRECTOR_ID = 1L;
+    /*public static final long TEST_DIRECTOR_ID = 1L;
     public static final long TEST_USER_ID = 1L;
     public static final int TEST_GENRE_ID = 1;
     public static final long TEST_REVIEW_ID = 1L;
@@ -37,7 +37,7 @@ public class JdbcReviewRepositoryTest {
     public static final int TOTAL_REVIEWS = 1;
     public static final int TEST_LIKE_COUNT = 1;
     public static final int TEST_DISLIKE_COUNT = -1;
-    public static final int ZERO = 0;
+    public static final int ZERO = 0;*/
 
     private final JdbcReviewRepository reviewRepository;
 
@@ -61,8 +61,8 @@ public class JdbcReviewRepositoryTest {
         jdbc.update("DELETE FROM reviews", new MapSqlParameterSource());
         jdbc.update("ALTER TABLE reviews ALTER COLUMN id RESTART WITH 1",  new MapSqlParameterSource());
 
-        userRepository.save(getTestUser());
-        filmRepository.save(getTestFilm());
+        userRepository.save(TEST_USER);
+        filmRepository.save(TEST_FILM);
 
         review = reviewRepository.save(getReview());
     }
@@ -137,7 +137,7 @@ public class JdbcReviewRepositoryTest {
 
         Review review = reviewRepository.getById(TEST_REVIEW_ID).orElseThrow();
 
-        assertThat(review.getUseful()).isEqualTo(ZERO);
+        assertThat(review.getUseful()).isEqualTo(COUNT_ZERO);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class JdbcReviewRepositoryTest {
 
         Review review = reviewRepository.getById(TEST_REVIEW_ID).orElseThrow();
 
-        assertThat(review.getUseful()).isEqualTo(ZERO);
+        assertThat(review.getUseful()).isEqualTo(COUNT_ZERO);
     }
 
     private static Review getReview() {
@@ -174,52 +174,5 @@ public class JdbcReviewRepositoryTest {
         review.setUseful(TEST_REVIEW_USEFUL);
 
         return review;
-    }
-
-    private static User getTestUser() {
-        return User.builder()
-                .id(TEST_USER_ID)
-                .email("example@email.ru")
-                .name("name")
-                .login("description")
-                .birthday(Instant.ofEpochMilli(1_714_608_000_000L))
-                .build();
-    }
-
-    private static LinkedHashSet<Genre> getGenres() {
-        Genre genre = new Genre();
-        LinkedHashSet<Genre> genres = new LinkedHashSet<>();
-        genre.setId(TEST_GENRE_ID);
-        genres.add(genre);
-        return genres;
-    }
-
-    private static LinkedHashSet<Director> getDirectors() {
-        Director director = new Director();
-        LinkedHashSet<Director> directors = new LinkedHashSet<>();
-        director.setId(TEST_DIRECTOR_ID);
-        director.setName("Имя Режиссера");
-        directors.add(director);
-        return directors;
-    }
-
-    private static Film getTestFilm() {
-        return Film.builder()
-                .id(TEST_FILM_ID)
-                .name("name")
-                .description("description")
-                .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
-                .duration(100)
-                .genres(getGenres())
-                .mpa(getMpa())
-                .directors(getDirectors())
-                .build();
-    }
-
-    private static Mpa getMpa() {
-        Mpa mpa = new Mpa();
-        mpa.setId(1);
-        mpa.setName("G");
-        return mpa;
     }
 }

@@ -30,9 +30,7 @@ class JdbcUserRepositoryTest {
     @DisplayName("должен добавлять друга")
     void should_add_friend() {
 
-        User user1 = getTestUser();
-
-        userRepository.save(user1);
+        User user1 = userRepository.save(getTestUser());
         User user2 = userRepository.save(getTestUser());
 
         userRepository.addFriend(user2.getId(), user1.getId());
@@ -46,9 +44,7 @@ class JdbcUserRepositoryTest {
     @Test
     @DisplayName("должен удалять друга")
     void should_remove_friend() {
-        User user1 = getTestUser();
-
-        userRepository.save(user1);
+        User user1 = userRepository.save(getTestUser());
         User user2 = userRepository.save(getTestUser());
 
         Collection<User> users = userRepository.values();
@@ -67,6 +63,7 @@ class JdbcUserRepositoryTest {
     @DisplayName("должен сохранять пользователя")
     void should_save_user() {
         User user = getTestUser();
+
         userRepository.save(user);
         assertThat(userRepository.findById(user.getId()))
                 .isPresent()
@@ -76,8 +73,8 @@ class JdbcUserRepositoryTest {
     @Test
     @DisplayName("должен обновлять пользователя")
     void should_update_user() {
-        User user = getTestUser();
-        userRepository.save(user);
+        User user = userRepository.save(getTestUser());
+
         user.setName("updated name");
         userRepository.update(user);
         assertThat(userRepository.findById(user.getId()))
@@ -88,8 +85,8 @@ class JdbcUserRepositoryTest {
     @Test
     @DisplayName("должен возвращать пользователя по идентификатору")
     void should_return_user_when_find_by_id() {
-        User user = getTestUser();
-        userRepository.save(user);
+        User user = userRepository.save(getTestUser());
+
         assertThat(userRepository.findById(TEST_USER_ID))
                 .isPresent()
                 .hasValueSatisfying(u -> assertThat(u.getId()).isEqualTo(TEST_USER_ID));
@@ -98,9 +95,7 @@ class JdbcUserRepositoryTest {
     @Test
     @DisplayName("должен возвращать пользователя из друзей по идентификатору")
     void should_return_user_from_friends_when_find_by_id() {
-        User user1 = getTestUser();
-
-        userRepository.save(user1);
+        User user1 =  userRepository.save(getTestUser());
         User user2 = userRepository.save(getTestUser());
 
         userRepository.addFriend(user1.getId(), user2.getId());
@@ -115,6 +110,7 @@ class JdbcUserRepositoryTest {
     @DisplayName("должен возвращать всех пользователей")
     void should_return_all_users() {
         User user = userRepository.save(getTestUser());
+
         Collection<User> users = userRepository.values();
         assertThat(users).isNotEmpty()
                 .extracting(User::getId)
@@ -125,6 +121,7 @@ class JdbcUserRepositoryTest {
     @DisplayName("должен удалять пользователя")
     void should_remove_user() {
         User user = getTestUser();
+
         userRepository.save(user);
         userRepository.remove(user.getId());
         assertThat(userRepository.findById(TEST_USER_ID)).isNotPresent();

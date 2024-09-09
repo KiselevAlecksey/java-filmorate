@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.yandex.practicum.filmorate.utils.TestDataFactory.TEST_MPA_ID;
+import static ru.yandex.practicum.filmorate.utils.TestDataFactory.TOTAL_MPA;
 
 @JdbcTest
 @Import({JdbcMpaRepository.class, MpaRowMapper.class})
@@ -21,9 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JdbcMpaRepositoryTest {
 
     private final JdbcMpaRepository mpaRepository;
-
-    private static final int TEST_MPA_ID = 1;
-    private static final int TOTAL_MPA = 5;
 
     @Test
     @DisplayName("должен находить MPA по идентификатору")
