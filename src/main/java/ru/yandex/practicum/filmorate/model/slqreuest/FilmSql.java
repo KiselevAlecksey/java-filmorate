@@ -68,5 +68,5 @@ public class FilmSql {
             "LEFT JOIN likes AS allLikes ON f.id = allLikes.film_id " +
             "WHERE userLikes.user_id = :user_id AND friendLikes.user_id = :friend_id " +
             "GROUP BY f.id " +
-            "ORDER BY like_count DESC; ";
+            "ORDER BY like_count DESC, f.id ";
 }
