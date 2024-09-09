@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.interfaces;
 
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
@@ -22,7 +22,7 @@ public interface UserService {
 
     Collection<UserDto> findAll();
 
-    UserDto get(long id);
+    UserDto getById(long id);
 
     List<Film> getFilmRecommendations(Long id);
 

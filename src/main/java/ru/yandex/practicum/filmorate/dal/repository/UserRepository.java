@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dal;
+package ru.yandex.practicum.filmorate.dal.repository;
 
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface UserRepository {
+
     void addFriend(Long userId, Long friendId);
 
     void removeFriend(Long userId, Long friendId);

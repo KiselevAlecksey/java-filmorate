@@ -1,6 +1,6 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.interfaces;
 
-import ru.yandex.practicum.filmorate.dto.GenreDto;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
 
 import java.util.Collection;
 

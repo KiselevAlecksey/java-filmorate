@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dal.GenreRepository;
-import ru.yandex.practicum.filmorate.dal.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.repository.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
+import ru.yandex.practicum.filmorate.dto.review.ReviewRequest;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Constant;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -25,6 +26,83 @@ public class Validator {
     @Autowired
     @Qualifier("JdbcMpaRepository")
     private final MpaRepository mpaRepository;
+
+    @Autowired
+    @Qualifier("JdbcReviewRepository")
+    private final ReviewRepository reviewRepository;
+
+    @Autowired
+    @Qualifier("JdbcFilmRepository")
+    private final FilmRepository filmRepository;
+
+    @Autowired
+    @Qualifier("JdbcUserRepository")
+    private final UserRepository userRepository;
+
+    public void validateReviewRequest(ReviewRequest reviewRequest) {
+        StringBuilder errorMessage = new StringBuilder();
+
+        if (isContentInvalid(reviewRequest)) {
+            throw new ConditionsNotMetException("Неверное содержание отзыва");
+        }
+
+        if (isUserInvalid(reviewRequest)) {
+            errorMessage.append("Неверный id пользователя, ");
+        }
+
+        if (isFilmInvalid(reviewRequest)) {
+            errorMessage.append("Неверный id фильма, ");
+        }
+
+        if (isIsPositiveInvalid(reviewRequest)) {
+            throw new ConditionsNotMetException("Отсутствует поле оценка");
+        }
+
+        if (!errorMessage.isEmpty()) {
+            throw new NotFoundException(errorMessage.toString().trim());
+        }
+
+    }
+
+    private boolean isIsPositiveInvalid(ReviewRequest reviewRequest) {
+        return reviewRequest.getIsPositive() == null;
+    }
+
+    private boolean isContentInvalid(ReviewRequest reviewRequest) {
+        return reviewRequest.getContent() == null || reviewRequest.getContent().isBlank();
+    }
+
+    private boolean isUserInvalid(ReviewRequest reviewRequest) {
+        Long id = reviewRequest.getUserId();
+
+        if (id == null) {
+            throw new ConditionsNotMetException("Неверный id пользователя");
+        }
+
+        if (id < 1) {
+            throw new NotFoundException("Пользователь не найден");
+        }
+
+        boolean isIdValid = userRepository.findById(id).isEmpty();
+
+        return isIdValid;
+    }
+
+    private boolean isFilmInvalid(ReviewRequest reviewRequest) {
+        Long filmId = reviewRequest.getFilmId();
+
+        if (filmId == null) {
+            throw new ConditionsNotMetException("Неверный id фильма");
+        }
+
+        if (filmId < 0) {
+            throw new NotFoundException("Фильм не найден");
+        }
+
+        boolean isIdValid = filmRepository.getByIdPartialDetails(filmId).isEmpty();
+
+        return isIdValid;
+    }
 
     public void validateFilmRequest(FilmRequest filmRequest) {
         StringBuilder errorMessage = new StringBuilder();
@@ -76,9 +154,8 @@ public class Validator {
 
         boolean isIdValid = mpaRepository.findById(filmRequest.getMpa().getId()).isEmpty();
 
-        boolean isValid = filmRequest.getMpa().getId() < 0 || filmRequest.getMpa().getId() > 6
+        return filmRequest.getMpa().getId() < 0 || filmRequest.getMpa().getId() > 6
                 || isIdValid;
-        return isValid;
     }
 
     private boolean areGenresInvalid(FilmRequest filmRequest) {

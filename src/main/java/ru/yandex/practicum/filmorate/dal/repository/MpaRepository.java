@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dal;
+package ru.yandex.practicum.filmorate.dal.repository;
 
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MpaRepository {
+
     Mpa save(Mpa mpa);
 
     Mpa update(Mpa mpa);

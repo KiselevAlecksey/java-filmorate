@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
@@ -27,9 +28,7 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
 
     @Override
     public Optional<Director> getById(Long id) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-        return findOne(GET_DIRECTOR_BY_ID, params);
+        return findOne(GET_DIRECTOR_BY_ID, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
@@ -50,11 +49,7 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
 
         String queryUpdate = "UPDATE directors SET name = :name WHERE id = :id";
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", director.getId());
-        params.put("name", director.getName());
-
-        update(queryUpdate, params);
+        update(queryUpdate, new MapSqlParameterSource().addValue("id", director.getId()).addValue("name", director.getName()));
 
         return getById(director.getId()).orElseThrow(
                 () -> new NotFoundException("Не удалось обновить режиссёра")
@@ -69,16 +64,13 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
     @Override
     public boolean delete(Long id) {
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-
         Optional<Director> optionalDirector = getById(id);
 
         if (optionalDirector.isEmpty()) {
             return false;
         }
 
-        return delete(DELETE_DIRECTOR_QUERY, params);
+        return delete(DELETE_DIRECTOR_QUERY, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
