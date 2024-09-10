@@ -206,7 +206,9 @@ public class DefaultFilmService implements FilmService {
 
     @Override
     public Collection<FilmDto> getCommonFilms(Long userId, Long friendId) {
-        return filmRepository.values().stream()
+        Collection<Film> commonFilms = filmRepository.getCommonFilms(userId, friendId);
+
+        return commonFilms.stream()
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
@@ -260,7 +262,6 @@ public class DefaultFilmService implements FilmService {
 
         film.setMpa(mpa);
     }
-
 
     public List<Film> getFilmsByDirector(Long dirId, List<String> sort) {
         List<Film> films = filmRepository.getFilmsByDirector(dirId, sort);

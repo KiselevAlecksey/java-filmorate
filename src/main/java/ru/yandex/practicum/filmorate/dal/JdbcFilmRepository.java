@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dal;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -23,6 +24,7 @@ import static ru.yandex.practicum.filmorate.model.slqreuest.FilmSql.*;
 import static ru.yandex.practicum.filmorate.model.slqreuest.GenreSql.ALL_GENRE_QUERY;
 import static ru.yandex.practicum.filmorate.model.slqreuest.MpaSql.ALL_MPA_QUERY;
 
+@Slf4j
 @Repository("JdbcFilmRepository")
 public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepository {
 
@@ -264,12 +266,25 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("user_id", userId);
         params.addValue("friend_id", friendId);
-
-        return jdbc.query(
+        Collection<Film> commonFilms = jdbc.query(
                 GET_COMMON_FILMS,
                 params,
                 mapper
         );
+
+        if (commonFilms.isEmpty()) {
+            log.info("No common films found for user ID: {} and friend ID: {}", userId, friendId);
+        } else {
+            log.info("Found {} common films for user ID: {} and friend ID: {}", commonFilms.size(), userId, friendId);
+            commonFilms.forEach(film -> log.info("Film ID: {}, Name: {}", film.getId(), film.getName()));
+        }
+        List<Film> commonFilmsWithFullDetails = new ArrayList<>();
+        for (Film film : commonFilms) {
+            Optional<Film> fullDetailsFilm = getByIdFullDetails(film.getId());
+            fullDetailsFilm.ifPresent(commonFilmsWithFullDetails::add);
+        }
+
+        return commonFilmsWithFullDetails;
     }
 
     public Optional<Mpa> findMpaById(Integer id) {
