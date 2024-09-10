@@ -270,4 +270,9 @@ public class DefaultFilmService implements FilmService {
                         .orElseThrow(() -> new NotFoundException("Фильм не найден")))
                 .toList();
     }
+
+    @Override
+    public Set<Film> search(String query, String[] searchFields) {
+        return filmRepository.search(query, searchFields);
+    }
 }

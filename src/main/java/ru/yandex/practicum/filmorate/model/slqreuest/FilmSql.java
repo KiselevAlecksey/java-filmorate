@@ -10,6 +10,11 @@ public class FilmSql {
             "release_date AS film_release_date, rating_id AS rating_id " +
             "FROM films;";
 
+    public static final String SEARCH_QUERY = "SELECT f.* " +
+            "FROM films f " +
+            "LEFT JOIN film_directors fd ON f.id = fd.film_id " +
+            "LEFT JOIN directors d ON fd.director_id = d.id " +
+            "LEFT JOIN rating r ON f.rating_id = r.id ";
     public static final String INSERT_FILM = "INSERT INTO films (name, description, release_date, duration, rating_id)" +
             " VALUES (:name, :description, :release_date, :duration, :rating_id)";
     public static final String UPDATE_FILM = "UPDATE films SET name = :name, description = :description," +

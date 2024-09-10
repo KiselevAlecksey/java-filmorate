@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface FilmService {
 
@@ -34,4 +35,6 @@ public interface FilmService {
     Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> count, Integer genreId, Integer year);
 
     Collection<FilmDto> getCommonFilms(Long userId, Long friendId);
+
+    Set<Film> search(String query, String[] searchFields);
 }

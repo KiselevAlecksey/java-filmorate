@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -84,7 +85,7 @@ public class FilmController {
         if (genreId != null || year != null) {
             return filmService.getPopularFilmsByGenresAndYears(count, genreId, year);
         }
-            return filmService.getPopularFilms(count);
+        return filmService.getPopularFilms(count);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -107,4 +108,9 @@ public class FilmController {
         return filmService.getCommonFilms(userId, friendId);
     }
 
+    @GetMapping("/search")
+    public Set<Film> search(@RequestParam(name = "query") String query, @RequestParam(name = "by") String[] by) {
+        log.info("Get films for search params {} and {}.", query, by);
+        return filmService.search(query, by);
+    }
 }
