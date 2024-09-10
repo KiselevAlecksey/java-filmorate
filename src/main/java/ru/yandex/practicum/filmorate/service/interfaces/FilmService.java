@@ -36,5 +36,5 @@ public interface FilmService {
 
     Collection<FilmDto> getCommonFilms(Long userId, Long friendId);
 
-    Set<Film> search(String query, String[] searchFields);
+    List<Film> search(String query, String[] searchFields);
 }

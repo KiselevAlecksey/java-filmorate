@@ -272,7 +272,7 @@ public class DefaultFilmService implements FilmService {
     }
 
     @Override
-    public Set<Film> search(String query, String[] searchFields) {
+    public List<Film> search(String query, String[] searchFields) {
         return filmRepository.search(query, searchFields);
     }
 }

@@ -460,9 +460,9 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     }
 
     @Override
-    public Set<Film> search(String query, String[] searchFields) {
+    public List<Film> search(String query, String[] searchFields) {
         if (query == null || query.trim().isEmpty() || searchFields == null || searchFields.length == 0) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
         String fieldsParam;
         if (searchFields.length == 2) {
@@ -476,7 +476,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
             }
         }
         String searchQuery = SEARCH_QUERY + "LEFT JOIN likes l ON f.id = l.film_id" +  " WHERE " + fieldsParam
-                + " GROUP BY f.id, f.name, f.description, f.duration, f.release_date, f.rating_id ORDER BY likes_count DESC"; // +ORDER BY
+                + " GROUP BY f.id, f.name, f.description, f.duration, f.release_date, f.rating_id ORDER BY likes_count DESC";
 
         List<Film> films = jdbc.query(searchQuery, mapper);
 
@@ -488,8 +488,8 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         setFilmDetails(films, filmGenresMap, filmMpaMap, filmDirectorsMap);
 
-        Set<Film> filmsSet = new HashSet<>(films);
+        LinkedHashSet<Film> filmsSet = new LinkedHashSet<>(films);
 
-        return filmsSet;
+        return filmsSet.stream().toList();
     }
 }
