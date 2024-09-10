@@ -475,9 +475,10 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
                 fieldsParam = "d.name" + " LIKE '%" + query + "%'";
             }
         }
-        String searchQuery = SEARCH_QUERY + " WHERE " + fieldsParam;
+        String searchQuery = SEARCH_QUERY + "LEFT JOIN likes l ON f.id = l.film_id" +  " WHERE " + fieldsParam
+                + " GROUP BY f.id, f.name, f.description, f.duration, f.release_date, f.rating_id ORDER BY likes_count DESC"; // +ORDER BY
 
-        List<Film> films1 = jdbc.query(searchQuery, mapper);
+        List<Film> films = jdbc.query(searchQuery, mapper);
 
         Map<Long, LinkedHashSet<Genre>> filmGenresMap = getFilmGenresMap();
 
@@ -485,9 +486,9 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         Map<Long, LinkedHashSet<Director>> filmDirectorsMap = getFilmDirectorsMap();
 
-        setFilmDetails(films1, filmGenresMap, filmMpaMap, filmDirectorsMap);
+        setFilmDetails(films, filmGenresMap, filmMpaMap, filmDirectorsMap);
 
-        Set<Film> filmsSet = new HashSet<>(films1);
+        Set<Film> filmsSet = new HashSet<>(films);
 
         return filmsSet;
     }
