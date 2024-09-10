@@ -475,8 +475,9 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
                 fieldsParam = "d.name" + " LIKE '%" + query + "%'";
             }
         }
-        String searchQuery = SEARCH_QUERY + "LEFT JOIN likes l ON f.id = l.film_id" +  " WHERE " + fieldsParam
-                + " GROUP BY f.id, f.name, f.description, f.duration, f.release_date, f.rating_id ORDER BY likes_count DESC";
+        String searchQuery = SEARCH_QUERY + " WHERE " + fieldsParam
+                + " GROUP BY f.id, f.name, f.description, f.duration, f.release_date, f.rating_id " +
+                "ORDER BY likes_count DESC";
 
         List<Film> films = jdbc.query(searchQuery, mapper);
 
