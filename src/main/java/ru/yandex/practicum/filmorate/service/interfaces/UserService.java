@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service.interfaces;
 
+import ru.yandex.practicum.filmorate.dto.feed.FeedDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
@@ -31,4 +32,6 @@ public interface UserService {
     UserDto update(UpdateUserRequest userRequest);
 
     boolean remove(Long id);
+
+    Collection<FeedDto> getFeed(Long id);
 }

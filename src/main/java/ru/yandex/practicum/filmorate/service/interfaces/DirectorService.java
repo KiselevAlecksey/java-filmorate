@@ -1,8 +1,8 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.interfaces;
 
-import ru.yandex.practicum.filmorate.dto.DirectorDto;
-import ru.yandex.practicum.filmorate.dto.NewDirectorRequest;
-import ru.yandex.practicum.filmorate.dto.UpdateDirectorRequest;
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
+import ru.yandex.practicum.filmorate.dto.director.NewDirectorRequest;
+import ru.yandex.practicum.filmorate.dto.director.UpdateDirectorRequest;
 
 import java.util.Collection;
 

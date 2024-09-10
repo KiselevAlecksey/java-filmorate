@@ -1,5 +1,6 @@
-package ru.yandex.practicum.filmorate.dal.repository;
+package ru.yandex.practicum.filmorate.dal.interfaces;
 
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -21,11 +22,13 @@ public interface UserRepository {
 
     Optional<User> findById(Long userId);
 
-    Optional<User> findOneByIdInFriends(Long userId);
+    Optional<User> getByIdInFriends(Long userId);
 
     Collection<User> values();
 
     boolean remove(Long id);
 
     Collection<User> findFriendsById(List<Long> ids);
+
+    Collection<Feed> getFeed(long id);
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.feed.FeedDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
@@ -100,5 +101,12 @@ public class UserController {
         boolean response = userService.remove(id);
         log.error("Users remove user id {},complete", id);
         return response;
+    }
+
+    @GetMapping("/{id}/feed")
+    @ResponseStatus(HttpStatus.OK)
+    public Collection<FeedDto> getFeed(@PathVariable long id) {
+        log.error("Feed get by user id is {} start", id);
+        return userService.getFeed(id);
     }
 }
