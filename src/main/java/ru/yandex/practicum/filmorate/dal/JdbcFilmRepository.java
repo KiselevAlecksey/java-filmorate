@@ -5,19 +5,20 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mapper.DirectorRowMapper;
+import ru.yandex.practicum.filmorate.dal.mapper.FeedRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
-import ru.yandex.practicum.filmorate.dal.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.FilmRepository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.utils.FeedUtils;
 
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static ru.yandex.practicum.filmorate.model.feed.enums.EventType.LIKE;
+import static ru.yandex.practicum.filmorate.model.feed.enums.Operation.*;
 import static ru.yandex.practicum.filmorate.model.slqreuest.DirectorSql.ALL_DIRECTOR_QUERY;
 import static ru.yandex.practicum.filmorate.model.slqreuest.FilmSql.*;
 import static ru.yandex.practicum.filmorate.model.slqreuest.GenreSql.ALL_GENRE_QUERY;
@@ -32,6 +33,10 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     private final RowMapper<Mpa> mpaMapper;
 
+    private final RowMapper<Feed> feedMapper;
+
+    private final FeedUtils<Feed> feedUtils;
+
     public JdbcFilmRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper, Film.class);
 
@@ -40,6 +45,10 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         genreMapper = new GenreRowMapper(jdbc);
 
         mpaMapper = new MpaRowMapper(jdbc);
+
+        feedMapper = new FeedRowMapper(jdbc);
+
+        feedUtils = new FeedUtils<>(jdbc, feedMapper);
     }
 
     @Override
@@ -47,6 +56,10 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         update(ADD_LIKE_QUERY, new MapSqlParameterSource()
                 .addValue("film_id", filmId)
                 .addValue("user_id", userId));
+
+        FeedEvent feedEvent = new FeedEvent(userId, filmId, LIKE.name(), ADD.name());
+
+        feedUtils.saveFeedEvent(feedEvent);
     }
 
     @Override
@@ -54,6 +67,10 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         update(REMOVE_LIKE_QUERY, new MapSqlParameterSource()
                 .addValue("film_id", filmId)
                 .addValue("user_id", userId));
+
+        FeedEvent feedEvent = new FeedEvent(userId, filmId, LIKE.name(), REMOVE.name());
+
+        feedUtils.saveFeedEvent(feedEvent);
     }
 
     @Override

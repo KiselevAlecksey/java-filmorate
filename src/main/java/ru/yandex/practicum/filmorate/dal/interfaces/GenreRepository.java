@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dal.repository;
+package ru.yandex.practicum.filmorate.dal.interfaces;
 
 import ru.yandex.practicum.filmorate.model.Genre;
 

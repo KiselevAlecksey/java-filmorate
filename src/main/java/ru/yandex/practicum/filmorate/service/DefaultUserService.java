@@ -2,13 +2,15 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.dal.repository.UserRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.UserRepository;
+import ru.yandex.practicum.filmorate.dto.feed.FeedDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -152,10 +154,21 @@ public class DefaultUserService implements UserService {
 
     @Override
     public boolean remove(Long id) {
-        if (id == null || !userRepository.findById(id).isPresent()) {
+        if (id == null || userRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Id не найден");
         }
         return userRepository.remove(id);
+    }
+
+    @Override
+    public Collection<FeedDto> getFeed(Long id) {
+        if (id == null || userRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Id не найден");
+        }
+
+        return userRepository.getFeed(id).stream()
+                .map(FeedMapper::mapToFeedDto)
+                .toList();
     }
 
     @Override
