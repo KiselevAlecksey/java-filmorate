@@ -74,6 +74,15 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
             insertGenres(id, genreIds);
         }
 
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+
+            List<Long> directorIds = film.getDirectors().stream()
+                    .map(director -> Long.valueOf(director.getId()))
+                    .toList();
+
+            insertDirectors(id, directorIds);
+        }
+
         return getByIdFullDetails(film.getId()).orElseThrow(
                 () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
     }
@@ -448,5 +457,40 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         }
 
         return filmSort;
+    }
+
+    @Override
+    public List<Film> search(String query, String[] searchFields) {
+        if (query == null || query.trim().isEmpty() || searchFields == null || searchFields.length == 0) {
+            return Collections.emptyList();
+        }
+        String fieldsParam;
+        if (searchFields.length == 2) {
+            fieldsParam = " f.name " + "LIKE '%" + query +
+                    "%'" + " OR " + " d.name LIKE '%" + query + "%'";
+        } else {
+            if (searchFields[0].equals("title")) {
+                fieldsParam = "f.name " + "LIKE '%" + query + "%'";
+            } else {
+                fieldsParam = "d.name" + " LIKE '%" + query + "%'";
+            }
+        }
+        String searchQuery = SEARCH_QUERY + " WHERE " + fieldsParam
+                + " GROUP BY f.id, f.name, f.description, f.duration, f.release_date, f.rating_id " +
+                "ORDER BY likes_count DESC";
+
+        List<Film> films = jdbc.query(searchQuery, mapper);
+
+        Map<Long, LinkedHashSet<Genre>> filmGenresMap = getFilmGenresMap();
+
+        Map<Long, Mpa> filmMpaMap = getMpaMap();
+
+        Map<Long, LinkedHashSet<Director>> filmDirectorsMap = getFilmDirectorsMap();
+
+        setFilmDetails(films, filmGenresMap, filmMpaMap, filmDirectorsMap);
+
+        LinkedHashSet<Film> filmsSet = new LinkedHashSet<>(films);
+
+        return filmsSet.stream().toList();
     }
 }

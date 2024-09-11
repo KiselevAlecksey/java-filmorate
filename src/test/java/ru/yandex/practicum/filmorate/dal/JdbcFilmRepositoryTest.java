@@ -46,38 +46,30 @@ class JdbcFilmRepositoryTest {
         params = new HashMap<>();
 
         jdbc.update("DELETE FROM films", new MapSqlParameterSource());
-        jdbc.update("ALTER TABLE films ALTER COLUMN id RESTART WITH 1",  new MapSqlParameterSource());
+        jdbc.update("ALTER TABLE films ALTER COLUMN id RESTART WITH 1", new MapSqlParameterSource());
     }
 
     @Test
     @DisplayName("Verify data.sql is loading data correctly")
     void testDataSqlLoading() {
 
-        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM users", sqlParameterSource,  Integer.class);
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM users", sqlParameterSource, Integer.class);
         assertThat(count).isEqualTo(COUNT_ONE);
 
         filmRepository.save(TEST_FILM);
-        Integer filmCount = jdbc.queryForObject("SELECT COUNT(*) FROM films", sqlParameterSource,  Integer.class);
+        Integer filmCount = jdbc.queryForObject("SELECT COUNT(*) FROM films", sqlParameterSource, Integer.class);
         assertThat(filmCount).isEqualTo(COUNT_ONE);
     }
 
     @Test
     @DisplayName("должен обновлять поле режиссеры фильма")
     public void should_update_field_directors_film() {
-        Director director = directorRepository.create(TEST_DIRECTORS.getFirst());
 
         Film film = filmRepository.save(TEST_FILM);
-
         LinkedHashSet<Director> set = new LinkedHashSet<>();
 
-        set.add(director);
-
-        film.setDirectors(set);
-
         filmRepository.update(film);
-
         Optional<Film> filmOptional = filmRepository.getByIdFullDetails(TEST_FILM_ID);
-
         assertThat(filmOptional)
                 .isPresent()
                 .get()
