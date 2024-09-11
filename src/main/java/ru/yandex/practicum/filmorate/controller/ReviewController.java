@@ -19,7 +19,6 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public ReviewDto create(@RequestBody NewReviewRequest reviewRequest) {
