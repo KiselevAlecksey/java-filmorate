@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dal.repository.*;
+import ru.yandex.practicum.filmorate.dal.interfaces.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
 import ru.yandex.practicum.filmorate.dto.review.ReviewRequest;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;

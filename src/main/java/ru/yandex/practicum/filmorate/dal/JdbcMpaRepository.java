@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dal.repository.MpaRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.MpaRepository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;

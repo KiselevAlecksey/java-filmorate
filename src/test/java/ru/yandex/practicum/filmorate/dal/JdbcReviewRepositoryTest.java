@@ -28,17 +28,6 @@ import static ru.yandex.practicum.filmorate.utils.TestDataFactory.*;
 @DisplayName("JdbcReviewRepository")
 public class JdbcReviewRepositoryTest {
 
-    /*public static final long TEST_DIRECTOR_ID = 1L;
-    public static final long TEST_USER_ID = 1L;
-    public static final int TEST_GENRE_ID = 1;
-    public static final long TEST_REVIEW_ID = 1L;
-    public static final long TEST_FILM_ID = 1L;
-    public static final int TEST_REVIEW_USEFUL = 0;
-    public static final int TOTAL_REVIEWS = 1;
-    public static final int TEST_LIKE_COUNT = 1;
-    public static final int TEST_DISLIKE_COUNT = -1;
-    public static final int ZERO = 0;*/
-
     private final JdbcReviewRepository reviewRepository;
 
     private final JdbcFilmRepository filmRepository;

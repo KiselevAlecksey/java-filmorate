@@ -4,14 +4,20 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dal.repository.ReviewRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.ReviewRepository;
+import ru.yandex.practicum.filmorate.dal.mapper.FeedRowMapper;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Feed;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.utils.FeedUtils;
 
 import java.sql.ResultSet;
 import java.util.*;
 
+import static ru.yandex.practicum.filmorate.model.feed.enums.EventType.REVIEW;
+import static ru.yandex.practicum.filmorate.model.feed.enums.Operation.*;
 import static ru.yandex.practicum.filmorate.model.slqreuest.ReviewSql.*;
 
 @Repository("JdbcReviewRepository")
@@ -19,8 +25,16 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
     private static final long DEFAULT_COUNT = 10L;
 
+    private final RowMapper<Feed> feedMapper;
+
+    private final FeedUtils<Feed> feedUtils;
+
     public JdbcReviewRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Review> mapper) {
         super(jdbc, mapper, Review.class);
+
+        feedMapper = new FeedRowMapper(jdbc);
+
+        feedUtils = new FeedUtils<>(jdbc, feedMapper);
     }
 
     @Override
@@ -29,11 +43,20 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
         Long id = insert(INSERT_REVIEW, createParameterSource(review));
 
         if (id != null) {
+
             review.setReviewId(id);
+
+            FeedEvent feedEvent = new FeedEvent(review.getUserId(), id, REVIEW.name(), ADD.name());
+
+            feedUtils.saveFeedEvent(feedEvent);
+
             return review;
+
         } else {
             throw new InternalServerException("Не удалось сохранить данные");
         }
+
+
     }
 
     @Override
@@ -45,15 +68,30 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
                 () -> new InternalServerException("Не удалось сохранить данные"));
 
         reviewUpdate.setUseful(getReaction(review.getReviewId()));
+
         if (review.getUseful() == null) {
             review.setUseful(0);
         }
+
+        FeedEvent feedEvent = new FeedEvent(review.getUserId(),
+                reviewUpdate.getReviewId(), REVIEW.name(), UPDATE.name());
+
+        feedUtils.saveFeedEvent(feedEvent);
+
         return reviewUpdate;
     }
 
     @Override
     public void remove(Long id) {
+
+        Long userId = getById(id).orElseThrow(
+                () -> new NotFoundException("id не найден")).getUserId();
+
         delete(DELETE_REVIEW, new MapSqlParameterSource().addValue("id", id));
+
+        FeedEvent feedEvent = new FeedEvent(userId, id, REVIEW.name(), REMOVE.name());
+
+        feedUtils.saveFeedEvent(feedEvent);
     }
 
     @Override

@@ -5,44 +5,68 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dal.repository.UserRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.UserRepository;
+import ru.yandex.practicum.filmorate.dal.mapper.FeedRowMapper;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
+import ru.yandex.practicum.filmorate.model.Feed;
+import ru.yandex.practicum.filmorate.model.FeedEvent;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.utils.FeedUtils;
 
 import java.sql.Timestamp;
 import java.util.*;
 
+import static ru.yandex.practicum.filmorate.model.feed.enums.EventType.FRIEND;
+import static ru.yandex.practicum.filmorate.model.feed.enums.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.feed.enums.Operation.REMOVE;
 import static ru.yandex.practicum.filmorate.model.slqreuest.UserSql.*;
 
 @Repository
 @Qualifier("JdbcUserRepository")
 public class JdbcUserRepository extends BaseRepository<User> implements UserRepository {
 
+    private final RowMapper<Feed> feedMapper;
+
+    private final FeedUtils<Feed> feedUtils;
+
     public JdbcUserRepository(NamedParameterJdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper, User.class);
+
+        feedMapper = new FeedRowMapper(jdbc);
+
+        feedUtils = new FeedUtils<>(jdbc, feedMapper);
     }
 
     @Override
     public void addFriend(Long userId, Long friendId) {
-        update(INSERT_FRIEND, new MapSqlParameterSource().addValue("user_id", userId).addValue("friend_id", friendId));
+
+        if (findById(friendId).isPresent()) {
+            update(INSERT_FRIEND, new MapSqlParameterSource()
+                    .addValue("user_id", userId).addValue("friend_id", friendId));
+
+            FeedEvent feedEvent = new FeedEvent(userId, friendId, FRIEND.name(), ADD.name());
+
+            feedUtils.saveFeedEvent(feedEvent);
+        }
     }
 
     @Override
     public void removeFriend(Long userId, Long friendId) {
 
-        if (findOneByIdInFriends(userId).isPresent()) {
-            update(DELETE_FRIEND, new MapSqlParameterSource().addValue("user_id", userId).addValue("friend_id", friendId));
-        }
+        if (getByIdInFriends(userId).isPresent()) {
+            update(DELETE_FRIEND, new MapSqlParameterSource()
+                    .addValue("user_id", userId).addValue("friend_id", friendId));
 
+            FeedEvent feedEvent = new FeedEvent(userId, friendId, FRIEND.name(), REMOVE.name());
+
+            feedUtils.saveFeedEvent(feedEvent);
+        }
     }
 
     @Override
     public Set<Long> getFriends(Long userId) {
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("user_id", userId);
-
-        Optional<User> user = findOneByIdInFriends(userId);
+        Optional<User> user = getByIdInFriends(userId);
 
         if (user.isEmpty()) {
             return Collections.emptySet();
@@ -74,17 +98,6 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
         }
     }
 
-    private static MapSqlParameterSource createParameterSource(User user) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
-        params.addValue("email", user.getEmail());
-        params.addValue("login", user.getLogin());
-        params.addValue("name", user.getName());
-        params.addValue("birthday", Timestamp.from(user.getBirthday()));
-
-        return params;
-    }
-
     @Override
     public User update(User user) {
         Map<String, Object> params = new HashMap<>();
@@ -106,7 +119,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     }
 
     @Override
-    public Optional<User> findOneByIdInFriends(Long userId) {
+    public Optional<User> getByIdInFriends(Long userId) {
 
         return findOne(FIND_ALL_FRIENDS, new MapSqlParameterSource().addValue("user_id", userId));
     }
@@ -141,5 +154,26 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
         }
 
         return users;
+    }
+
+    @Override
+    public Collection<Feed> getFeed(long id) {
+        String query = "SELECT * FROM user_feed WHERE user_id = :user_id";
+
+        List<Feed> feeds = jdbc.query(query, new MapSqlParameterSource().addValue("user_id", id), feedMapper);
+
+        System.out.println(feeds);
+        return feeds;
+    }
+
+    private static MapSqlParameterSource createParameterSource(User user) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        params.addValue("email", user.getEmail());
+        params.addValue("login", user.getLogin());
+        params.addValue("name", user.getName());
+        params.addValue("birthday", Timestamp.from(user.getBirthday()));
+
+        return params;
     }
 }

@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.*;
 
 @Component("FilmRowMapper")
@@ -45,8 +44,7 @@ public class FilmRowMapper implements RowMapper<Film> {
             film.setMpa(mpa);
         }
 
-        Timestamp releaseDate = resultSet.getTimestamp("release_date");
-        film.setReleaseDate(releaseDate.toInstant());
+        film.setReleaseDate(resultSet.getTimestamp("release_date").toInstant());
 
         return film;
     }
