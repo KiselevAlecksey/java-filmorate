@@ -10,7 +10,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-@EqualsAndHashCode(of = "eventId")
+@EqualsAndHashCode(of = "entityId")
 public class Feed {
 
     @Builder.Default

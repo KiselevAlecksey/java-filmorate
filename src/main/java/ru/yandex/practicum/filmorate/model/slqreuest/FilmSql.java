@@ -10,8 +10,7 @@ public class FilmSql {
             "release_date AS film_release_date, rating_id AS rating_id " +
             "FROM films;";
 
-    public static final String SEARCH_QUERY = "SELECT f.id, f.name, f.description, " +
-            "f.duration, f.release_date, f.rating_id, " +
+    public static final String SEARCH_QUERY = "SELECT f.*, " +
             "COUNT(l.user_id) AS likes_count " +
             "FROM films f " +
             "LEFT JOIN film_directors fd ON f.id = fd.film_id " +

@@ -22,7 +22,7 @@ public interface UserRepository {
 
     Optional<User> findById(Long userId);
 
-    Optional<User> getByIdInFriends(Long userId);
+    Integer getByIdInFriends(Long userId, Long friendId);
 
     Collection<User> values();
 

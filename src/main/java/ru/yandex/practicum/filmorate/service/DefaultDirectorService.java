@@ -49,6 +49,10 @@ public class DefaultDirectorService implements DirectorService {
     @Override
     public DirectorDto create(NewDirectorRequest request) {
 
+        if (request.getName().isBlank()) {
+            throw new ConditionsNotMetException("Поле имя не может быть пустым");
+        }
+
         Director putDirector = DirectorMapper.mapToDirector(request);
 
         putDirector = directorRepository.create(putDirector);
@@ -63,13 +67,12 @@ public class DefaultDirectorService implements DirectorService {
             throw new NotFoundException("Id должен быть указан");
         }
 
-        if (directorRepository.getById(request.getId()).isPresent()) {
-            if (request.getName().isBlank()) {
+        if (request.getName().isBlank()) {
+            throw new ConditionsNotMetException("Поле имя не может быть пустым");
+        }
 
-                throw new ConditionsNotMetException(
-                        "Поле имя не может быть пустым"
-                );
-            }
+        if (directorRepository.getById(request.getId()).isPresent()) {
+
             Director updatedDirector = directorRepository.getById(request.getId())
                     .map(director -> DirectorMapper.updateDirectorFields(director, request))
                     .orElseThrow(() -> new NotFoundException("Режиссер не найден"));

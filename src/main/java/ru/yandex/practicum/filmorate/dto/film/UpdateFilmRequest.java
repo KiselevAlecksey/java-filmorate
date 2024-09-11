@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dto.film;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.yandex.practicum.filmorate.model.Constant;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -55,7 +56,7 @@ public class UpdateFilmRequest implements FilmRequest {
     }
 
     public boolean hasReleaseDate() {
-        return releaseDate != null && releaseDate.isBefore(Instant.now());
+        return releaseDate != null && releaseDate.isAfter(Instant.ofEpochMilli(Constant.CINEMA_BURN_DAY));
     }
 
     private boolean isNotBlank(String value) {

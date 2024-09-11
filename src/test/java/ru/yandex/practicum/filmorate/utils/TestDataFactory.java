@@ -25,7 +25,7 @@ public class TestDataFactory {
     public static final int TEST_INT_TWO = 2;
     public static final long TEST_DIRECTOR_ID = 1L;
 
-    public static final long TEST_REVIEW_ID = 1L;
+    public static final long TEST_REVIEW_ID = 1;
     public static final int TEST_REVIEW_USEFUL = 0;
     public static final int TOTAL_REVIEWS = 1;
     public static final int TEST_DISLIKE_COUNT = -1;

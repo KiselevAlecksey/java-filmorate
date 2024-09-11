@@ -53,7 +53,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     @Override
     public void removeFriend(Long userId, Long friendId) {
 
-        if (getByIdInFriends(userId).isPresent()) {
+        if (findById(friendId).isPresent() && getByIdInFriends(userId, friendId) > 0) {
             update(DELETE_FRIEND, new MapSqlParameterSource()
                     .addValue("user_id", userId).addValue("friend_id", friendId));
 
@@ -66,7 +66,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     @Override
     public Set<Long> getFriends(Long userId) {
 
-        Optional<User> user = getByIdInFriends(userId);
+        Collection<User> user = findFriendsById(Collections.singletonList(userId));
 
         if (user.isEmpty()) {
             return Collections.emptySet();
@@ -119,9 +119,18 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     }
 
     @Override
-    public Optional<User> getByIdInFriends(Long userId) {
+    public Integer getByIdInFriends(Long userId, Long friendId) {
 
-        return findOne(FIND_ALL_FRIENDS, new MapSqlParameterSource().addValue("user_id", userId));
+        String query = "SELECT COUNT(*) AS count " +
+                "FROM friends " +
+                "WHERE friend_id = :friend_id AND user_id = :user_id";
+
+        Integer count = jdbc.queryForObject(query,
+                new MapSqlParameterSource().addValue("friend_id", friendId).addValue("user_id", userId),
+                Integer.class
+        );
+
+        return count;
     }
 
     @Override
@@ -162,7 +171,6 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
 
         List<Feed> feeds = jdbc.query(query, new MapSqlParameterSource().addValue("user_id", id), feedMapper);
 
-        System.out.println(feeds);
         return feeds;
     }
 

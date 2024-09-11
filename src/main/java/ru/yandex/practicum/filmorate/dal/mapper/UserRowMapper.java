@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.dal.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -9,7 +11,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 @Component
+@RequiredArgsConstructor
 public class UserRowMapper implements RowMapper<User> {
+
+    protected final NamedParameterJdbcTemplate jdbc;
 
     @Override
     public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
