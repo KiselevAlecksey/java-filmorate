@@ -46,21 +46,6 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
         }
     }
 
-    /*private void saveFeedEvent(FeedEvent feedEvent) {
-        String query = "INSERT INTO user_feed (timestamp, user_id, event_type, operation, entity_id) " +
-                "VALUES (:timestamp, :user_id, :event_type, :operation, :entity_id)";
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
-        params.addValue("timestamp", Timestamp.from(Instant.now()));
-        params.addValue("user_id", feedEvent.getUserId());
-        params.addValue("event_type", feedEvent.getEventType());
-        params.addValue("operation", feedEvent.getOperation());
-        params.addValue("entity_id", feedEvent.getEntityId());
-
-        update(query, params);
-    }*/
-
     @Override
     public void removeFriend(Long userId, Long friendId) {
 
