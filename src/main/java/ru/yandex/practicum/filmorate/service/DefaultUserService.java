@@ -8,8 +8,6 @@ import ru.yandex.practicum.filmorate.dto.feed.FeedDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
-import ru.yandex.practicum.filmorate.dto.user.UserRequest;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
@@ -18,7 +16,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.interfaces.UserService;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
