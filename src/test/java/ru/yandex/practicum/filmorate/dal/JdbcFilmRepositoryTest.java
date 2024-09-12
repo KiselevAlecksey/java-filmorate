@@ -62,6 +62,25 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
+    @DisplayName("должен обновить поле жанры")
+    void should_update_genres() {
+        directorRepository.create(TEST_DIRECTORS.getFirst());
+
+        Film film = filmRepository.save(TEST_FILM);
+        film.setName("updated name");
+        film.setGenres(new LinkedHashSet<>());
+        Film filmUpdated = filmRepository.update(film);
+
+        Optional<Film> updatedFilm = filmRepository.getByIdFullDetails(TEST_FILM_ID);
+
+        assertThat(updatedFilm)
+                .isPresent()
+                .get()
+                .usingRecursiveComparison()
+                .isEqualTo(film);
+    }
+
+    @Test
     @DisplayName("должен обновлять поле режиссеры фильма")
     public void should_update_field_directors_film() {
 
@@ -179,6 +198,24 @@ class JdbcFilmRepositoryTest {
         assertThat(allFilms)
                 .usingRecursiveComparison()
                 .isEqualTo(Arrays.asList(film1, film2));
+    }
+
+    @Test
+    @DisplayName("должен возвращать фильмы по названию или режиссёру")
+    void should_return_films_when_director_called() {
+
+        Film film1 = filmRepository.save(TEST_FILM);
+        film1.setName("Film Updated");
+        Film film2 = filmRepository.save(TestDataFactory.getTestFilm(film1));
+
+        String query = "upDatE";
+        String[] searchFields = {"title", "director"};
+
+        List<Film> filmsSort = filmRepository.search(query, searchFields);
+
+        assertThat(filmsSort)
+                .usingRecursiveComparison()
+                .isEqualTo(Collections.singletonList(film2));
     }
 
     @Test

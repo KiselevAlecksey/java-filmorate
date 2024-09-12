@@ -33,6 +33,21 @@ public class FeedUtils<T> {
         update(query, params);
     }
 
+    public void removeFeedEvent(FeedEvent feedEvent) {
+        String query = "DELETE FROM user_feed WHERE user_id = :user_id AND entity_id = :entity_id";
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        params.addValue("user_id", feedEvent.getUserId());
+        params.addValue("entity_id", feedEvent.getEntityId());
+
+        delete(query, params);
+    }
+
+    private void delete(String query, MapSqlParameterSource params) {
+        jdbc.update(query, params);
+    }
+
     private void update(String query, MapSqlParameterSource params) {
         int rowsUpdated = jdbc.update(query, params);
         if (rowsUpdated == 0) {

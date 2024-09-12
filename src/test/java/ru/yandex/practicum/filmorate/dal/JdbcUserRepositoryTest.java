@@ -101,9 +101,8 @@ class JdbcUserRepositoryTest {
         userRepository.addFriend(user1.getId(), user2.getId());
         userRepository.addFriend(user2.getId(), user1.getId());
 
-        assertThat(userRepository.getByIdInFriends(user1.getId()))
-                .isPresent()
-                .hasValueSatisfying(u -> assertThat(u.getId()).isEqualTo(user2.getId()));
+        assertThat(userRepository.getByIdInFriends(user1.getId(), user2.getId()))
+                .isPositive();
     }
 
     @Test

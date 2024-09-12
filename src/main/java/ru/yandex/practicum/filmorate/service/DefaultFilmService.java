@@ -251,18 +251,6 @@ public class DefaultFilmService implements FilmService {
         }
     }
 
-    private void setGenreAndMpa(Long id, Film film, Mpa film1) {
-        Collection<Genre> genres = genreRepository.getFilmGenres(id);
-
-        film.setGenres(new LinkedHashSet<>(genres));
-
-        Mpa mpa = mpaRepository.findById(film1.getId()).orElseThrow(() ->
-                new NotFoundException("MPA с id = " + id + " не найден")
-        );
-
-        film.setMpa(mpa);
-    }
-
     public List<Film> getFilmsByDirector(Long dirId, List<String> sort) {
         List<Film> films = filmRepository.getFilmsByDirector(dirId, sort);
 

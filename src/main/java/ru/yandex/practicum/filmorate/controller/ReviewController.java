@@ -19,7 +19,6 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public ReviewDto create(@RequestBody NewReviewRequest reviewRequest) {
@@ -59,7 +58,7 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.OK)
     public Collection<ReviewDto> getAll(
             @RequestParam(required = false) Long filmId,
-            @RequestParam(required = false) Long count) {
+            @RequestParam(required = false) Integer count) {
 
         log.error("Get all review by filmId {}, count {} start", filmId, count);
         Collection<ReviewDto> reviewDto = reviewService.getByReviewsId(filmId, count);

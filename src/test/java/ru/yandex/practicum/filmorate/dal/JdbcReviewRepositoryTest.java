@@ -74,6 +74,8 @@ public class JdbcReviewRepositoryTest {
     void should_update_review() {
 
         review.setContent("Обновленный отзыв");
+        review.setUserId(1L);
+        review.setFilmId(1L);
         reviewRepository.updateReview(review);
 
         Optional<Review> reviewOptional = reviewRepository.getById(TEST_REVIEW_ID);
@@ -99,7 +101,7 @@ public class JdbcReviewRepositoryTest {
     @DisplayName("должен возвращать отзывы по id фильма с заданным количеством count")
     void should_return_reviews_by_film_id_with_count() {
 
-        Collection<Review> reviews = reviewRepository.getReviewsByFilmId(TEST_FILM_ID, TEST_REVIEW_ID);
+        Collection<Review> reviews = reviewRepository.getReviewsByFilmId(TEST_FILM_ID, COUNT_ONE);
 
         assertThat(reviews)
                 .isNotEmpty()
