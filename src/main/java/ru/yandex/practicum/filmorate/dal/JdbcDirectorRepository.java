@@ -10,20 +10,18 @@ import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.*;
 
-import static ru.yandex.practicum.filmorate.model.slqreuest.DirectorSql.DELETE_DIRECTOR_QUERY;
+import static ru.yandex.practicum.filmorate.model.slqreuest.DirectorSql.*;
 
 @Repository("JdbcDirectorRepository")
 public class JdbcDirectorRepository extends BaseRepository<Director> implements DirectorRepository {
-    private static final String GET_DIRECTOR_BY_ID = "SELECT * FROM directors WHERE id = :id";
 
     public JdbcDirectorRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Director> mapper) {
         super(jdbc, mapper, Director.class);
     }
 
     @Override
-    public List<Integer> getAllIds() {
-        String query = "SELECT * FROM directors";
-        return jdbc.query(query, (rs, rowNum) -> rs.getInt("id"));
+    public List<Long> getAllIds() {
+        return jdbc.query(GET_ALL_DIRECTORS, (rs, rowNum) -> rs.getLong("id"));
     }
 
     @Override
@@ -34,9 +32,7 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
     @Override
     public Director create(Director director) {
 
-        String query = "INSERT INTO directors (name) VALUES (:name)";
-
-        Long id = insert(query, new MapSqlParameterSource()
+        Long id = insert(INSERT_QUERY, new MapSqlParameterSource()
                 .addValue("name", director.getName()));
 
         return getById(id).orElseThrow(
@@ -47,9 +43,7 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
     @Override
     public Director update(Director director) {
 
-        String queryUpdate = "UPDATE directors SET name = :name WHERE id = :id";
-
-        update(queryUpdate, new MapSqlParameterSource().addValue("id", director.getId()).addValue("name", director.getName()));
+        update(UPDATE_QUERY, new MapSqlParameterSource().addValue("id", director.getId()).addValue("name", director.getName()));
 
         return getById(director.getId()).orElseThrow(
                 () -> new NotFoundException("Не удалось обновить режиссёра")
@@ -58,7 +52,7 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
 
     @Override
     public Collection<Director> values() {
-        return jdbc.query("SELECT * FROM directors", mapper);
+        return jdbc.query(GET_ALL_DIRECTORS, mapper);
     }
 
     @Override
@@ -75,9 +69,6 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
 
     @Override
     public List<Director> getByIds(List<Long> ids) {
-
-        String query = "SELECT id, name FROM directors WHERE id IN (:ids)";
-
-        return jdbc.query(query, new MapSqlParameterSource("ids", ids), mapper);
+        return jdbc.query(GET_BY_IDS, new MapSqlParameterSource("ids", ids), mapper);
     }
 }

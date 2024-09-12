@@ -9,6 +9,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import ru.yandex.practicum.filmorate.dal.interfaces.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.ReviewRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.UserRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
@@ -21,22 +24,20 @@ import static ru.yandex.practicum.filmorate.utils.TestDataFactory.*;
 
 
 @JdbcTest
-@Import({JdbcFilmRepository.class, JdbcReviewRepository.class, JdbcUserRepository.class, JdbcDirectorRepository.class,
+@Import({JdbcFilmRepository.class, JdbcReviewRepository.class, JdbcUserRepository.class, JdbcDirectorRepositoryTest.class,
         DirectorRowMapper.class, FilmRowMapper.class, GenreRowMapper.class, MpaRowMapper.class,
         UserRowMapper.class, ReviewRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcReviewRepository")
 public class JdbcReviewRepositoryTest {
 
-    private final JdbcReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
 
-    private final JdbcFilmRepository filmRepository;
+    private final FilmRepository filmRepository;
 
-    private final JdbcUserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final NamedParameterJdbcTemplate jdbc;
-
-    private Review review;
 
     @BeforeEach
     void init() {
@@ -52,31 +53,31 @@ public class JdbcReviewRepositoryTest {
 
         userRepository.save(TEST_USER);
         filmRepository.save(TEST_FILM);
+        filmRepository.save(getTestFilm(TEST_FILM));
 
-        review = reviewRepository.save(getReview());
+        reviewRepository.save(TEST_REVIEW);
     }
 
     @Test
     @DisplayName("должен добавлять отзыв")
     void should_save_review() {
 
-        Optional<Review> reviewOptional = reviewRepository.getById(TEST_REVIEW_ID);
+        Review reviewOptional = reviewRepository.save(TEST_REVIEW);
 
         assertThat(reviewOptional)
-                .isPresent()
-                .get()
                 .usingRecursiveComparison()
-                .isEqualTo(getReview());
+                .isEqualTo(TEST_REVIEW);
     }
 
     @Test
     @DisplayName("должен обновлять отзыв")
     void should_update_review() {
 
-        review.setContent("Обновленный отзыв");
-        review.setUserId(1L);
-        review.setFilmId(1L);
-        reviewRepository.updateReview(review);
+        TEST_REVIEW.setContent("Обновленный отзыв");
+
+        reviewRepository.addLike(TEST_REVIEW_ID, TEST_USER_ID);
+
+        reviewRepository.updateReview(TEST_REVIEW);
 
         Optional<Review> reviewOptional = reviewRepository.getById(TEST_REVIEW_ID);
 
@@ -84,14 +85,14 @@ public class JdbcReviewRepositoryTest {
                 .isPresent()
                 .get()
                 .usingRecursiveComparison()
-                .isEqualTo(review);
+                .isEqualTo(TEST_REVIEW);
     }
 
     @Test
     @DisplayName("должен удалять отзыв")
     void should_remove_review() {
 
-        reviewRepository.remove(getReview().getReviewId());
+        reviewRepository.remove(TEST_REVIEW.getReviewId());
 
         assertThrows(NotFoundException.class, () -> reviewRepository.getById(TEST_REVIEW_ID));
     }
@@ -153,17 +154,5 @@ public class JdbcReviewRepositoryTest {
         Review review = reviewRepository.getById(TEST_REVIEW_ID).orElseThrow();
 
         assertThat(review.getUseful()).isEqualTo(COUNT_ZERO);
-    }
-
-    private static Review getReview() {
-        Review review = new Review();
-        review.setReviewId(TEST_REVIEW_ID);
-        review.setContent("Отзыв");
-        review.setIsPositive(true);
-        review.setUserId(TEST_USER_ID);
-        review.setFilmId(TEST_FILM_ID);
-        review.setUseful(TEST_REVIEW_USEFUL);
-
-        return review;
     }
 }

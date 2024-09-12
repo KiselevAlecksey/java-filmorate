@@ -38,16 +38,4 @@ public class UpdateReviewRequest implements ReviewRequest {
     public boolean hasIsPositive() {
         return isPositive != null;
     }
-
-    public boolean hasUserId() {
-        return userId != null && userId > 0;
-    }
-
-    public boolean hasFilmId() {
-        return filmId != null && filmId > 0;
-    }
-
-    public boolean hasUseful() {
-        return useful != null;
-    }
 }

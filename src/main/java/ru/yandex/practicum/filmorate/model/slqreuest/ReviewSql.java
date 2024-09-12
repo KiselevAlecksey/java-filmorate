@@ -39,4 +39,8 @@ public class ReviewSql {
             "FROM reviews_reactions " +
             "WHERE review_id IN (:review_id) " +
             "GROUP BY review_id";
+
+    public static final String GET_LIKE_REACTION_BY_USER_ID = "\n" +
+            "SELECT reaction_like FROM reviews_reactions \n" +
+            "WHERE user_id = :user_id AND reaction_like = TRUE";
 }

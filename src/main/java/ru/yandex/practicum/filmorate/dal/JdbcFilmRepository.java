@@ -32,8 +32,6 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     private final RowMapper<Mpa> mpaMapper;
 
-    private final RowMapper<Feed> feedMapper;
-
     private final FeedUtils<Feed> feedUtils;
 
     public JdbcFilmRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Film> mapper) {
@@ -45,7 +43,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         mpaMapper = new MpaRowMapper(jdbc);
 
-        feedMapper = new FeedRowMapper(jdbc);
+        RowMapper<Feed> feedMapper = new FeedRowMapper(jdbc);
 
         feedUtils = new FeedUtils<>(jdbc, feedMapper);
     }
@@ -53,16 +51,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     @Override
     public void addLike(Long filmId, Long userId) {
 
-        String queryLike = "\n" +
-                "SELECT COUNT(*) AS total_likes\n" +
-                "FROM likes\n" +
-                "WHERE film_id = :film_id AND user_id = :user_id;";
-
-        Integer count = jdbc.queryForObject(queryLike, new MapSqlParameterSource()
-                .addValue("film_id", filmId)
-                .addValue("user_id", userId),
-                Integer.class
-        );
+        Integer count = getLikeCount(filmId, userId);
 
         FeedEvent feedEvent = new FeedEvent(userId, filmId, LIKE.name(), ADD.name());
 
@@ -77,8 +66,17 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
                 .addValue("user_id", userId));
     }
 
+    private Integer getLikeCount(Long filmId, Long userId) {
+        return jdbc.queryForObject(USER_LIKE_COUNT_IN_LIKES, new MapSqlParameterSource()
+                        .addValue("film_id", filmId)
+                        .addValue("user_id", userId),
+                Integer.class
+        );
+    }
+
     @Override
     public void removeLike(Long filmId, Long userId) {
+
         update(REMOVE_LIKE_QUERY, new MapSqlParameterSource()
                 .addValue("film_id", filmId)
                 .addValue("user_id", userId));
@@ -94,6 +92,14 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         Long id = insert(INSERT_FILM, createParameterSource(film));
 
         film.setId(id);
+
+        saveComplexFields(film, id);
+
+        return getByIdFullDetails(film.getId()).orElseThrow(
+                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
+    }
+
+    private void saveComplexFields(Film film, Long id) {
 
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
 
@@ -112,15 +118,20 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
             insertDirectors(id, directorIds);
         }
-
-        return getByIdFullDetails(film.getId()).orElseThrow(
-                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
     }
 
     @Override
     public Film update(Film film) {
 
         jdbc.update(UPDATE_FILM, createParameterSource(film));
+
+        updateComplexFields(film);
+
+        return getByIdFullDetails(film.getId()).orElseThrow(
+                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
+    }
+
+    private void updateComplexFields(Film film) {
 
         List<Long> genreIds = film.getGenres().stream()
                 .map(genre -> Long.valueOf(genre.getId()))
@@ -137,42 +148,6 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         deleteDirectors(film.getId());
 
         insertDirectors(film.getId(), directorIds);
-
-        Film filmUpdated = getByIdFullDetails(film.getId()).orElseThrow(
-                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
-
-        return filmUpdated;
-    }
-
-    private void insertDirectors(Long filmId, List<Long> directorIds) {
-        String insertDirectors = "INSERT INTO film_directors (director_id, film_id) VALUES (:director_id, :film_id)";
-
-        List<MapSqlParameterSource> paramsList = getMapSqlDirectors(filmId, directorIds);
-
-        jdbc.batchUpdate(insertDirectors, paramsList.toArray(new MapSqlParameterSource[0]));
-    }
-
-    private void deleteDirectors(Long filmId) {
-
-        String deleteDirectors = "DELETE FROM film_directors WHERE film_id = :film_id";
-
-        delete(deleteDirectors, new MapSqlParameterSource().addValue("film_id", filmId));
-    }
-
-    private void insertGenres(Long filmId, List<Long> genreIds) {
-
-        String insertGenres = "INSERT INTO film_genres (film_id, genre_id) VALUES (:film_id, :genre_id)";
-
-        List<MapSqlParameterSource> paramsList = getMapSqlGenres(filmId, genreIds);
-
-        jdbc.batchUpdate(insertGenres, paramsList.toArray(new MapSqlParameterSource[0]));
-    }
-
-    private void deleteGenres(Long filmId) {
-
-        String deleteGenres = "DELETE FROM film_genres WHERE film_id = :film_id";
-
-        delete(deleteGenres, new MapSqlParameterSource().addValue("film_id", filmId));
     }
 
     @Override
@@ -185,13 +160,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         List<Film> films = jdbc.query(ALL_FILMS_QUERY, mapper);
 
-        Map<Long, LinkedHashSet<Genre>> filmGenresMap = getFilmGenresMap();
-
-        Map<Long, Mpa> filmMpaMap = getMpaMap();
-
-        Map<Long, LinkedHashSet<Director>> filmDirectorsMap = getFilmDirectorsMap();
-
-        setFilmDetails(films, filmGenresMap, filmMpaMap, filmDirectorsMap);
+        setFilmDetails(films);
 
         return films;
     }
@@ -206,13 +175,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         List<Film> films = jdbc.query(GET_POPULAR_FILMS_QUERY, mapper);
 
-        Map<Long, LinkedHashSet<Genre>> filmGenresMap = getFilmGenresMap();
-
-        Map<Long, Mpa> filmMpaMap = getMpaMap();
-
-        Map<Long, LinkedHashSet<Director>> filmDirectorsMap = getFilmDirectorsMap();
-
-        setFilmDetails(films, filmGenresMap, filmMpaMap, filmDirectorsMap);
+        setFilmDetails(films);
 
         return films;
     }
@@ -233,9 +196,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         film.setMpa(mpa);
 
-        film.setGenres(new LinkedHashSet<>(getFilmGenres(film.getId(), film.getGenres().stream()
-                .map(genre -> Long.valueOf(genre.getId()))
-                .toList())));
+        film.setGenres(new LinkedHashSet<>(getFilmGenres(film.getId())));
 
         film.setDirectors(new LinkedHashSet<>(getFilmDirectors(film.getId())));
 
@@ -244,70 +205,25 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year) {
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("SELECT f.*, COUNT(l.user_id) AS likes_count ")
-                .append("FROM films f ")
-                .append("LEFT JOIN likes l ON f.id = l.film_id ");
 
-        if (genreId != null) {
-            queryBuilder.append("JOIN film_genres fg ON f.id = fg.film_id ");
-        }
+        List<Film> films = getSortPopularFilms(countOpt.orElse(null), genreId, year);
 
-        queryBuilder.append("WHERE 1=1 ");
-
-        if (genreId != null) {
-            queryBuilder.append("AND fg.genre_id = :genre_id ");
-        }
-
-        if (year != null) {
-            queryBuilder.append("AND YEAR(f.release_date) = :year ");
-        }
-
-        queryBuilder.append("GROUP BY f.id ")
-                .append("ORDER BY likes_count DESC ");
-
-        if (countOpt.isPresent() && countOpt.get() > 0) {
-            queryBuilder.append("LIMIT :count");
-        }
-
-        String query = queryBuilder.toString();
-
-        Map<String, Object> params = new HashMap<>();
-        if (countOpt.isPresent() && countOpt.get() > 0) {
-            params.put("count", countOpt.get());
-        }
-        if (genreId != null) {
-            params.put("genre_id", genreId);
-        }
-        if (year != null) {
-            params.put("year", year);
-        }
-
-        List<Film> films = jdbc.query(query, params, mapper);
-
-        Map<Long, LinkedHashSet<Genre>> filmGenresMap = getFilmGenresMap();
-
-        Map<Long, Mpa> filmMpaMap = getMpaMap();
-
-        Map<Long, LinkedHashSet<Director>> filmDirectorsMap = getFilmDirectorsMap();
-
-        setFilmDetails(films, filmGenresMap, filmMpaMap, filmDirectorsMap);
+        setFilmDetails(films);
 
         return films;
     }
 
     @Override
     public List<Film> getRecommendedFilms(Long userId) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("user_id", userId);
 
         List<Film> recommendedFilms = jdbc.query(
                 GET_RECOMMENDED_FILMS,
-                params,
+                new MapSqlParameterSource("user_id", userId),
                 mapper
         );
 
         List<Film> recommendedFilmsWithFullDetails = new ArrayList<>();
+
         for (Film film : recommendedFilms) {
             Optional<Film> fullDetailsFilm = getByIdFullDetails(film.getId());
             fullDetailsFilm.ifPresent(recommendedFilmsWithFullDetails::add);
@@ -318,23 +234,21 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public Collection<Film> getCommonFilms(Long userId, Long friendId) {
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("user_id", userId);
-        params.addValue("friend_id", friendId);
         Collection<Film> commonFilms = jdbc.query(
                 GET_COMMON_FILMS,
-                params,
+                new MapSqlParameterSource().addValue("user_id", userId).addValue("friend_id", friendId),
                 mapper
         );
 
         if (commonFilms.isEmpty()) {
-            log.info("No common films found for user ID: {} and friend ID: {}", userId, friendId);
+            log.trace("No common films found for user ID: {} and friend ID: {}", userId, friendId);
         } else {
-            log.info("Found {} common films for user ID: {} and friend ID: {}", commonFilms.size(), userId, friendId);
-            commonFilms.forEach(film -> log.info("Film ID: {}, Name: {}", film.getId(), film.getName()));
+            log.trace("Found {} common films for user ID: {} and friend ID: {}", commonFilms.size(), userId, friendId);
+            commonFilms.forEach(film -> log.trace("Film ID: {}, Name: {}", film.getId(), film.getName()));
         }
+
         List<Film> commonFilmsWithFullDetails = new ArrayList<>();
+
         for (Film film : commonFilms) {
             Optional<Film> fullDetailsFilm = getByIdFullDetails(film.getId());
             fullDetailsFilm.ifPresent(commonFilmsWithFullDetails::add);
@@ -345,42 +259,110 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     public Optional<Mpa> findMpaById(Integer id) {
         String query = "SELECT * FROM rating WHERE id = :id";
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-        Mpa mpa = jdbc.queryForObject(query, params, mpaMapper);
+        Mpa mpa = jdbc.queryForObject(query,  new MapSqlParameterSource("id", id), mpaMapper);
         return Optional.ofNullable(mpa);
     }
 
-    private Collection<Genre> getFilmGenres(Long filmId, List<Long> genreIds) {
-        String query = "SELECT * FROM genre " +
-                "WHERE id IN (SELECT genre_id AS id FROM film_genres WHERE film_id = :film_id)";
+    @Override
+    public List<Film> getFilmsByDirector(Long directorId, List<String> sort) {
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("film_id", filmId);
-        Collection<Genre> genres = jdbc.query(query, params, genreMapper);
-        return genres;
+        List<Film> filmSort = new ArrayList<>();
+
+        if (sort.getFirst().equals("year")) {
+
+            filmSort = jdbc.query(QUERY_BY_RELEASE_DATE, new MapSqlParameterSource("director_id", directorId), mapper);
+
+        } else if (sort.getLast().equals("likes")) {
+
+            if (getDirector(directorId).isEmpty()) {
+                throw new NotFoundException("Режиссёр не найден");
+            }
+
+            filmSort = jdbc.query(QUERY_BY_LIKE_COUNT,
+                    new MapSqlParameterSource("director_id", directorId), mapper
+            );
+
+        }
+
+        return filmSort;
+    }
+
+    @Override
+    public List<Film> search(String query, String[] searchFields) {
+
+        if (query == null || query.trim().isEmpty() || searchFields == null || searchFields.length == 0) {
+            return Collections.emptyList();
+        }
+
+        String searchQuery = getSearchQuery(query, searchFields);
+
+        List<Film> films = jdbc.query(searchQuery, mapper);
+
+        setFilmDetails(films);
+
+        return films;
+    }
+
+    private void insertDirectors(Long filmId, List<Long> directorIds) {
+
+        List<MapSqlParameterSource> paramsList = getMapSqlDirectors(filmId, directorIds);
+
+        jdbc.batchUpdate(INSERT_DIRECTORS, paramsList.toArray(new MapSqlParameterSource[0]));
+    }
+
+    private void deleteDirectors(Long filmId) {
+        delete(DELETE_DIRECTORS, new MapSqlParameterSource().addValue("film_id", filmId));
+    }
+
+    private void insertGenres(Long filmId, List<Long> genreIds) {
+
+        List<MapSqlParameterSource> paramsList = getMapSqlGenres(filmId, genreIds);
+
+        jdbc.batchUpdate(INSERT_GENRES, paramsList.toArray(new MapSqlParameterSource[0]));
+    }
+
+    private void deleteGenres(Long filmId) {
+        delete(DELETE_GENRES, new MapSqlParameterSource().addValue("film_id", filmId));
+    }
+
+
+    private static String getSearchQuery(String query, String[] searchFields) {
+
+        query = query.trim().toLowerCase();
+
+        String fieldsParam;
+
+        if (searchFields.length == 2) {
+            fieldsParam = " LOWER(TRIM(f.name)) " + "LIKE '%" + query +
+                    "%'" + " OR " + " LOWER(TRIM(d.name)) LIKE '%" + query + "%'";
+        } else {
+            if (searchFields[0].equals("title")) {
+                fieldsParam = "LOWER(TRIM(f.name)) " + "LIKE '%" + query + "%'";
+            } else {
+                fieldsParam = "LOWER(TRIM(d.name))" + " LIKE '%" + query + "%'";
+            }
+        }
+        return SEARCH_QUERY + " WHERE " + fieldsParam + " GROUP BY f.id " + "ORDER BY likes_count DESC";
+    }
+
+    private Collection<Genre> getFilmGenres(Long filmId) {
+        return jdbc.query(
+                SELECT_FILM_GENRES,
+                new MapSqlParameterSource().addValue("film_id", filmId),
+                genreMapper
+        );
     }
 
     private Collection<Director> getFilmDirectors(Long filmId) {
-        String query = "SELECT * FROM directors " +
-                "WHERE id IN (SELECT director_id AS id FROM film_directors WHERE film_id = :film_id)";
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("film_id", filmId);
-
-        Collection<Director> directors = jdbc.query(query, params, directorMapper);
-        return directors;
+        return jdbc.query(
+                SELECT_FILM_DIRECTORS,
+                new MapSqlParameterSource("film_id", filmId),
+                directorMapper
+        );
     }
 
     private Collection<Director> getDirector(Long id) {
-        String query = "SELECT * FROM directors " +
-                "WHERE id = :id";
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", id);
-
-        Collection<Director> directors = jdbc.query(query, params, directorMapper);
-        return directors;
+        return jdbc.query(SELECT_DIRECTOR, new MapSqlParameterSource("id", id), directorMapper);
     }
 
     private static List<MapSqlParameterSource> getMapSqlGenres(Long filmId, List<Long> genreIds) {
@@ -408,7 +390,6 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     }
 
     private static MapSqlParameterSource createParameterSource(Film film) {
-
         MapSqlParameterSource params = new MapSqlParameterSource();
 
         params.addValue("id", film.getId());
@@ -419,32 +400,6 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         params.addValue("rating_id", film.getMpa().getId());
 
         return params;
-    }
-
-    private static void setFilmDetails(
-            List<Film> films, Map<Long,
-            LinkedHashSet<Genre>> filmGenresMap,
-            Map<Long, Mpa> filmMpaMap, Map<Long,
-            LinkedHashSet<Director>> filmDirectorsMap) {
-
-        for (Film film : films) {
-            LinkedHashSet<Genre> genres = filmGenresMap.get(film.getId());
-            if (genres != null) {
-                film.setGenres(genres);
-            }
-
-            Mpa mpa = filmMpaMap.get(film.getId());
-
-            if (mpa != null) {
-                film.setMpa(mpa);
-            }
-
-            LinkedHashSet<Director> directors = filmDirectorsMap.get(film.getId());
-
-            if (directors != null) {
-                film.setDirectors(directors);
-            }
-        }
     }
 
     private Map<Long, Mpa> getMpaMap() {
@@ -486,80 +441,69 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         return filmDirectorsMap;
     }
 
-    public List<Film> getFilmsByDirector(Long dirId, List<String> sort) {
+    private List<Film> getSortPopularFilms(Integer count, Integer genreId, Integer year) {
+        String query = getQueryPopularFilms(count, genreId, year);
 
-        String queryReleaseDate = "\n" +
-                "   SELECT f.* \n" +
-                "   FROM film_directors AS fd \n" +
-                "   LEFT JOIN films AS f ON fd.film_id = f.id \n" +
-                "   WHERE fd.director_id = :director_id \n" +
-                "   GROUP BY f.id \n" +
-                "   ORDER BY release_date";
-
-        List<Film> filmSort = new ArrayList<>();
-
-        if (sort.getFirst().equals("year")) {
-
-            filmSort = jdbc.query(queryReleaseDate, new MapSqlParameterSource().addValue("director_id", dirId), mapper);
-
-        } else if (sort.getLast().equals("likes")) {
-
-            if (getDirector(dirId).isEmpty()) {
-                throw new NotFoundException("Режиссёр не найден");
-            }
-
-            filmSort = jdbc.query(
-                    "SELECT f.*, COUNT(l.user_id) AS like_count " +
-                            "FROM film_directors AS fd " +
-                            "LEFT JOIN films AS f ON fd.film_id = f.id " +
-                            "LEFT JOIN likes AS l ON f.id = l.film_id " +
-                            "WHERE fd.director_id = :director_id " +
-                            "GROUP BY f.id " +
-                            "ORDER BY like_count DESC",
-
-                    new MapSqlParameterSource().addValue("director_id", dirId), mapper
-            );
-
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        if (count != null && count > 0) {
+            params.addValue("count", count);
+        }
+        if (genreId != null) {
+            params.addValue("genre_id", genreId);
+        }
+        if (year != null) {
+            params.addValue("year", year);
         }
 
-        return filmSort;
+        return jdbc.query(query, params, mapper);
     }
 
-    @Override
-    public List<Film> search(String query, String[] searchFields) {
-        if (query == null || query.trim().isEmpty() || searchFields == null || searchFields.length == 0) {
-            return Collections.emptyList();
-        }
-        query = query.trim().toLowerCase();
+    private static String getQueryPopularFilms(Integer count, Integer genreId, Integer year) {
+        StringBuilder query = new StringBuilder("SELECT f.*, COUNT(l.user_id) AS likes_count " +
+                "FROM films f LEFT JOIN likes l ON f.id = l.film_id ");
 
-        String fieldsParam;
-        if (searchFields.length == 2) {
-            fieldsParam = " LOWER(TRIM(f.name)) " + "LIKE '%" + query +
-                    "%'" + " OR " + " LOWER(TRIM(d.name)) LIKE '%" + query + "%'";
-        } else {
-            if (searchFields[0].equals("title")) {
-                fieldsParam = "LOWER(TRIM(f.name)) " + "LIKE '%" + query + "%'";
-            } else {
-                fieldsParam = "LOWER(TRIM(d.name))" + " LIKE '%" + query + "%'";
+        if (genreId != null) {
+            query.append("JOIN film_genres fg ON f.id = fg.film_id ");
+        }
+
+        query.append("WHERE 1=1 ");
+
+        if (genreId != null) {
+            query.append("AND fg.genre_id = :genre_id ");
+        }
+
+        if (year != null) {
+            query.append("AND YEAR(f.release_date) = :year ");
+        }
+
+        query.append("GROUP BY f.id ORDER BY likes_count DESC ");
+
+        if (count != null && count > 0) {
+            query.append("LIMIT :count");
+        }
+
+        return query.toString();
+    }
+
+    private void setFilmDetails(List<Film> films) {
+
+        for (Film film : films) {
+            LinkedHashSet<Genre> genres = getFilmGenresMap().get(film.getId());
+            if (genres != null) {
+                film.setGenres(genres);
+            }
+
+            Mpa mpa = getMpaMap().get(film.getId());
+
+            if (mpa != null) {
+                film.setMpa(mpa);
+            }
+
+            LinkedHashSet<Director> directors = getFilmDirectorsMap().get(film.getId());
+
+            if (directors != null) {
+                film.setDirectors(directors);
             }
         }
-        String searchQuery = SEARCH_QUERY + " WHERE " +
-                fieldsParam
-                + " GROUP BY f.id " +
-                "ORDER BY likes_count DESC";
-
-        List<Film> films = jdbc.query(searchQuery, mapper);
-
-        Map<Long, LinkedHashSet<Genre>> filmGenresMap = getFilmGenresMap();
-
-        Map<Long, Mpa> filmMpaMap = getMpaMap();
-
-        Map<Long, LinkedHashSet<Director>> filmDirectorsMap = getFilmDirectorsMap();
-
-        setFilmDetails(films, filmGenresMap, filmMpaMap, filmDirectorsMap);
-
-        LinkedHashSet<Film> filmsSet = new LinkedHashSet<>(films);
-
-        return filmsSet.stream().toList();
     }
 }

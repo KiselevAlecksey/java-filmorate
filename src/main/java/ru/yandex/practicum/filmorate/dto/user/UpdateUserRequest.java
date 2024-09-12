@@ -8,13 +8,17 @@ import java.time.Instant;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateUserRequest {
-    Long id;
-    String login;
-    String email;
-    String name;
-    Instant birthday;
+public class UpdateUserRequest implements UserRequest {
 
+    Long id;
+
+    String login;
+
+    String email;
+
+    String name;
+
+    Instant birthday;
 
     public boolean hasName() {
         return isNotBlank(name);
@@ -32,7 +36,7 @@ public class UpdateUserRequest {
         return birthday != null && birthday.isBefore(Instant.now());
     }
 
-    private boolean isNotBlank(String value) {
+    boolean isNotBlank(String value) {
         return value != null && !value.isBlank();
     }
 }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.filmorate.dal.interfaces.MpaRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
@@ -22,7 +23,7 @@ import static ru.yandex.practicum.filmorate.utils.TestDataFactory.TOTAL_MPA;
 @DisplayName("JdbcMpaRepository")
 class JdbcMpaRepositoryTest {
 
-    private final JdbcMpaRepository mpaRepository;
+    private final MpaRepository mpaRepository;
 
     @Test
     @DisplayName("должен находить MPA по идентификатору")

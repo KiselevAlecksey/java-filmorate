@@ -9,9 +9,10 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.*;
 
+import static ru.yandex.practicum.filmorate.model.slqreuest.GenreSql.*;
+
 @Repository("JdbcGenreRepository")
 public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreRepository {
-    private static final String FIND_BY_ID_GENRE = "SELECT * FROM genre WHERE id = :id";
 
     public JdbcGenreRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Genre> mapper) {
         super(jdbc, mapper, Genre.class);
@@ -19,9 +20,7 @@ public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreR
 
     @Override
     public void save(Genre genre) {
-        String query = "INSERT INTO genre (name) VALUES (:name)";
-
-        insert(query, new MapSqlParameterSource().addValue("name", genre.getName()));
+        insert(INSERT_GENRE, new MapSqlParameterSource().addValue("name", genre.getName()));
     }
 
     @Override
@@ -30,10 +29,7 @@ public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreR
 
     @Override
     public LinkedHashSet<Genre> getFilmGenres(Long filmId) {
-        String query = "SELECT * FROM genre " +
-                "WHERE id IN (SELECT genre_id AS id FROM film_genres WHERE film_id = :film_id)";
-
-        Collection<Genre> genres = findMany(query, new MapSqlParameterSource().addValue("film_id", filmId));
+        Collection<Genre> genres = findMany(GET_GENRES_BY_FILM, new MapSqlParameterSource().addValue("film_id", filmId));
         return new LinkedHashSet<>(genres);
     }
 
@@ -44,20 +40,16 @@ public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreR
 
     @Override
     public Collection<Genre> values() {
-        return jdbc.query("SELECT * FROM genre", mapper);
+        return jdbc.query(GET_ALL, mapper);
     }
 
     @Override
     public List<Integer> getAllGenreIds() {
-        String query = "SELECT id FROM genre";
-        return jdbc.query(query, (rs, rowNum) -> rs.getInt("id"));
+        return jdbc.query(GET_ALL_IDS, (rs, rowNum) -> rs.getInt("id"));
     }
 
     @Override
     public List<Genre> getByIds(List<Integer> ids) {
-
-        String query = "SELECT id, name FROM genre WHERE id IN (:ids)";
-
-        return jdbc.query(query, new MapSqlParameterSource("ids", ids), mapper);
+        return jdbc.query(GET_BY_IDS_QUERY, new MapSqlParameterSource("ids", ids), mapper);
     }
 }

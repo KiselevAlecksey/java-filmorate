@@ -8,15 +8,14 @@ import ru.yandex.practicum.filmorate.dto.feed.FeedDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.interfaces.UserService;
+import ru.yandex.practicum.filmorate.validator.Validator;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,10 @@ import java.util.stream.Collectors;
 public class DefaultUserService implements UserService {
 
     private final UserRepository userRepository;
+
     private final FilmRepository filmRepository;
+
+    private final Validator validator;
 
     @Override
     public Collection<UserDto> getFriends(Long id) {
@@ -128,16 +130,7 @@ public class DefaultUserService implements UserService {
     @Override
     public UserDto create(NewUserRequest userRequest) {
 
-        if (userRequest.getEmail().isBlank() || userRequest.getEmail().indexOf('@') == -1
-                || userRequest.getLogin().isBlank() || userRequest.getLogin().indexOf(' ') >= 0
-                || userRequest.getBirthday().isAfter(Instant.now())) {
-
-            throw new ConditionsNotMetException(
-                    "Поле почта не может быть пустым"
-                            + " или пропущен знак @" + " логин не может быть пустым и содержать пробелы"
-                            + " дата рождения не может быть в будущем"
-            );
-        }
+        validator.validateUserRequest(userRequest);
 
         User createUser = UserMapper.mapToUser(userRequest);
 
@@ -178,16 +171,8 @@ public class DefaultUserService implements UserService {
         }
 
         if (userRepository.findById(userRequest.getId()).isPresent()) {
-            if (userRequest.getEmail().isBlank() || userRequest.getEmail().indexOf('@') == -1
-                    || userRequest.getLogin().isBlank() || userRequest.getLogin().indexOf(' ') >= 0
-                    || userRequest.getBirthday().isAfter(Instant.now())) {
 
-                throw new ConditionsNotMetException(
-                        "Поле почта не может быть пустым"
-                                + " или пропущен знак @" + " логин не может быть пустым и содержать пробелы"
-                                + " дата рождения не может быть в будущем"
-                );
-            }
+            validator.validateUserRequest(userRequest);
 
             User updatedUser = userRepository.findById(userRequest.getId())
                     .map(user -> UserMapper.updateUserFields(user, userRequest))
@@ -200,9 +185,5 @@ public class DefaultUserService implements UserService {
                             ? updatedUser.toBuilder().id(userRequest.getId()).name(userRequest.getLogin()).build() : updatedUser);
         }
         throw new NotFoundException("Пользователь с id = " + userRequest.getId() + " не найден");
-    }
-
-    private Set<Long> getListIdsFromUsers(Long userId) {
-        return userRepository.getFriends(userId);
     }
 }

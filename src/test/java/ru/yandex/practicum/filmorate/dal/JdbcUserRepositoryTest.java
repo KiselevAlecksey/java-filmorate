@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.filmorate.dal.interfaces.UserRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -24,7 +25,7 @@ class JdbcUserRepositoryTest {
     public static final long TEST_USER_ID = 2L;
     public static final long TEST_FRIEND_ID = 3L;
 
-    private final JdbcUserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Test
     @DisplayName("должен добавлять друга")

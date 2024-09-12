@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DirectorRepository {
-    List<Integer> getAllIds();
+    List<Long> getAllIds();
 
     Optional<Director> getById(Long id);
 

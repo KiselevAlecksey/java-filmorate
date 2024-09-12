@@ -9,6 +9,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import ru.yandex.practicum.filmorate.dal.interfaces.DirectorRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.UserRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.*;
 import ru.yandex.practicum.filmorate.model.*;
 
@@ -28,11 +31,11 @@ import ru.yandex.practicum.filmorate.utils.TestDataFactory;
 @DisplayName("JdbcFilmRepository")
 class JdbcFilmRepositoryTest {
 
-    private final JdbcDirectorRepository directorRepository;
+    private final DirectorRepository directorRepository;
 
-    private final JdbcFilmRepository filmRepository;
+    private final FilmRepository filmRepository;
 
-    private final JdbcUserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final NamedParameterJdbcTemplate jdbc;
 
@@ -47,6 +50,10 @@ class JdbcFilmRepositoryTest {
 
         jdbc.update("DELETE FROM films", new MapSqlParameterSource());
         jdbc.update("ALTER TABLE films ALTER COLUMN id RESTART WITH 1", new MapSqlParameterSource());
+
+        jdbc.update("DELETE FROM directors", new MapSqlParameterSource());
+        jdbc.update("ALTER TABLE directors ALTER COLUMN id RESTART WITH 1",  new MapSqlParameterSource());
+
     }
 
     @Test
@@ -64,7 +71,7 @@ class JdbcFilmRepositoryTest {
     @Test
     @DisplayName("должен обновить поле жанры")
     void should_update_genres() {
-        directorRepository.create(TEST_DIRECTORS.getFirst());
+        directorRepository.create(TEST_DIRECTOR);
 
         Film film = filmRepository.save(TEST_FILM);
         film.setName("updated name");
@@ -261,7 +268,7 @@ class JdbcFilmRepositoryTest {
         filmRepository.addLike(TEST_FILM3_ID, TEST_USER_ID);
 
         List<Film> popularFilms = filmRepository.getPopularFilmsByGenreAndYear(
-                Optional.of(TEST_COUNT),
+                Optional.of(TEST_COUNT_TWO),
                 TEST_INT_ONE,
                 TEST_INT_YEAR);
 
@@ -297,7 +304,7 @@ class JdbcFilmRepositoryTest {
         filmRepository.addLike(TEST_FILM_ID, TEST_USER_ID);
         filmRepository.addLike(TEST_FILM_ID, TEST_USER2_ID);
         filmRepository.addLike(TEST_FILM2_ID, TEST_USER_ID);
-        Director director = TEST_DIRECTORS.getFirst();
+        Director director = TEST_DIRECTOR;
 
         List<Film> recommendedFilms = filmRepository.getRecommendedFilms(TEST_USER2_ID);
 
