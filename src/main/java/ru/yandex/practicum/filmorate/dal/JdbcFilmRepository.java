@@ -148,28 +148,6 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         insertDirectors(film.getId(), directorIds);
     }
 
-    private void insertDirectors(Long filmId, List<Long> directorIds) {
-
-        List<MapSqlParameterSource> paramsList = getMapSqlDirectors(filmId, directorIds);
-
-        jdbc.batchUpdate(INSERT_DIRECTORS, paramsList.toArray(new MapSqlParameterSource[0]));
-    }
-
-    private void deleteDirectors(Long filmId) {
-        delete(DELETE_DIRECTORS, new MapSqlParameterSource().addValue("film_id", filmId));
-    }
-
-    private void insertGenres(Long filmId, List<Long> genreIds) {
-
-        List<MapSqlParameterSource> paramsList = getMapSqlGenres(filmId, genreIds);
-
-        jdbc.batchUpdate(INSERT_GENRES, paramsList.toArray(new MapSqlParameterSource[0]));
-    }
-
-    private void deleteGenres(Long filmId) {
-        delete(DELETE_GENRES, new MapSqlParameterSource().addValue("film_id", filmId));
-    }
-
     @Override
     public Optional<Film> getByIdPartialDetails(Long id) {
         return findOne(FIND_BY_ID_QUERY, new MapSqlParameterSource().addValue("id", id));
