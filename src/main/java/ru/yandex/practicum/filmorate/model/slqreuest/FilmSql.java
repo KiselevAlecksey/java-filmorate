@@ -90,4 +90,28 @@ public class FilmSql {
     public static final String DELETE_DIRECTORS = "DELETE FROM film_directors WHERE film_id = :film_id";
     public static final String INSERT_DIRECTORS = "INSERT INTO film_directors (director_id, film_id) " +
             "VALUES (:director_id, :film_id)";
+
+    public static final String SELECT_FILM_GENRES = "SELECT * FROM genre " +
+            "WHERE id IN (SELECT genre_id AS id FROM film_genres WHERE film_id = :film_id)";
+
+    public static final String SELECT_FILM_DIRECTORS = "SELECT * FROM directors " +
+            "WHERE id IN (SELECT director_id AS id FROM film_directors WHERE film_id = :film_id)";
+    public static final String SELECT_DIRECTOR = "SELECT * FROM directors WHERE id = :id";
+
+    public static final String QUERY_BY_RELEASE_DATE = "\n" +
+            "   SELECT f.* \n" +
+            "   FROM film_directors AS fd \n" +
+            "   LEFT JOIN films AS f ON fd.film_id = f.id \n" +
+            "   WHERE fd.director_id = :director_id \n" +
+            "   GROUP BY f.id \n" +
+            "   ORDER BY release_date";
+
+    public static final String QUERY_BY_LIKE_COUNT = "\n" +
+            "   SELECT f.*, COUNT(l.user_id) AS like_count \n" +
+            "   FROM film_directors AS fd \n" +
+            "   LEFT JOIN films AS f ON fd.film_id = f.id \n" +
+            "   LEFT JOIN likes AS l ON f.id = l.film_id \n" +
+            "   WHERE fd.director_id = :director_id \n" +
+            "   GROUP BY f.id \n" +
+            "   ORDER BY like_count DESC";
 }
