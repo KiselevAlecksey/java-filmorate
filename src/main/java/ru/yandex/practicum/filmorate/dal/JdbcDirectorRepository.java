@@ -20,9 +20,8 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
     }
 
     @Override
-    public List<Integer> getAllIds() {
-
-        return jdbc.query(GET_ALL_DIRECTORS, (rs, rowNum) -> rs.getInt("id"));
+    public List<Long> getAllIds() {
+        return jdbc.query(GET_ALL_DIRECTORS, (rs, rowNum) -> rs.getLong("id"));
     }
 
     @Override
@@ -43,8 +42,6 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
 
     @Override
     public Director update(Director director) {
-
-
 
         update(UPDATE_QUERY, new MapSqlParameterSource().addValue("id", director.getId()).addValue("name", director.getName()));
 

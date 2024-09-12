@@ -20,10 +20,12 @@ public class TestDataFactory {
     public static final int COUNT_ZERO = 0;
     public static final int COUNT_ONE = 1;
     public static final int TEST_INT_YEAR = 2024;
-    public static final int TEST_COUNT = 2;
+    public static final int TEST_COUNT_TWO = 2;
     public static final int TEST_INT_ONE = 1;
     public static final int TEST_INT_TWO = 2;
+
     public static final long TEST_DIRECTOR_ID = 1L;
+    public static final long TEST_DIRECTOR_ID2 = 2L;
 
     public static final long TEST_REVIEW_ID = 1;
     public static final int TEST_REVIEW_USEFUL = 0;
@@ -36,8 +38,10 @@ public class TestDataFactory {
     public static final Film TEST_FILM = getTestFilm();
     public static final User TEST_USER = getTestUser();
     public static final Mpa TEST_MPA = getMpa();
+    public static final Director TEST_DIRECTOR = getDirector();
     public static final LinkedHashSet<Director> TEST_DIRECTORS = getDirectors();
     public static final LinkedHashSet<Genre> TEST_GENRES = getGenres();
+    public static final Review TEST_REVIEW = getReview();
 
     public static Film getTestFilm(Film film) {
         return film.toBuilder()
@@ -48,7 +52,7 @@ public class TestDataFactory {
                 .duration(film.getDuration())
                 .genres(getGenres())
                 .mpa(getMpa())
-                .directors(getDirectors())
+                .directors(new LinkedHashSet<>())
                 .build();
     }
 
@@ -81,7 +85,7 @@ public class TestDataFactory {
                 .duration(100)
                 .genres(getGenres())
                 .mpa(getMpa())
-                .directors(getDirectors())
+                .directors(TEST_DIRECTORS)
                 .build();
     }
 
@@ -95,6 +99,19 @@ public class TestDataFactory {
         return genres;
     }
 
+    private static Review getReview() {
+        Review review = Review.builder()
+                .reviewId(TEST_REVIEW_ID)
+                .content("content")
+                .isPositive(true)
+                .userId(TEST_USER_ID)
+                .filmId(TEST_FILM_ID)
+                .useful(TEST_INT_ONE)
+                .build();
+
+        return review;
+    }
+
     private static Mpa getMpa() {
         Mpa mpa = new Mpa();
         mpa.setId(1);
@@ -102,12 +119,33 @@ public class TestDataFactory {
         return mpa;
     }
 
-    private static LinkedHashSet<Director> getDirectors() {
+    private static Director getDirector() {
         Director director = new Director();
-        LinkedHashSet<Director> directors = new LinkedHashSet<>();
+
         director.setId(TEST_DIRECTOR_ID);
         director.setName("Имя Режиссера");
+
+        return director;
+    }
+
+    private static LinkedHashSet<Director> getDirectors() {
+
+        LinkedHashSet<Director> directors = new LinkedHashSet<>();
+
+        Director director = new Director();
+
+        director.setId(TEST_DIRECTOR_ID);
+        director.setName("Имя Режиссера");
+
+        Director director2 = director.toBuilder()
+                .id(TEST_DIRECTOR_ID2)
+                .name("Имя Режиссера2")
+                .build();
+
+
         directors.add(director);
+        directors.add(director2);
+
         return directors;
     }
 

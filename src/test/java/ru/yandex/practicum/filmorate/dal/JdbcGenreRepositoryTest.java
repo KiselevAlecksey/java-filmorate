@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.filmorate.dal.interfaces.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.GenreRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
@@ -18,15 +20,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static ru.yandex.practicum.filmorate.utils.TestDataFactory.*;
 
 @JdbcTest
-@Import({JdbcGenreRepository.class, GenreRowMapper.class, JdbcDirectorRepository.class, DirectorRowMapper.class,
+@Import({JdbcGenreRepository.class, GenreRowMapper.class, JdbcDirectorRepositoryTest.class, DirectorRowMapper.class,
         JdbcFilmRepository.class, FilmRowMapper.class, MpaRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcGenreRepository")
 class JdbcGenreRepositoryTest {
 
-    private final JdbcGenreRepository genreRepository;
+    private final GenreRepository genreRepository;
 
-    private final JdbcFilmRepository filmRepository;
+    private final FilmRepository filmRepository;
 
     @Test
     @DisplayName("должен возвращать жанры фильма")
