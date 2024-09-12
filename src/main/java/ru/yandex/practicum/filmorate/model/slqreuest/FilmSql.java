@@ -78,4 +78,16 @@ public class FilmSql {
             "AND friendLikes.user_id = :friend_id " +
             "GROUP BY f.id " +
             "ORDER BY like_count DESC, f.id; ";
+
+    public static final String USER_LIKE_COUNT_IN_LIKES = "\n" +
+            "SELECT COUNT(*) AS total_likes\n" +
+            "FROM likes\n" +
+            "WHERE film_id = :film_id AND user_id = :user_id;";
+
+    public static final String DELETE_GENRES = "DELETE FROM film_genres WHERE film_id = :film_id";
+    public static final String INSERT_GENRES = "INSERT INTO film_genres (film_id, genre_id) " +
+            "VALUES (:film_id, :genre_id)";
+    public static final String DELETE_DIRECTORS = "DELETE FROM film_directors WHERE film_id = :film_id";
+    public static final String INSERT_DIRECTORS = "INSERT INTO film_directors (director_id, film_id) " +
+            "VALUES (:director_id, :film_id)";
 }

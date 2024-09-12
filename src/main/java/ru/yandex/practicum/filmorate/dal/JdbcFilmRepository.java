@@ -53,16 +53,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     @Override
     public void addLike(Long filmId, Long userId) {
 
-        String queryLike = "\n" +
-                "SELECT COUNT(*) AS total_likes\n" +
-                "FROM likes\n" +
-                "WHERE film_id = :film_id AND user_id = :user_id;";
-
-        Integer count = jdbc.queryForObject(queryLike, new MapSqlParameterSource()
-                .addValue("film_id", filmId)
-                .addValue("user_id", userId),
-                Integer.class
-        );
+        Integer count = getLikeCount(filmId, userId);
 
         FeedEvent feedEvent = new FeedEvent(userId, filmId, LIKE.name(), ADD.name());
 
@@ -77,8 +68,19 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
                 .addValue("user_id", userId));
     }
 
+    private Integer getLikeCount(Long filmId, Long userId) {
+
+        Integer count = jdbc.queryForObject(USER_LIKE_COUNT_IN_LIKES, new MapSqlParameterSource()
+                .addValue("film_id", filmId)
+                .addValue("user_id", userId),
+                Integer.class
+        );
+        return count;
+    }
+
     @Override
     public void removeLike(Long filmId, Long userId) {
+
         update(REMOVE_LIKE_QUERY, new MapSqlParameterSource()
                 .addValue("film_id", filmId)
                 .addValue("user_id", userId));
@@ -94,6 +96,14 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         Long id = insert(INSERT_FILM, createParameterSource(film));
 
         film.setId(id);
+
+        saveComplexFields(film, id);
+
+        return getByIdFullDetails(film.getId()).orElseThrow(
+                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
+    }
+
+    private void saveComplexFields(Film film, Long id) {
 
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
 
@@ -112,15 +122,22 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
             insertDirectors(id, directorIds);
         }
-
-        return getByIdFullDetails(film.getId()).orElseThrow(
-                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
     }
 
     @Override
     public Film update(Film film) {
 
         jdbc.update(UPDATE_FILM, createParameterSource(film));
+
+        updateComplexFields(film);
+
+        Film filmUpdated = getByIdFullDetails(film.getId()).orElseThrow(
+                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
+
+        return filmUpdated;
+    }
+
+    private void updateComplexFields(Film film) {
 
         List<Long> genreIds = film.getGenres().stream()
                 .map(genre -> Long.valueOf(genre.getId()))
@@ -137,42 +154,28 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
         deleteDirectors(film.getId());
 
         insertDirectors(film.getId(), directorIds);
-
-        Film filmUpdated = getByIdFullDetails(film.getId()).orElseThrow(
-                () -> new NotFoundException("Фильм с id = " + film.getId() + " не найден"));
-
-        return filmUpdated;
     }
 
     private void insertDirectors(Long filmId, List<Long> directorIds) {
-        String insertDirectors = "INSERT INTO film_directors (director_id, film_id) VALUES (:director_id, :film_id)";
 
         List<MapSqlParameterSource> paramsList = getMapSqlDirectors(filmId, directorIds);
 
-        jdbc.batchUpdate(insertDirectors, paramsList.toArray(new MapSqlParameterSource[0]));
+        jdbc.batchUpdate(INSERT_DIRECTORS, paramsList.toArray(new MapSqlParameterSource[0]));
     }
 
     private void deleteDirectors(Long filmId) {
-
-        String deleteDirectors = "DELETE FROM film_directors WHERE film_id = :film_id";
-
-        delete(deleteDirectors, new MapSqlParameterSource().addValue("film_id", filmId));
+        delete(DELETE_DIRECTORS, new MapSqlParameterSource().addValue("film_id", filmId));
     }
 
     private void insertGenres(Long filmId, List<Long> genreIds) {
 
-        String insertGenres = "INSERT INTO film_genres (film_id, genre_id) VALUES (:film_id, :genre_id)";
-
         List<MapSqlParameterSource> paramsList = getMapSqlGenres(filmId, genreIds);
 
-        jdbc.batchUpdate(insertGenres, paramsList.toArray(new MapSqlParameterSource[0]));
+        jdbc.batchUpdate(INSERT_GENRES, paramsList.toArray(new MapSqlParameterSource[0]));
     }
 
     private void deleteGenres(Long filmId) {
-
-        String deleteGenres = "DELETE FROM film_genres WHERE film_id = :film_id";
-
-        delete(deleteGenres, new MapSqlParameterSource().addValue("film_id", filmId));
+        delete(DELETE_GENRES, new MapSqlParameterSource().addValue("film_id", filmId));
     }
 
     @Override
@@ -244,7 +247,9 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
     @Override
     public List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year) {
+
         StringBuilder queryBuilder = new StringBuilder();
+
         queryBuilder.append("SELECT f.*, COUNT(l.user_id) AS likes_count ")
                 .append("FROM films f ")
                 .append("LEFT JOIN likes l ON f.id = l.film_id ");
