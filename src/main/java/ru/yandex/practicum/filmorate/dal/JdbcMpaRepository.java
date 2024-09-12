@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;
 
+import static ru.yandex.practicum.filmorate.model.slqreuest.MpaSql.*;
+
 @Repository("JdbcMpaRepository")
 public class JdbcMpaRepository extends BaseRepository<Mpa> implements MpaRepository {
 
@@ -28,21 +30,16 @@ public class JdbcMpaRepository extends BaseRepository<Mpa> implements MpaReposit
 
     @Override
     public Optional<Mpa> findById(Integer id) {
-        String query = "SELECT * FROM rating WHERE id = :id";
-
-        Optional<Mpa> mpa = findOne(query, new MapSqlParameterSource().addValue("id", id));
-        return mpa;
+        return findOne(GET_BY_ID, new MapSqlParameterSource().addValue("id", id));
     }
 
     @Override
     public Collection<Mpa> values() {
-        String query = "SELECT * FROM rating";
-        return jdbc.query(query, mapper);
+        return jdbc.query(GET_ALL, mapper);
     }
 
     @Override
     public List<Integer> getAllMpaIds() {
-        String query = "SELECT id FROM rating";
-        return jdbc.query(query, (rs, rowNumber) -> rs.getInt("id"));
+        return jdbc.query(GET_ALL_IDS, (rs, rowNumber) -> rs.getInt("id"));
     }
 }

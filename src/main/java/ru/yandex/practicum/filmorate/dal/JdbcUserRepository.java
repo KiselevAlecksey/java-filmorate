@@ -125,12 +125,10 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
                 "FROM friends " +
                 "WHERE friend_id = :friend_id AND user_id = :user_id";
 
-        Integer count = jdbc.queryForObject(query,
+        return jdbc.queryForObject(query,
                 new MapSqlParameterSource().addValue("friend_id", friendId).addValue("user_id", userId),
                 Integer.class
         );
-
-        return count;
     }
 
     @Override
@@ -169,9 +167,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     public Collection<Feed> getFeed(long id) {
         String query = "SELECT * FROM user_feed WHERE user_id = :user_id";
 
-        List<Feed> feeds = jdbc.query(query, new MapSqlParameterSource().addValue("user_id", id), feedMapper);
-
-        return feeds;
+        return jdbc.query(query, new MapSqlParameterSource().addValue("user_id", id), feedMapper);
     }
 
     private static MapSqlParameterSource createParameterSource(User user) {

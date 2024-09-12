@@ -14,14 +14,6 @@ public interface ReviewRequest {
 
     Long getFilmId();
 
-    void setReviewId(Long id);
-
-    void setIsPositive(Boolean isPositive);
-
-    void setUseful(Integer useful);
-
-    void setContent(String review);
-
     void setUserId(Long userId);
 
     void setFilmId(Long filmId);

@@ -8,9 +8,13 @@ import java.time.Instant;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class NewUserRequest {
+public class NewUserRequest  implements UserRequest {
+
     String login;
+
     String email;
+
     String name;
+
     Instant birthday;
 }

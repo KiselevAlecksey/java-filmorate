@@ -27,14 +27,12 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
     private static final long DEFAULT_COUNT = 10L;
 
-    private final RowMapper<Feed> feedMapper;
-
     private final FeedUtils<Feed> feedUtils;
 
     public JdbcReviewRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Review> mapper) {
         super(jdbc, mapper, Review.class);
 
-        feedMapper = new FeedRowMapper(jdbc);
+        RowMapper<Feed> feedMapper = new FeedRowMapper(jdbc);
 
         feedUtils = new FeedUtils<>(jdbc, feedMapper);
     }
@@ -42,9 +40,7 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
     @Override
     public Review save(Review review) {
 
-        if (review.getUseful() == null) {
-            review.setUseful(0);
-        }
+        setUseful(review);
 
         Long id = insert(INSERT_REVIEW, createParameterSource(review));
 
@@ -61,16 +57,12 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
         } else {
             throw new InternalServerException("Не удалось сохранить данные");
         }
-
-
     }
 
     @Override
     public Review updateReview(Review review) {
 
-        if (review.getUseful() == null) {
-            review.setUseful(0);
-        }
+        setUseful(review);
 
         update(UPDATE_REVIEW, createParameterSource(review));
 
@@ -85,6 +77,8 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
             feedUtils.saveFeedEvent(feedEvent);
         }
+
+        isReviewUpdate = true;
 
         return reviewUpdate;
     }
@@ -130,9 +124,7 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
             params.addValue("film_id", filmId);
         }
 
-        Collection<Review> reviews = getReviewsFromDb(query, params);
-
-        return reviews;
+        return getReviewsFromDb(query, params);
     }
 
     @Override
@@ -146,7 +138,7 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
         isReviewUpdate = false;
 
-        Review review = updateReview(getById(id).orElseThrow(
+        updateReview(getById(id).orElseThrow(
                 () -> new NotFoundException("Отзыв не найден")
         ));
     }
@@ -169,23 +161,16 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
     @Override
     public void addDislike(Long id, Long userId) {
-        String query = "SELECT reaction_like FROM reviews_reactions WHERE user_id = :user_id AND reaction_like = TRUE";
 
-        List<Boolean> likeOptional = jdbc.query(query,
-                new MapSqlParameterSource().addValue("user_id", userId),
-                (ResultSet rs, int rowNum) -> {
-                    return rs.getBoolean("reaction_like");
-                });
-
-        if (!likeOptional.isEmpty() && likeOptional.getFirst().describeConstable().isPresent()) {
-            removeLike(id, userId);
-        }
+        clearLikeAfterDislike(id, userId);
 
         update(INSERT_DISLIKE, new MapSqlParameterSource()
                 .addValue("review_id", id)
                 .addValue("user_id", userId)
                 .addValue("reaction_dislike", true)
         );
+
+        isReviewUpdate = false;
 
         updateReview(getById(id).orElseThrow(
                 () -> new NotFoundException("Отзыв не найден")
@@ -200,6 +185,8 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
                 .addValue("user_id", userId)
                 .addValue("reaction_dislike", false)
         );
+
+        isReviewUpdate = false;
 
         updateReview(getById(id).orElseThrow(
                 () -> new NotFoundException("Отзыв не найден")
@@ -226,23 +213,6 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
                         .addValue("review_id", reviewId), Integer.class);
     }
 
-    private Map<Long, Integer> getReactions(List<Long> reviewIds) {
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
-        params.addValue("review_id", reviewIds);
-
-        return jdbc.query(SELECT_REACTIONS, params, resultSet -> {
-            Map<Long, Integer> reactionsMap = new java.util.HashMap<>();
-            while (resultSet.next()) {
-                Long reviewId = resultSet.getLong("review_id");
-                Integer netReaction = resultSet.getInt("net_reaction");
-                reactionsMap.put(reviewId, netReaction);
-            }
-            return reactionsMap;
-        });
-    }
-
     private String buildReviewsByFilmIdQuery(Long filmId, Integer count) {
 
         StringBuilder queryBuilder = new StringBuilder(
@@ -262,8 +232,24 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
 
     private Collection<Review> getReviewsFromDb(String query, MapSqlParameterSource params) {
 
-        List<Review> reviews = select(query, params).stream().toList();
+        return select(query, params).stream().toList();
+    }
 
-        return reviews;
+    private static void setUseful(Review review) {
+        if (review.getUseful() == null) {
+            review.setUseful(0);
+        }
+    }
+
+    private void clearLikeAfterDislike(Long id, Long userId) {
+        List<Boolean> likeOptional = jdbc.query(GET_LIKE_REACTION_BY_USER_ID,
+                new MapSqlParameterSource().addValue("user_id", userId),
+                (ResultSet rs, int rowNum) -> {
+                    return rs.getBoolean("reaction_like");
+                });
+
+        if (!likeOptional.isEmpty() && likeOptional.getFirst().describeConstable().isPresent()) {
+            removeLike(id, userId);
+        }
     }
 }
