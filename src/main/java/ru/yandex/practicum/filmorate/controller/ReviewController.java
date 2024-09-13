@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.review.NewReviewRequest;
@@ -23,7 +22,6 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.OK)
     public ReviewDto create(@RequestBody NewReviewRequest reviewRequest) {
         log.error("Review create {} start", reviewRequest);
         ReviewDto created = reviewService.create(reviewRequest);
@@ -32,7 +30,6 @@ public class ReviewController {
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
     public ReviewDto update(@RequestBody UpdateReviewRequest reviewRequest) {
         log.error("Review update {} start", reviewRequest);
         ReviewDto updated = reviewService.update(reviewRequest);
@@ -41,7 +38,6 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long id) {
         log.error("Review delete id {} start", id);
         reviewService.remove(id);
@@ -49,7 +45,6 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public ReviewDto getById(@PathVariable long id) {
         log.error("Review delete id {} start", id);
         ReviewDto reviewDto = reviewService.getById(id);
@@ -58,7 +53,6 @@ public class ReviewController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public Collection<ReviewDto> getAll(
             @RequestParam(required = false) Long filmId,
             @RequestParam(required = false) @Positive Integer count) {
@@ -70,7 +64,6 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    @ResponseStatus(HttpStatus.OK)
     public void addLike(@PathVariable long id, @PathVariable long userId) {
         log.error("Add like review id {}, user id {} start", id, userId);
         reviewService.addLike(id, userId);
@@ -78,7 +71,6 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    @ResponseStatus(HttpStatus.OK)
     public void removeLike(@PathVariable long id, @PathVariable long userId) {
         log.error("Remove like review id {}, user id {} start", id, userId);
         reviewService.removeLike(id, userId);
@@ -86,7 +78,6 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}/dislike/{userId}")
-    @ResponseStatus(HttpStatus.OK)
     public void addDislike(@PathVariable long id, @PathVariable long userId) {
         log.error("Add dislike review id {}, user id {} start", id, userId);
         reviewService.addDislike(id, userId);
@@ -94,7 +85,6 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
-    @ResponseStatus(HttpStatus.OK)
     public void removeDislike(@PathVariable long id, @PathVariable long userId) {
         log.error("Remove dislike review id {}, user id {} start", id, userId);
         reviewService.removeDislike(id, userId);

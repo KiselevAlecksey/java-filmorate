@@ -20,13 +20,11 @@ public class DirectorController {
     private final DirectorService directorService;
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public Collection<DirectorDto> getAll() {
         return directorService.getAll();
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public DirectorDto getById(@PathVariable Long id) {
         log.error("Genre get name by id {} start", id);
         DirectorDto directorDto = directorService.getById(id);
@@ -44,7 +42,6 @@ public class DirectorController {
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
     public DirectorDto update(@RequestBody UpdateDirectorRequest request) {
         log.error("Director update {} start", request);
         DirectorDto updated = directorService.update(request);
@@ -53,7 +50,6 @@ public class DirectorController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable Long id) {
         log.error("Remove director id {}", id);
         directorService.delete(id);
