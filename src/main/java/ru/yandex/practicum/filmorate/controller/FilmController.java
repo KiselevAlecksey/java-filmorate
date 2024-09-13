@@ -24,7 +24,6 @@ public class FilmController {
 
     private final FilmService filmService;
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public Collection<FilmDto> findAll() {
         return filmService.findAll();
@@ -39,7 +38,6 @@ public class FilmController {
         return created;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public FilmDto update(@RequestBody UpdateFilmRequest filmRequest) {
         log.error("Film update {} start", filmRequest);
@@ -48,7 +46,6 @@ public class FilmController {
         return updated;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable long id, @PathVariable long userId) {
         log.error("Add like film id {}, user id {} start", id, userId);
@@ -56,7 +53,6 @@ public class FilmController {
         log.error("Added like film id {}, user id {} complete", id, userId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable long id, @PathVariable long userId) {
         log.error("Remove like film id {}, user id {} start", id, userId);
@@ -64,7 +60,6 @@ public class FilmController {
         log.error("Removed like film id {}, user id {} complete", id, userId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public FilmDto get(@PathVariable long id) {
         log.error("Get film with genre id {} start", id);
@@ -73,7 +68,6 @@ public class FilmController {
         return film;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/popular")
     public Collection<FilmDto> getPopularFilms(
             @RequestParam(defaultValue = "10") Integer count,
@@ -88,7 +82,6 @@ public class FilmController {
         return filmService.getPopularFilms(count);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
     public boolean remove(@PathVariable Long id) {
         return filmService.remove(id);

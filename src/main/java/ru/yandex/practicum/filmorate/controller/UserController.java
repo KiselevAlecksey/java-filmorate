@@ -23,13 +23,11 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public Collection<UserDto> findAll() {
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public UserDto getById(@PathVariable long id) {
         log.error("User get by id {} start", id);
         return userService.getById(id);
@@ -45,7 +43,6 @@ public class UserController {
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
     public UserDto update(@RequestBody UpdateUserRequest userRequest) {
         log.error("User update {} start", userRequest);
         UserDto updated = userService.update(userRequest);
@@ -54,7 +51,6 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    @ResponseStatus(HttpStatus.OK)
     public void addFriend(@PathVariable long id, @PathVariable long friendId) {
         log.error("Users add friends id {}, friend_id {} start", id, friendId);
         userService.addFriend(id, friendId);
@@ -62,7 +58,6 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    @ResponseStatus(HttpStatus.OK)
     public void removeFriend(@PathVariable long id, @PathVariable long friendId) {
         log.error("Users remove friends id {}, friend_id {} start", id, friendId);
         userService.removeFriend(id, friendId);
@@ -70,7 +65,6 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{friendId}")
-    @ResponseStatus(HttpStatus.OK)
     public Collection<UserDto> getCommonFriends(@PathVariable long id, @PathVariable long friendId) {
         log.error("Users get common friends id {}, friend_id {} start", id, friendId);
         Collection<UserDto> commonFriends = userService.getCommonFriends(id, friendId);
@@ -79,7 +73,6 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    @ResponseStatus(HttpStatus.OK)
     public Collection<UserDto> getFriends(@PathVariable long id) {
         log.error("User get friends list id {} start", id);
         Collection<UserDto> friends = userService.getFriends(id);
@@ -88,14 +81,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}/recommendations")
-    @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilmRecommendations(@PathVariable Long id) {
         log.info("Get film recommendations request");
         return userService.getFilmRecommendations(id);
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public boolean userRemove(@PathVariable long id) {
         log.error("Users remove user id {},start", id);
         boolean response = userService.remove(id);
@@ -104,7 +95,6 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    @ResponseStatus(HttpStatus.OK)
     public Collection<FeedDto> getFeed(@PathVariable long id) {
         log.error("Feed get by user id is {} start", id);
         return userService.getFeed(id);
