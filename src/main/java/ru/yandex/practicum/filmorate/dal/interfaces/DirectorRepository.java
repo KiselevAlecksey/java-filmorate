@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dal.interfaces;
 
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
@@ -19,5 +20,5 @@ public interface DirectorRepository {
 
     boolean delete(Long id);
 
-    List<Director> getByIds(List<Long> ids);
+    List<DirectorDto> getByIds(List<Long> ids);
 }

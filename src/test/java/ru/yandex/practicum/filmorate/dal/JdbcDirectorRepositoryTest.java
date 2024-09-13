@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import ru.yandex.practicum.filmorate.dal.interfaces.DirectorRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.*;
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.Collection;
@@ -96,11 +97,11 @@ public class JdbcDirectorRepositoryTest {
     void should_get_directors_by_ids() {
         TEST_DIRECTORS.forEach(directorRepository::create);
 
-        List<Director> directors = directorRepository.getByIds(List.of(TEST_DIRECTOR_ID, TEST_DIRECTOR_ID2));
+        List<DirectorDto> directors = directorRepository.getByIds(List.of(TEST_DIRECTOR_ID, TEST_DIRECTOR_ID2));
 
         assertThat(directors)
                 .hasSize(TEST_COUNT_TWO)
-                .extracting(Director::getId)
+                .extracting(DirectorDto::getId)
                 .containsExactlyInAnyOrder(TEST_DIRECTOR_ID, TEST_DIRECTOR_ID2);
     }
 }

@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.review.NewReviewRequest;
 import ru.yandex.practicum.filmorate.dto.review.ReviewDto;
@@ -12,6 +14,7 @@ import ru.yandex.practicum.filmorate.service.interfaces.ReviewService;
 import java.util.Collection;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
@@ -58,7 +61,7 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.OK)
     public Collection<ReviewDto> getAll(
             @RequestParam(required = false) Long filmId,
-            @RequestParam(required = false) Integer count) {
+            @RequestParam(required = false) @Positive Integer count) {
 
         log.error("Get all review by filmId {}, count {} start", filmId, count);
         Collection<ReviewDto> reviewDto = reviewService.getByReviewsId(filmId, count);

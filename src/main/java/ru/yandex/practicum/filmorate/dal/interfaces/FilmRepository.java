@@ -28,7 +28,7 @@ public interface FilmRepository {
 
     Optional<Film> getByIdFullDetails(Long id);
 
-    List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year);
+    List<Film> getPopularFilmsByGenreAndYear(Integer countOpt, Integer genreId, Integer year);
 
     List<Film> getRecommendedFilms(Long userId);
 
