@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.interfaces.ReviewRepository;
-import ru.yandex.practicum.filmorate.dal.mapper.FeedRowMapper;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Feed;
@@ -32,9 +31,7 @@ public class JdbcReviewRepository extends BaseRepository<Review> implements Revi
     public JdbcReviewRepository(NamedParameterJdbcTemplate jdbc, RowMapper<Review> mapper) {
         super(jdbc, mapper, Review.class);
 
-        RowMapper<Feed> feedMapper = new FeedRowMapper(jdbc);
-
-        feedUtils = new FeedUtils<>(jdbc, feedMapper);
+        feedUtils = new FeedUtils<>(jdbc);
     }
 
     @Override

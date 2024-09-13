@@ -8,8 +8,11 @@ import lombok.Data;
 public class FeedEvent {
 
     private Long userId;
+
     private Long entityId;
+
     private String eventType;
+
     private String operation;
 
 }

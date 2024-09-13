@@ -268,7 +268,7 @@ class JdbcFilmRepositoryTest {
         filmRepository.addLike(TEST_FILM3_ID, TEST_USER_ID);
 
         List<Film> popularFilms = filmRepository.getPopularFilmsByGenreAndYear(
-                Optional.of(TEST_COUNT_TWO),
+                TEST_COUNT_TWO,
                 TEST_INT_ONE,
                 TEST_INT_YEAR);
 

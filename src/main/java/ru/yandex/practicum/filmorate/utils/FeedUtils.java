@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.utils;
 
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
@@ -11,11 +10,9 @@ import java.time.Instant;
 
 public class FeedUtils<T> {
     protected final NamedParameterJdbcTemplate jdbc;
-    protected final RowMapper<T> mapper;
 
-    public FeedUtils(NamedParameterJdbcTemplate jdbc, RowMapper<T> mapper) {
+    public FeedUtils(NamedParameterJdbcTemplate jdbc) {
         this.jdbc = jdbc;
-        this.mapper = mapper;
     }
 
     public void saveFeedEvent(FeedEvent feedEvent) {

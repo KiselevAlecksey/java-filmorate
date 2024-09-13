@@ -25,16 +25,12 @@ import static ru.yandex.practicum.filmorate.model.slqreuest.UserSql.*;
 @Qualifier("JdbcUserRepository")
 public class JdbcUserRepository extends BaseRepository<User> implements UserRepository {
 
-    private final RowMapper<Feed> feedMapper;
-
     private final FeedUtils<Feed> feedUtils;
 
     public JdbcUserRepository(NamedParameterJdbcTemplate jdbc, RowMapper<User> mapper) {
         super(jdbc, mapper, User.class);
 
-        feedMapper = new FeedRowMapper(jdbc);
-
-        feedUtils = new FeedUtils<>(jdbc, feedMapper);
+        feedUtils = new FeedUtils<>(jdbc);
     }
 
     @Override
@@ -167,7 +163,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
     public Collection<Feed> getFeed(long id) {
         String query = "SELECT * FROM user_feed WHERE user_id = :user_id";
 
-        return jdbc.query(query, new MapSqlParameterSource().addValue("user_id", id), feedMapper);
+        return jdbc.query(query, new MapSqlParameterSource().addValue("user_id", id), FeedRowMapper.getInstance());
     }
 
     private static MapSqlParameterSource createParameterSource(User user) {

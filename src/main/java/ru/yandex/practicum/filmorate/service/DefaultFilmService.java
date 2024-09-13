@@ -5,17 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.interfaces.*;
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
 import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
@@ -147,17 +147,13 @@ public class DefaultFilmService implements FilmService {
     }
 
     @Override
-    public Collection<FilmDto> getPopularFilms(Optional<Integer> countOpt) {
+    public Collection<FilmDto> getPopularFilms(Integer count) {
 
         int popularFilmsSize = filmRepository.getTopPopular().size();
 
         int start = 0;
 
-        int end = Math.min(popularFilmsSize, 10);
-
-        int count = countOpt.orElse(0);
-
-        if (countOpt.isEmpty()) {
+        if (count == 10) {
             return getTopTen(0, Math.min(10, popularFilmsSize));
         }
 
@@ -173,11 +169,11 @@ public class DefaultFilmService implements FilmService {
     }
 
     @Override
-    public Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> countOpt, Integer genreId, Integer year) {
+    public Collection<FilmDto> getPopularFilmsByGenresAndYears(Integer countOpt, Integer genreId, Integer year) {
         List<Film> films = filmRepository.getPopularFilmsByGenreAndYear(countOpt, genreId, year);
-        int limit = countOpt.orElse(Integer.MAX_VALUE);
+
         return films.stream()
-                .limit(limit)
+                .limit(countOpt)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
     }
@@ -215,9 +211,9 @@ public class DefaultFilmService implements FilmService {
 
     private void validateGenre(FilmRequest filmRequest) {
         if (filmRequest.getGenres() != null) {
-            List<Integer> genreIds = filmRequest.getGenres().stream().map(Genre::getId).toList();
+            List<Integer> genreIds = filmRequest.getGenres().stream().map(GenreDto::getId).toList();
 
-            List<Genre> genres = genreRepository.getByIds(genreIds);
+            List<GenreDto> genres = genreRepository.getByIds(genreIds);
 
             if (genreIds.size() != genres.size()) {
                 throw new NotFoundException("Жанры не найдены");
@@ -229,9 +225,9 @@ public class DefaultFilmService implements FilmService {
 
     private void validateDirectors(FilmRequest filmRequest) {
         if (filmRequest.getDirectors() != null) {
-            List<Long> directorIds = filmRequest.getDirectors().stream().map(Director::getId).toList();
+            List<Long> directorIds = filmRequest.getDirectors().stream().map(DirectorDto::getId).toList();
 
-            List<Director> directors = directorRepository.getByIds(directorIds);
+            List<DirectorDto> directors = directorRepository.getByIds(directorIds);
 
             if (directorIds.size() != directors.size()) {
                 throw new NotFoundException("Жанры не найдены");
@@ -243,7 +239,7 @@ public class DefaultFilmService implements FilmService {
 
     private void validateMpa(FilmRequest filmRequest) {
         if (filmRequest.getMpa().getId() != null) {
-            Mpa mpa = filmRequest.getMpa();
+            MpaDto mpa = filmRequest.getMpa();
 
             mpa = mpaRepository.findById(mpa.getId()).orElseThrow(() -> new NotFoundException("Рейтинг не найден"));
 

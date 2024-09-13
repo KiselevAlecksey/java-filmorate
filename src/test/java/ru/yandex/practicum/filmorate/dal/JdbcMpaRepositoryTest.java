@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import ru.yandex.practicum.filmorate.dal.interfaces.MpaRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
@@ -29,7 +30,7 @@ class JdbcMpaRepositoryTest {
     @DisplayName("должен находить MPA по идентификатору")
     void should_find_mpa_by_id() {
 
-        Optional<Mpa> mpa = mpaRepository.findById(TEST_MPA_ID);
+        Optional<MpaDto> mpa = mpaRepository.findById(TEST_MPA_ID);
 
         assertThat(mpa)
                 .isPresent()

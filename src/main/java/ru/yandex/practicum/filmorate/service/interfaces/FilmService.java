@@ -23,7 +23,7 @@ public interface FilmService {
 
     boolean removeLike(Long filmId, Long userId);
 
-    Collection<FilmDto> getPopularFilms(Optional<Integer> countOpt);
+    Collection<FilmDto> getPopularFilms(Integer countOpt);
 
     Collection<FilmDto> findAll();
 
@@ -31,7 +31,7 @@ public interface FilmService {
 
     boolean remove(Long id);
 
-    Collection<FilmDto> getPopularFilmsByGenresAndYears(Optional<Integer> count, Integer genreId, Integer year);
+    Collection<FilmDto> getPopularFilmsByGenresAndYears(Integer count, Integer genreId, Integer year);
 
     Collection<FilmDto> getCommonFilms(Long userId, Long friendId);
 

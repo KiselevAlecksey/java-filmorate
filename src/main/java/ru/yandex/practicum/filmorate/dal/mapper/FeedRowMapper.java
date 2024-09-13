@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.dal.mapper;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Feed;
 
@@ -10,9 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component("FeedRowMapper")
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FeedRowMapper implements RowMapper<Feed> {
-    protected final NamedParameterJdbcTemplate jdbc;
 
     @Override
     public Feed mapRow(ResultSet resultSet, int rowNum) throws SQLException {
@@ -26,5 +25,9 @@ public class FeedRowMapper implements RowMapper<Feed> {
         feed.setEntityId(resultSet.getLong("entity_id"));
 
         return feed;
+    }
+
+    public static RowMapper<Feed> getInstance() {
+        return new FeedRowMapper();
     }
 }

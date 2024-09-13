@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dal.interfaces;
 
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
@@ -12,7 +13,7 @@ public interface MpaRepository {
 
     Mpa update(Mpa mpa);
 
-    Optional<Mpa> findById(Integer id);
+    Optional<MpaDto> findById(Integer id);
 
     Collection<Mpa> values();
 

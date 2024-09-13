@@ -3,10 +3,10 @@ package ru.yandex.practicum.filmorate.dto.film;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 import ru.yandex.practicum.filmorate.model.Constant;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -23,13 +23,13 @@ public class UpdateFilmRequest implements FilmRequest {
 
     Integer duration;
 
-    LinkedHashSet<Genre> genres;
+    LinkedHashSet<GenreDto> genres;
 
-    Mpa mpa;
+    MpaDto mpa;
 
     Instant releaseDate;
 
-    LinkedHashSet<Director> directors;
+    LinkedHashSet<DirectorDto> directors;
 
     public boolean hasName() {
         return isNotBlank(name);

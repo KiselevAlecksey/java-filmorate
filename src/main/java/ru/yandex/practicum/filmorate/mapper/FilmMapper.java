@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.dto.film.FilmDto;
 import ru.yandex.practicum.filmorate.dto.film.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.film.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.Film;
+import static ru.yandex.practicum.filmorate.utils.ModelConverter.*;
 
 @Component
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -19,9 +20,9 @@ public final class FilmMapper {
                 .description(request.getDescription())
                 .releaseDate(request.getReleaseDate())
                 .duration(request.getDuration())
-                .genres(request.getGenres())
-                .mpa(request.getMpa())
-                .directors(request.getDirectors())
+                .genres(mapToGenre(request.getGenres()))
+                .mpa(mapToMpa(request.getMpa()))
+                .directors(mapToDirector(request.getDirectors()))
                 .build();
     }
 
@@ -31,10 +32,10 @@ public final class FilmMapper {
         dto.setName(film.getName());
         dto.setDescription(film.getDescription());
         dto.setDuration(film.getDuration());
-        dto.setGenres(film.getGenres());
-        dto.setMpa(film.getMpa());
+        dto.setGenres(mapToGenreDto(film.getGenres()));
+        dto.setMpa(mapToMpaDto(film.getMpa()));
         dto.setReleaseDate(film.getReleaseDate());
-        dto.setDirectors(film.getDirectors());
+        dto.setDirectors(mapToDirectorDto(film.getDirectors()));
 
         return dto;
     }
@@ -50,16 +51,16 @@ public final class FilmMapper {
             film.setDuration(request.getDuration());
         }
         if (request.hasGenre()) {
-            film.setGenres(request.getGenres());
+            film.setGenres(mapToGenre(request.getGenres()));
         }
         if (request.hasMpa()) {
-            film.setMpa(request.getMpa());
+            film.setMpa(mapToMpa(request.getMpa()));
         }
         if (request.hasReleaseDate()) {
             film.setReleaseDate(request.getReleaseDate());
         }
         if (request.hasDirector()) {
-            film.setDirectors(request.getDirectors());
+            film.setDirectors(mapToDirector(request.getDirectors()));
         }
         return film;
     }

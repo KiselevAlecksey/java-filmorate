@@ -43,9 +43,7 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
 
         mpaMapper = new MpaRowMapper(jdbc);
 
-        RowMapper<Feed> feedMapper = new FeedRowMapper(jdbc);
-
-        feedUtils = new FeedUtils<>(jdbc, feedMapper);
+        feedUtils = new FeedUtils<>(jdbc);
     }
 
     @Override
@@ -204,9 +202,9 @@ public class JdbcFilmRepository extends BaseRepository<Film> implements FilmRepo
     }
 
     @Override
-    public List<Film> getPopularFilmsByGenreAndYear(Optional<Integer> countOpt, Integer genreId, Integer year) {
+    public List<Film> getPopularFilmsByGenreAndYear(Integer countOpt, Integer genreId, Integer year) {
 
-        List<Film> films = getSortPopularFilms(countOpt.orElse(null), genreId, year);
+        List<Film> films = getSortPopularFilms(countOpt, genreId, year);
 
         setFilmDetails(films);
 

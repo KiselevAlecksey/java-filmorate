@@ -5,11 +5,13 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.interfaces.GenreRepository;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.*;
 
 import static ru.yandex.practicum.filmorate.model.slqreuest.GenreSql.*;
+import static ru.yandex.practicum.filmorate.utils.ModelConverter.*;
 
 @Repository("JdbcGenreRepository")
 public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreRepository {
@@ -49,7 +51,11 @@ public class JdbcGenreRepository extends BaseRepository<Genre> implements GenreR
     }
 
     @Override
-    public List<Genre> getByIds(List<Integer> ids) {
-        return jdbc.query(GET_BY_IDS_QUERY, new MapSqlParameterSource("ids", ids), mapper);
+    public List<GenreDto> getByIds(List<Integer> ids) {
+        List<Genre> genres = jdbc.query(GET_BY_IDS_QUERY, new MapSqlParameterSource("ids", ids), mapper);
+
+        LinkedHashSet<GenreDto> genreDto = mapToGenreDto(new LinkedHashSet<>(genres));
+
+        return new ArrayList<>(genreDto);
     }
 }

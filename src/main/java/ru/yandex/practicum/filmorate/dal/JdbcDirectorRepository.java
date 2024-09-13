@@ -5,12 +5,14 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.interfaces.DirectorRepository;
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.*;
 
 import static ru.yandex.practicum.filmorate.model.slqreuest.DirectorSql.*;
+import static ru.yandex.practicum.filmorate.utils.ModelConverter.mapToDirectorDto;
 
 @Repository("JdbcDirectorRepository")
 public class JdbcDirectorRepository extends BaseRepository<Director> implements DirectorRepository {
@@ -68,7 +70,12 @@ public class JdbcDirectorRepository extends BaseRepository<Director> implements 
     }
 
     @Override
-    public List<Director> getByIds(List<Long> ids) {
-        return jdbc.query(GET_BY_IDS, new MapSqlParameterSource("ids", ids), mapper);
+    public List<DirectorDto> getByIds(List<Long> ids) {
+
+        List<Director> directors = jdbc.query(GET_BY_IDS, new MapSqlParameterSource("ids", ids), mapper);
+
+        LinkedHashSet<DirectorDto> directorDto = mapToDirectorDto(new LinkedHashSet<>(directors));
+
+        return new ArrayList<>(directorDto);
     }
 }

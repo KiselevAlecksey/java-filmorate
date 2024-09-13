@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dal.interfaces.*;
 import ru.yandex.practicum.filmorate.dto.film.FilmRequest;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
 import ru.yandex.practicum.filmorate.dto.review.ReviewRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserRequest;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Constant;
-import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.time.Instant;
 import java.util.List;
@@ -193,7 +193,7 @@ public class Validator {
 
         if (filmRequest.getGenres() == null) return false;
 
-        for (Genre genre : filmRequest.getGenres()) {
+        for (GenreDto genre : filmRequest.getGenres()) {
             Integer genreId = genre.getId();
 
             if (genreId == null) {
