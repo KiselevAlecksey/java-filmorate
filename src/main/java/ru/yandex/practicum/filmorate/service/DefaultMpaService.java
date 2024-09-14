@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.MpaRepository;
-import ru.yandex.practicum.filmorate.dto.MpaDto;
+import ru.yandex.practicum.filmorate.dal.interfaces.MpaRepository;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.MpaMapper;
+import ru.yandex.practicum.filmorate.service.interfaces.MpaService;
+import static ru.yandex.practicum.filmorate.utils.ModelConverter.*;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -27,7 +29,7 @@ public class DefaultMpaService implements MpaService {
             throw new NotFoundException("Рейтинг не найден");
         }
 
-        return mpaRepository.findById(id).map(MpaMapper::mapToMpaDto).orElse(null);
+        return mpaRepository.findById(id).orElse(null);
     }
 
     @Override

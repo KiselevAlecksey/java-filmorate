@@ -2,16 +2,20 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dal.UserRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.UserRepository;
+import ru.yandex.practicum.filmorate.dto.feed.FeedDto;
 import ru.yandex.practicum.filmorate.dto.user.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.user.UserDto;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FeedMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.interfaces.UserService;
+import ru.yandex.practicum.filmorate.validator.Validator;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,6 +24,10 @@ import java.util.stream.Collectors;
 public class DefaultUserService implements UserService {
 
     private final UserRepository userRepository;
+
+    private final FilmRepository filmRepository;
+
+    private final Validator validator;
 
     @Override
     public Collection<UserDto> getFriends(Long id) {
@@ -96,29 +104,33 @@ public class DefaultUserService implements UserService {
         return userRepository.values().stream()
                 .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList()
-        );
+                );
     }
 
     @Override
-    public Optional<UserDto> get(User user) {
-        return Optional.ofNullable(userRepository.findById(user.getId())
+    public UserDto getById(long id) {
+        return userRepository.findById(id)
                 .map(UserMapper::mapToUserDto)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден")));
+                .orElseThrow(() -> new NotFoundException("Пользователя с ID " + id + " не существует"));
+    }
+
+    @Override
+    public List<Film> getFilmRecommendations(Long id) {
+        if (id == null) {
+            throw new NotFoundException("Id должен быть указан");
+        }
+
+        if (userRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Пользователя с ID " + id + " не существует");
+        }
+
+        return filmRepository.getRecommendedFilms(id);
     }
 
     @Override
     public UserDto create(NewUserRequest userRequest) {
 
-        if (userRequest.getEmail().isBlank() || userRequest.getEmail().indexOf('@') == -1
-                || userRequest.getLogin().isBlank() || userRequest.getLogin().indexOf(' ') >= 0
-                || userRequest.getBirthday().isAfter(Instant.now())) {
-
-            throw new ConditionsNotMetException(
-                    "Поле почта не может быть пустым"
-                    + " или пропущен знак @" + " логин не может быть пустым и содержать пробелы"
-                    + " дата рождения не может быть в будущем"
-            );
-        }
+        validator.validateUserRequest(userRequest);
 
         User createUser = UserMapper.mapToUser(userRequest);
 
@@ -134,22 +146,33 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
+    public boolean remove(Long id) {
+        if (id == null || userRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Id не найден");
+        }
+        return userRepository.remove(id);
+    }
+
+    @Override
+    public Collection<FeedDto> getFeed(Long id) {
+        if (id == null || userRepository.findById(id).isEmpty()) {
+            throw new NotFoundException("Id не найден");
+        }
+
+        return userRepository.getFeed(id).stream()
+                .map(FeedMapper::mapToFeedDto)
+                .toList();
+    }
+
+    @Override
     public UserDto update(UpdateUserRequest userRequest) {
         if (userRequest.getId() == null) {
             throw new NotFoundException("Id должен быть указан");
         }
 
         if (userRepository.findById(userRequest.getId()).isPresent()) {
-            if (userRequest.getEmail().isBlank() || userRequest.getEmail().indexOf('@') == -1
-                    || userRequest.getLogin().isBlank() || userRequest.getLogin().indexOf(' ') >= 0
-                    || userRequest.getBirthday().isAfter(Instant.now())) {
 
-                throw new ConditionsNotMetException(
-                        "Поле почта не может быть пустым"
-                                + " или пропущен знак @" + " логин не может быть пустым и содержать пробелы"
-                                + " дата рождения не может быть в будущем"
-                );
-            }
+            validator.validateUserRequest(userRequest);
 
             User updatedUser = userRepository.findById(userRequest.getId())
                     .map(user -> UserMapper.updateUserFields(user, userRequest))
@@ -162,9 +185,5 @@ public class DefaultUserService implements UserService {
                             ? updatedUser.toBuilder().id(userRequest.getId()).name(userRequest.getLogin()).build() : updatedUser);
         }
         throw new NotFoundException("Пользователь с id = " + userRequest.getId() + " не найден");
-    }
-
-    private Set<Long> getListIdsFromUsers(Long userId) {
-        return userRepository.getFriends(userId);
     }
 }

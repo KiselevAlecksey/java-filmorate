@@ -22,6 +22,7 @@ USING (SELECT 1 AS id, 'Комедия' AS name UNION ALL
 ON target.id = source.id
 WHEN NOT MATCHED THEN
     INSERT (id, name) VALUES (source.id, source.name);
+
 /*
 -- Наполнение таблицы users
 MERGE INTO users AS target
@@ -76,3 +77,4 @@ ON target.film_id = source.film_id AND target.user_id = source.user_id
 WHEN NOT MATCHED THEN
     INSERT (film_id, user_id) VALUES (source.film_id, source.user_id);
 */
+

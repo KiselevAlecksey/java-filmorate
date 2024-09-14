@@ -6,13 +6,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.filmorate.dal.interfaces.MpaRepository;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Collection;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.yandex.practicum.filmorate.utils.TestDataFactory.TEST_MPA_ID;
+import static ru.yandex.practicum.filmorate.utils.TestDataFactory.TOTAL_MPA;
 
 @JdbcTest
 @Import({JdbcMpaRepository.class, MpaRowMapper.class})
@@ -20,16 +24,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("JdbcMpaRepository")
 class JdbcMpaRepositoryTest {
 
-    private final JdbcMpaRepository mpaRepository;
-
-    private static final int TEST_MPA_ID = 1;
-    private static final int TOTAL_MPA = 5;
+    private final MpaRepository mpaRepository;
 
     @Test
     @DisplayName("должен находить MPA по идентификатору")
     void should_find_mpa_by_id() {
 
-        Optional<Mpa> mpa = mpaRepository.findById(TEST_MPA_ID);
+        Optional<MpaDto> mpa = mpaRepository.findById(TEST_MPA_ID);
 
         assertThat(mpa)
                 .isPresent()

@@ -10,6 +10,7 @@ import java.time.Instant;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EqualsAndHashCode(of = "id")
 public class UserDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

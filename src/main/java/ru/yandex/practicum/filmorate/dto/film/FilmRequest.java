@@ -1,7 +1,8 @@
 package ru.yandex.practicum.filmorate.dto.film;
 
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.dto.director.DirectorDto;
+import ru.yandex.practicum.filmorate.dto.genre.GenreDto;
+import ru.yandex.practicum.filmorate.dto.mpa.MpaDto;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -16,11 +17,15 @@ public interface FilmRequest {
 
     Integer getDuration();
 
-    Mpa getMpa();
+    MpaDto getMpa();
 
-    LinkedHashSet<Genre> getGenres();
+    LinkedHashSet<GenreDto> getGenres();
 
-    void setGenres(LinkedHashSet<Genre> genres);
+    void setGenres(LinkedHashSet<GenreDto> genres);
 
-    void setMpa(Mpa mpa);
+    void setMpa(MpaDto mpa);
+
+    LinkedHashSet<DirectorDto> getDirectors();
+
+    void setDirectors(LinkedHashSet<DirectorDto> directors);
 }

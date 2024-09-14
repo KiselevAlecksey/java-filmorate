@@ -6,38 +6,35 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.filmorate.dal.interfaces.FilmRepository;
+import ru.yandex.practicum.filmorate.dal.interfaces.GenreRepository;
+import ru.yandex.practicum.filmorate.dal.mapper.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.dal.mapper.MpaRowMapper;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.yandex.practicum.filmorate.utils.TestDataFactory.*;
 
 @JdbcTest
-@Import({JdbcGenreRepository.class, GenreRowMapper.class,
+@Import({JdbcGenreRepository.class, GenreRowMapper.class, JdbcDirectorRepositoryTest.class, DirectorRowMapper.class,
         JdbcFilmRepository.class, FilmRowMapper.class, MpaRowMapper.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @DisplayName("JdbcGenreRepository")
 class JdbcGenreRepositoryTest {
 
-    public static final int TEST_GENRE_ID = 1;
-    public static final long TEST_FILM_ID = 1L;
-    public static final int TOTAL_GENRES = 6;
+    private final GenreRepository genreRepository;
 
-    private final JdbcGenreRepository genreRepository;
-
-    private final JdbcFilmRepository filmRepository;
+    private final FilmRepository filmRepository;
 
     @Test
     @DisplayName("должен возвращать жанры фильма")
     void should_return_film_genres() {
 
-        filmRepository.save(getTestFilm());
+        filmRepository.save(TEST_FILM);
 
         genreRepository.getFilmGenres(TEST_FILM_ID);
 
@@ -83,32 +80,5 @@ class JdbcGenreRepositoryTest {
         assertThat(genreIds)
                 .isNotEmpty()
                 .contains(TOTAL_GENRES);
-    }
-
-    private static LinkedHashSet<Genre> getGenres() {
-        Genre genre = new Genre();
-        LinkedHashSet<Genre> genres = new LinkedHashSet<>();
-        genre.setId(TEST_GENRE_ID);
-        genres.add(genre);
-        return genres;
-    }
-
-    private static Film getTestFilm() {
-        return Film.builder()
-                .id(TEST_FILM_ID)
-                .name("name")
-                .description("description")
-                .releaseDate(Instant.ofEpochMilli(1_714_608_000_000L))
-                .duration(100)
-                .genres(getGenres())
-                .mpa(getMpa())
-                .build();
-    }
-
-    private static Mpa getMpa() {
-        Mpa mpa = new Mpa();
-        mpa.setId(1);
-        mpa.setName("G");
-        return mpa;
     }
 }

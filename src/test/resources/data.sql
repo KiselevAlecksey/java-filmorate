@@ -6,6 +6,8 @@ ON target.name = source.name
 WHEN NOT MATCHED THEN
     INSERT (name) VALUES (source.name);
 
+INSERT INTO directors (name) VALUES ('name');
+
 INSERT INTO users (email, login, name, birthday)
 VALUES ('email@email.com', 'login', 'name', '2024-05-02');
 
@@ -14,3 +16,5 @@ VALUES ('name', 'description', 100, '2024-05-02 00:00:00+00', 1);
 
 INSERT INTO film_genres (film_id, genre_id)
 VALUES (1, 1);*/
+
+
