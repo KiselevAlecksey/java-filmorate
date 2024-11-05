@@ -78,7 +78,7 @@ public class DefaultReviewService implements ReviewService {
     }
 
     @Override
-    public Collection<ReviewDto> getByReviewsId(Long filmId, Integer count) {
+    public Collection<ReviewDto> getReviewsByFilmId(Long filmId, Integer count) {
 
         Collection<Review> reviews = reviewRepository.getReviewsByFilmId(filmId, count);
 

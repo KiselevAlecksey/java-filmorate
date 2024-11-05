@@ -58,7 +58,7 @@ public class ReviewController {
             @RequestParam(required = false) @Positive Integer count) {
 
         log.error("Get all review by filmId {}, count {} start", filmId, count);
-        Collection<ReviewDto> reviewDto = reviewService.getByReviewsId(filmId, count);
+        Collection<ReviewDto> reviewDto = reviewService.getReviewsByFilmId(filmId, count);
         log.error("Get all review by filmId {}, count {} complete", filmId, count);
         return reviewDto;
     }

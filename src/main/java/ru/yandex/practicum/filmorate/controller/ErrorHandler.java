@@ -19,9 +19,7 @@ public class ErrorHandler {
     public ErrorResponse handleNotFound(final NotFoundException e) {
         log.trace("Получен статус 404 Not found {}", e.getMessage(), e);
 
-        return new ErrorResponse(
-                e.getMessage()
-        );
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
@@ -29,10 +27,7 @@ public class ErrorHandler {
     public ErrorResponse handleConditionsNotMet(final ConditionsNotMetException e) {
         log.trace("Получен статус 400 Bad request {}", e.getMessage(), e);
 
-        return new ErrorResponse(
-                e.getMessage(),
-                "Условия не соблюдены"
-        );
+        return new ErrorResponse(e.getMessage(), "Условия не соблюдены");
     }
 
     @ExceptionHandler
@@ -40,9 +35,7 @@ public class ErrorHandler {
     public ErrorResponse handle(final Throwable e) {
         log.trace("Получен статус 500 Internal server error {}", e.getMessage(), e);
 
-        return new ErrorResponse(
-                "Произошла непредвиденная ошибка"
-        );
+        return new ErrorResponse("Произошла непредвиденная ошибка");
     }
 
     @ExceptionHandler
@@ -50,9 +43,9 @@ public class ErrorHandler {
     public ErrorResponse handleParameterNotValid(final ParameterNotValidException e) {
         log.trace("Получен статус 400 Bad request {}", e.getMessage(), e);
 
-        return new ErrorResponse(
-                "Некорректное значение параметра " + e.getParameter() + ": " + e.getReason()
-        );
+        String message = e.getMessage();
+
+        return new ErrorResponse("Некорректное значение параметра " + e.getParameter() + ": " + e.getReason());
     }
 
     @ExceptionHandler
