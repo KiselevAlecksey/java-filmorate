@@ -64,3 +64,7 @@ Filmorate – это Java-приложение, которое позволяе�
 ### Тестирование
 
 Тесты JUnit выполнены с использованием H2
+
+### Схема базы
+
+![gitTitle](https://raw.githubusercontent.com/KiselevAlecksey/java-filmorate/main/media/schema.png)
